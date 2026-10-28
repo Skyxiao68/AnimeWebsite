@@ -1,0 +1,780 @@
+/* css/style.css —— 排版、组件、四态、响应式（S3 骨架）
+ * 依赖 tokens.css，只用变量，不写死颜色/间距。
+ * 结构对应 index.html：header / hero / 四段 section / footer / 移动 tab bar / 收藏抽屉。
+ */
+
+/* ---------------------------------------------------------------- reset-lite */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  color-scheme: dark;
+}
+
+body,
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+ul,
+ol {
+  margin: 0;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+/* ---------------------------------------------------------------- 基础排版 */
+body {
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--text-muted);
+  font-family: var(--font-sans);
+  font-size: var(--fs-md);
+  line-height: var(--lh-body);
+  /* 移动端底部 tab bar 会压住内容 */
+  padding-block-end: calc(var(--tabbar-h) + var(--sp-4));
+}
+
+h1,
+h2,
+h3 {
+  color: var(--text);
+  font-family: var(--font-display);
+  line-height: var(--lh-tight);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.container {
+  width: min(100% - 2 * var(--gutter), var(--container));
+  margin-inline: auto;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: var(--sp-4);
+  z-index: var(--z-toast);
+  padding: var(--sp-2) var(--sp-4);
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-radius: var(--r-md);
+  font-weight: 600;
+}
+
+.skip-link:focus {
+  top: var(--sp-2);
+}
+
+/* ---------------------------------------------------------------- 顶栏 */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-header);
+  min-height: var(--header-h);
+  display: flex;
+  align-items: center;
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: blur(12px);
+  border-block-end: 1px solid var(--line);
+}
+
+.site-header__inner {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-5);
+  width: min(100% - 2 * var(--gutter), var(--container));
+  margin-inline: auto;
+  padding-block: var(--sp-3);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.brand__mark {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: var(--fs-sm);
+  font-weight: 800;
+}
+
+.site-nav {
+  display: none; /* 移动端靠 tab bar，桌面端才出链接 */
+  gap: var(--sp-1);
+  margin-inline-start: auto;
+}
+
+.site-nav__link {
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-pill);
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  font-weight: 550;
+  transition: color var(--t-fast) var(--ease), background-color var(--t-fast) var(--ease);
+}
+
+.site-nav__link:hover {
+  color: var(--text);
+  background: var(--surface);
+}
+
+.site-nav__link[aria-current="page"] {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* 顶部「收藏」入口：可见文字 + aria-pressed（PRD #05） */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-inline-start: auto;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-height: 40px;
+  padding: var(--sp-2) var(--sp-4);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--text);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease),
+    color var(--t-fast) var(--ease);
+}
+
+.btn:hover {
+  background: var(--surface-2);
+  border-color: var(--line-strong);
+}
+
+.btn--accent {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+.btn--accent:hover {
+  background: color-mix(in srgb, var(--accent) 88%, white);
+}
+
+.btn[aria-pressed="true"] {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ---------------------------------------------------------------- Hero + 搜索 */
+.hero {
+  padding-block: var(--sp-7) var(--sp-6);
+  background: radial-gradient(120% 120% at 50% 0%, var(--bg-soft) 0%, var(--bg) 60%);
+  border-block-end: 1px solid var(--line);
+}
+
+.hero__eyebrow {
+  display: inline-block;
+  margin-block-end: var(--sp-3);
+  padding: var(--sp-1) var(--sp-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-pill);
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+.hero__title {
+  max-width: 18ch;
+  font-size: var(--fs-3xl);
+  letter-spacing: -0.03em;
+}
+
+.hero__lede {
+  max-width: 56ch;
+  margin-block-start: var(--sp-3);
+  font-size: var(--fs-lg);
+  line-height: var(--lh-snug);
+}
+
+/* 搜索条：PRD #13 要求移动端搜索常驻。
+ * sticky 必须挂在 .search-bar 上、且它是 body 直系子元素（在 .hero 之外）——
+ * 以前把 sticky 挂在 .hero 内的 .search 上，hero 一滚出视口，搜索就跟着走了。
+ * top 用顶栏高度变量（--header-h 64）对齐，顶栏固定在 0，不然会压住半行。 */
+.search-bar {
+  position: sticky;
+  top: var(--header-h);
+  z-index: calc(var(--z-header) - 1);
+  padding-block: var(--sp-3);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(12px);
+  border-block-end: 1px solid var(--line);
+}
+
+.search-bar > .container {
+  display: flex;
+  justify-content: center;
+}
+
+/* 搜索框：PRD #20 —— 桌面宽 ≥640px、高 56px、字号 20px */
+.search {
+  flex: 1 1 auto;
+  display: flex;
+  gap: var(--sp-2);
+  align-items: center;
+  width: 100%;
+  max-width: 720px;
+  padding: var(--sp-1);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-pill);
+  box-shadow: var(--shadow-2);
+}
+
+.search:focus-within {
+  border-color: var(--focus);
+  box-shadow: var(--shadow-2), 0 0 0 3px color-mix(in srgb, var(--focus) 30%, transparent);
+}
+
+.search__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.search__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 56px;
+  padding-inline: var(--sp-5);
+  border: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--text);
+  font-size: var(--fs-lg); /* PRD #20：20px */
+}
+
+.search__input::placeholder {
+  color: var(--text-dim);
+}
+
+.search__submit {
+  min-height: 48px;
+  padding-inline: var(--sp-5);
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: var(--fs-md);
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.search__submit:hover {
+  background: color-mix(in srgb, var(--accent) 88%, white);
+}
+
+/* ---------------------------------------------------------------- 四段 */
+main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-8);
+  padding-block: var(--sp-7);
+}
+
+.section__head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  margin-block-end: var(--sp-4);
+}
+
+.section__title {
+  font-size: var(--fs-xl);
+}
+
+.section__hint {
+  color: var(--text-dim);
+  font-size: var(--fs-sm);
+}
+
+.section__more {
+  margin-inline-start: auto;
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+
+.section__more:hover {
+  color: var(--accent);
+}
+
+/* ---------------------------------------------------------------- 卡片网格 */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: var(--gutter);
+}
+
+/* 错误 / 空态面板横跨整行，别只占一格（1 列时 1 / -1 就是整行，无害） */
+.grid[data-state="error"] > .state,
+.grid[data-state="empty"] > .state {
+  grid-column: 1 / -1;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  transition: transform var(--t-base) var(--ease), border-color var(--t-base) var(--ease),
+    box-shadow var(--t-base) var(--ease);
+}
+
+.card:hover,
+.card:focus-within {
+  transform: translateY(-2px);
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow-2);
+}
+
+.card__link {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.card__cover {
+  aspect-ratio: var(--card-cover-ratio); /* PRD #08：统一 2:3 */
+  width: 100%;
+  object-fit: cover;
+  background: var(--surface-2);
+}
+
+.card__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  padding: var(--sp-3) var(--sp-3) var(--sp-4);
+}
+
+.card__title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-family: var(--font-sans);
+  font-size: var(--fs-md);
+  font-weight: 600;
+  line-height: var(--lh-snug);
+}
+
+.card__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  color: var(--text-dim);
+  font-size: var(--fs-sm);
+}
+
+.card__score {
+  color: var(--accent);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.card__format {
+  padding-inline: var(--sp-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  font-size: var(--fs-xs);
+  letter-spacing: 0.04em;
+}
+
+/* 收藏按钮：可见文字（PRD #05），不做右下角浮动图标 */
+.card__save {
+  margin: 0 var(--sp-3) var(--sp-3);
+  min-height: 36px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease),
+    background-color var(--t-fast) var(--ease);
+}
+
+.card__save:hover {
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.card__save[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* ---------------------------------------------------------------- 四态 */
+/* loading：骨架卡，尺寸与真卡片一致，避免加载完跳动 */
+.card--skeleton {
+  pointer-events: none;
+}
+
+.card--skeleton .card__cover,
+.card--skeleton .skeleton-line {
+  background: linear-gradient(100deg, var(--surface-2) 20%, #2c2339 40%, var(--surface-2) 60%);
+  background-size: 220% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+.skeleton-line {
+  height: 12px;
+  margin-inline: var(--sp-3);
+  border-radius: var(--r-sm);
+}
+
+.skeleton-line + .skeleton-line {
+  margin-block-start: var(--sp-2);
+}
+
+.skeleton-line--short {
+  width: 45%;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 120% 0;
+  }
+  to {
+    background-position: -120% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card--skeleton .card__cover,
+  .card--skeleton .skeleton-line {
+    animation: none;
+  }
+}
+
+/* success 无额外样式；error / empty 共用面板 */
+.state {
+  display: grid;
+  gap: var(--sp-2);
+  justify-items: start;
+  padding: var(--sp-6);
+  background: var(--surface);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--r-lg);
+  
+}
+
+.state__title {
+  font-size: var(--fs-lg);
+}
+
+.state__message {
+  max-width: 60ch;
+  color: var(--text-muted);
+}
+
+.state--error {
+  border-color: color-mix(in srgb, var(--danger) 55%, transparent);
+  background: color-mix(in srgb, var(--danger) 8%, var(--surface));
+}
+
+.state--error .state__title {
+  color: var(--danger);
+}
+
+.state__action {
+  margin-block-start: var(--sp-2);
+}
+
+/* ---------------------------------------------------------------- 收藏抽屉（PRD #06）*/
+.drawer {
+  position: fixed;
+  inset-block: 0;
+  inset-inline-end: 0;
+  z-index: var(--z-drawer);
+  width: min(380px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-5);
+  background: var(--bg-soft);
+  border-inline-start: 1px solid var(--line-strong);
+  box-shadow: var(--shadow-3);
+  overflow-y: auto;
+  transform: translateX(100%);
+  transition: transform var(--t-base) var(--ease);
+}
+
+.drawer[data-open="true"] {
+  transform: translateX(0);
+}
+
+.drawer__head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.drawer__title {
+  font-size: var(--fs-lg);
+}
+
+.drawer__close {
+  margin-inline-start: auto;
+}
+
+.drawer__list {
+  display: grid;
+  gap: var(--sp-2);
+}
+
+.drawer__empty {
+  color: var(--text-dim);
+}
+
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-drawer) - 1);
+  background: rgba(0, 0, 0, 0.55);
+  border: 0;
+  cursor: pointer;
+}
+
+/* ---------------------------------------------------------------- 移动 tab bar */
+/* 层级：--z-tabbar 100 < --z-drawer 200，抽屉/遮罩打开时盖住它；不跟 header 抢层。
+ * 只有 <600 存在（≥600 的媒体查询里 display:none），不靠 JS 挂载。 */
+.tabbar {
+  position: fixed;
+  inset-block-end: 0;
+  inset-inline: 0;
+  z-index: var(--z-tabbar);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  min-height: var(--tabbar-h);
+  padding-block-end: env(safe-area-inset-bottom, 0);
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(12px);
+  border-block-start: 1px solid var(--line);
+}
+
+.tabbar__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding-block: var(--sp-2);
+  border: 0;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tabbar__item[aria-current="page"] {
+  color: var(--accent);
+}
+
+.tabbar__icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* ---------------------------------------------------------------- 页脚 */
+.site-footer {
+  padding-block: var(--sp-6);
+  border-block-start: 1px solid var(--line);
+  color: var(--text-dim);
+  font-size: var(--fs-sm);
+}
+
+.site-footer__inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ---------------------------------------------------------------- 响应式 */
+/* 移动端：搜索 → Top Rated → Weekly（PRD #12，用 order 调，不复制 DOM） */
+@media (max-width: 599px) {
+  :root {
+    --gutter: var(--sp-4);
+  }
+
+  .section--weekly {
+    order: 2;
+  }
+
+  .section--toprated {
+    order: 1;
+  }
+
+  .section--tv,
+  .section--movies {
+    order: 3;
+  }
+
+  /* 移动端段头：标题独占一行，副标题 + See all 排第二行，不然三块各折两三行 */
+  .section__head {
+    flex-wrap: wrap;
+    row-gap: var(--sp-1);
+  }
+
+  .section__title {
+    flex: 1 1 100%;
+  }
+
+  .section__hint {
+    flex: 1 1 auto;
+  }
+
+  /* tab bar 遮挡兜底：body 已留 --tabbar-h + 16（footer 也够），main 再补一段，
+     保证最后一张卡的 Bookmark 按钮不贴着 bar。 */
+  main {
+    padding-block-end: calc(var(--tabbar-h) + var(--sp-4));
+  }
+
+  /* sticky 搜索条压在顶栏下面，别让它盖住 header 的下边线 */
+  .search-bar {
+    box-shadow: 0 1px 0 var(--line);
+  }
+}
+
+/* ≥600：平板双列，tab bar 收起，桌面导航出现 */
+@media (min-width: 600px) {
+  body {
+    padding-block-end: 0;
+  }
+
+  .tabbar {
+    display: none;
+  }
+
+  .site-nav {
+    display: flex;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .hero {
+    padding-block: var(--sp-8) var(--sp-7);
+  }
+
+  .hero__title {
+    max-width: 24ch;
+  }
+}
+
+/* ≥992：桌面三列 */
+@media (min-width: 992px) {
+  :root {
+    --gutter: var(--sp-5);
+  }
+
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  main {
+    gap: var(--sp-9);
+  }
+}
+
+/* 大屏：六列（HiFi 稿与 PLAN.md 都按 6 列记，1440 上也是 6 不是 5）
+ * 1200 容器 / 6 列 → 每张约 180px；标题靠 .card__title 的 2 行 clamp 兜住 */
+@media (min-width: 1280px) {
+  .grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  /* 首页前两段是 4 张横向条（设计稿里 Weekly 与 Ranks 并排、各占一半），
+   * 6 列会空出两格，这里单独压回 4 列；TV / Movies 仍是 6 列。 */
+  .grid[data-section="weekly"],
+  .grid[data-section="topRated"] {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

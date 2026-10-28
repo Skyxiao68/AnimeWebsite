@@ -1,0 +1,659 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MikuFansAnime · Discover anime worth your night</title>
+    <meta
+      name="description"
+      content="Weekly picks, all-time top rated, TV series and movies — browsed from live AniList data."
+    />
+    <link rel="stylesheet" href="css/tokens.css" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <!-- ============================================================ 顶栏 -->
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand" href="index.html">
+          <span class="brand__mark" aria-hidden="true">A</span>
+          <!-- 站点名：PRD 正式名 MikuFansAnime（logo 同名） -->
+          MikuFansAnime
+        </a>
+
+        <nav class="site-nav" aria-label="Main">
+          <a class="site-nav__link" href="index.html" aria-current="page"
+            >Home</a
+          >
+          <a class="site-nav__link" href="catalog.html">Catalog</a>
+          <a class="site-nav__link" href="rankings.html">Rankings</a>
+        </nav>
+
+        <div class="header-actions">
+          <!-- PRD #06：收藏走抽屉，不新建页面。行为归 bookmarks.js -->
+          <button
+            class="btn"
+            type="button"
+            id="open-bookmarks"
+            aria-expanded="false"
+            aria-controls="bookmark-drawer"
+          >
+            Bookmarks
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- ============================================================ Hero -->
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="container">
+        <span class="hero__eyebrow">Weekly · Top rated · TV · Movies</span>
+        <h1 class="hero__title" id="hero-title">
+          Find the anime you will actually finish.
+        </h1>
+        <p class="hero__lede">
+          Four hand-picked shelves, updated from live AniList data. Search by
+          title, or start from a shelf below.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================================================ 搜索条（PRD #13 / #20）
+       sticky 必须在 .hero 外面：放 hero 里，hero 滚出视口搜索就跟着消失。
+       放在 hero 之后，移动端首屏仍然看得到（header 65 + hero 约 330）。
+       提交行为归 filters.js，这里只保证有 <form> + name="q" -->
+    <div class="search-bar">
+      <div class="container">
+        <form class="search" action="catalog.html" method="get" role="search">
+          <label class="search__label" for="q">Search anime</label>
+          <input
+            class="search__input"
+            id="q"
+            name="q"
+            type="search"
+            placeholder="Search anime, e.g. Frieren"
+            autocomplete="off"
+          />
+          <button class="search__submit" type="submit">Search</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ============================================================ 四段
+       S5：把每个 .grid 里的静态卡片删掉，改成 home.js 里
+           ui.renderCards(grid, items)，四段各 12 条。
+       现在卡片是写死的（真实 AniList id + 封面 URL），只为了让结构和样式先能验。 -->
+    <main id="main" class="container">
+      <section
+        class="section section--weekly"
+        id="weekly"
+        aria-labelledby="weekly-title"
+      >
+        <div class="section__head">
+          <h2 class="section__title" id="weekly-title">Weekly</h2>
+          <p class="section__hint">Airing now, trending this week</p>
+          <a class="section__more" href="catalog.html?sort=trending">See all</a>
+        </div>
+        <div class="grid" data-section="weekly" data-state="success">
+          <article class="card" data-id="159042">
+            <a class="card__link" href="detail.html?id=159042">
+              <img
+                class="card__cover"
+                src="https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx159042-GGFwlDskc5vR.png"
+                alt="Cover of Reincarnated as a Sword Season 2"
+                width="400"
+                height="600"
+                loading="lazy"
+                decoding="async"
+              />
+              <div class="card__body">
+                <h3 class="card__title">Reincarnated as a Sword Season 2</h3>
+                <p class="card__meta">
+                  <span class="card__score">75</span
+                  ><span class="card__format">ONA</span>
+                </p>
+              </div>
+            </a>
+            <button
+              class="card__save"
+              type="button"
+              aria-pressed="false"
+              aria-label="Bookmark: Reincarnated as a Sword Season 2"
+            >
+              Bookmark
+            </button>
+          </article>
+          <article class="card" data-id="195539">
+            <a class="card__link" href="detail.html?id=195539">
+              <img
+                class="card__cover"
+                src="https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx195539-4LdfmKIHzuxr.png"
+                alt="Cover of Cyberpunk: Edgerunners 2"
+                width="400"
+                height="600"
+                loading="lazy"
+                decoding="async"
+              />
+              <div class="card__body">
+                <h3 class="card__title">Cyberpunk: Edgerunners 2</h3>
+                <p class="card__meta">
+                  <span class="card__score">84</span
+                  ><span class="card__format">ONA</span>
+                </p>
+              </div>
+            </a>
+            <button
+              class="card__save"
+              type="button"
+              aria-pressed="false"
+              aria-label="Bookmark: Cyberpunk: Edgerunners 2"
+            >
+              Bookmark
+            </button>
+          </article>
+          <article class="card" data-id="211778">
+            <a class="card__link" href="detail.html?id=211778">
+              <img
+                class="card__cover"
+                src="https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx211778-0MXK5HqVFBYH.jpg"
+                alt="Cover of The World's Strongest Witch"
+                width="400"
+                height="600"
+                loading="lazy"
+                decoding="async"
+              />
+              <div class="card__body">
+                <h3 class="card__title">The World's Strongest Witch</h3>
+                <p class="card__meta">
+                  <span class="card__score">70</span
+                  ><span class="card__format">TV</span>
+                </p>
+              </div>
+            </a>
+            <button
+              class="card__save"
+              type="button"
+              aria-pressed="false"
+              aria-label="Bookmark: The World's Strongest Witch"
+            >
+              Bookmark
+            </button>
+          </article>
+          <article class="card" data-id="172192">
+            <a class="card__link" href="detail.html?id=172192">
+              <img
+                class="card__cover"
+                src="https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx172192-W7P5xEUaxF3y.jpg"
+                alt="Cover of A Returner's Magic Should be Special Season 2"
+                width="400"
+                height="600"
+                loading="lazy"
+                decoding="async"
+              />
+              <div class="card__body">
+                <h3 class="card__title">
+                  A Returner's Magic Should be Special Season 2
+                </h3>
+                <p class="card__meta">
+                  <span class="card__score">69</span
+                  ><span class="card__format">TV</span>
+                </p>
+              </div>
+            </a>
+            <button
+              class="card__save"
+              type="button"
+              aria-pressed="false"
+              aria-label="Bookmark: A Returner's Magic Should be Special Season 2"
+            >
+              Bookmark
+            </button>
+          </article>
+        </div>
+      </section>
+
+      <!-- 移动端顺序：这一段排到 Weekly 前面（PRD #12，CSS order） -->
+      <section
+        class="section section--toprated"
+        id="top-rated"
+        aria-labelledby="toprated-title"
+      >
+        <div class="section__head">
+          <h2 class="section__title" id="toprated-title">Top Rated</h2>
+          <p class="section__hint">Highest scored on AniList</p>
+          <a class="section__more" href="catalog.html?sort=score">See all</a>
+        </div>
+        <div class="grid" data-section="topRated" data-state="success">
+          <article class="card" data-id="154587">
+            <a class="card__link" href="detail.html?id=154587">
+              <img
+                class="card__cover"
+                src="https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx154587-qQTzQnEJJ3oB.jpg"
+                alt="Cover of Frieren: Beyond Journey’s End"
+                width="400"
+                height="600"
+                loading="lazy"
+                decoding="async"
+              />
+              <div class="card__body">
+                <h3 class="card__title">Frieren: Beyond Journey’s End</h3>
+                <p class="card__meta">
+                  <span class="card__score">91</span
+                  ><span class="card__format">TV</span>
+                </p>
+              </div>
+            </a>
+            <button
+              class="card__save"
+              type="button"
+              aria-pressed="false"
+              aria-label="Bookmark: Frieren: Beyond Journey’s End"
+            >
+              Bookmark
+            </button>
+          </article>
+          <article class="card" data-id="114129">
+            <a class="card__link" href="detail.html?id=114129">
+              <img
+                class="card__cover"
+                src="https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx114129-RLgSuh6YbeYx.jpg"
+                alt="Cover of Gintama: THE VERY FINAL"
+                width="400"
+                height="600"
+                loading="lazy"
+                decoding="async"
+              />
+              <div class="card__body">
+                <h3 class="card__title">Gintama: THE VERY FINAL</h3>
+                <p class="card__meta">
+                  <span class="card__score">90</span
+                  ><span class="card__format">MOVIE</span>
+                </p>
+              </div>
+            </a>
+            <button
+              class="card__save"
+              type="button"
+              aria-pressed="false"
+              aria-label="Bookmark: Gintama: THE VERY FINAL"
+            >
+              Bookmark
+            </button>
+          </article>
+          <article class="card" data-id="20996">
+            <a class="card__link" href="detail.html?id=20996">
+              <img
+                class="card__cover"
+                src="https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx20996-kBEGEGdeK1r7.jpg"
+                alt="Cover of Gintama Season 3"
+                width="400"
+                height="600"
+                loading="lazy"
+                decoding="async"
+              />
+              <div class="card__body">
+                <h3 class="card__title">Gintama Season 3</h3>
+                <p class="card__meta">
+                  <span class="card__score">90</span
+                  ><span class="card__format">TV</span>
+                </p>
+              </div>
+            </a>
+            <button
+              class="card__save"
+              type="button"
+              aria-pressed="false"
+              aria-label="Bookmark: Gintama Season 3"
+            >
+              Bookmark
+            </button>
+          </article>
+          <article class="card" data-id="189046">
+            <a class="card__link" href="detail.html?id=189046">
+              <img
+                class="card__cover"
+                src="https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx189046-yaHWtS5FII46.jpg"
+                alt="Cover of Re:ZERO -Starting Life in Another World- Season 4"
+                width="400"
+                height="600"
+                loading="lazy"
+                decoding="async"
+              />
+              <div class="card__body">
+                <h3 class="card__title">
+                  Re:ZERO -Starting Life in Another World- Season 4
+                </h3>
+                <p class="card__meta">
+                  <span class="card__score">90</span
+                  ><span class="card__format">TV</span>
+                </p>
+              </div>
+            </a>
+            <button
+              class="card__save"
+              type="button"
+              aria-pressed="false"
+              aria-label="Bookmark: Re:ZERO -Starting Life in Another World- Season 4"
+            >
+              Bookmark
+            </button>
+          </article>
+        </div>
+      </section>
+
+      <section class="section section--tv" id="tv" aria-labelledby="tv-title">
+        <div class="section__head">
+          <h2 class="section__title" id="tv-title">TV</h2>
+          <p class="section__hint">Series people binge</p>
+          <a class="section__more" href="catalog.html?format=TV">See all</a>
+        </div>
+        <div class="grid" data-section="tv" data-state="success">
+          <article class="card" data-id="16498">
+            <a class="card__link" href="detail.html?id=16498">
+              <img
+                class="card__cover"
+                src="https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx16498-buvcRTBx4NSm.jpg"
+                alt="Cover of Attack on Titan"
+                width="400"
+                height="600"
+                loading="lazy"
+                decoding="async"
+              />
+              <div class="card__body">
+                <h3 class="card__title">Attack on Titan</h3>
+                <p class="card__meta">
+                  <span class="card__score">85</span
+                  ><span class="card__format">TV</span>
+                </p>
+              </div>
+            </a>
+            <button
+              class="card__save"
+              type="button"
+              aria-pressed="false"
+              aria-label="Bookmark: Attack on Titan"
+            >
+              Bookmark
+            </button>
+          </article>
+          <article class="card" data-id="101922">
+            <a class="card__link" href="detail.html?id=101922">
+              <img
+                class="card__cover"
+                src="https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx101922-WBsBl0ClmgYL.jpg"
+                alt="Cover of Demon Slayer: Kimetsu no Yaiba"
+                width="400"
+                height="600"
+                loading="lazy"
+                decoding="async"
+              />
+              <div class="card__body">
+                <h3 class="card__title">Demon Slayer: Kimetsu no Yaiba</h3>
+                <p class="card__meta">
+                  <span class="card__score">82</span
+                  ><span class="card__format">TV</span>
+                </p>
+              </div>
+            </a>
+            <button
+              class="card__save"
+              type="button"
+              aria-pressed="false"
+              aria-label="Bookmark: Demon Slayer: Kimetsu no Yaiba"
+            >
+              Bookmark
+            </button>
+          </article>
+          <article class="card" data-id="113415">
+            <a class="card__link" href="detail.html?id=113415">
+              <img
+                class="card__cover"
+                src="https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx113415-LHBAeoZDIsnF.jpg"
+                alt="Cover of JUJUTSU KAISEN"
+                width="400"
+                height="600"
+                loading="lazy"
+                decoding="async"
+              />
+              <div class="card__body">
+                <h3 class="card__title">JUJUTSU KAISEN</h3>
+                <p class="card__meta">
+                  <span class="card__score">84</span
+                  ><span class="card__format">TV</span>
+                </p>
+              </div>
+            </a>
+            <button
+              class="card__save"
+              type="button"
+              aria-pressed="false"
+              aria-label="Bookmark: JUJUTSU KAISEN"
+            >
+              Bookmark
+            </button>
+          </article>
+          <article class="card" data-id="1535">
+            <a class="card__link" href="detail.html?id=1535">
+              <img
+                class="card__cover"
+                src="https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx1535-kUgkcrfOrkUM.jpg"
+                alt="Cover of Death Note"
+                width="400"
+                height="600"
+                loading="lazy"
+                decoding="async"
+              />
+              <div class="card__body">
+                <h3 class="card__title">Death Note</h3>
+                <p class="card__meta">
+                  <span class="card__score">84</span
+                  ><span class="card__format">TV</span>
+                </p>
+              </div>
+            </a>
+            <button
+              class="card__save"
+              type="button"
+              aria-pressed="false"
+              aria-label="Bookmark: Death Note"
+            >
+              Bookmark
+            </button>
+          </article>
+        </div>
+      </section>
+
+      <section
+        class="section section--movies"
+        id="movies"
+        aria-labelledby="movies-title"
+      >
+        <div class="section__head">
+          <h2 class="section__title" id="movies-title">Movies</h2>
+          <p class="section__hint">One sitting, no commitment</p>
+          <a class="section__more" href="catalog.html?format=MOVIE">See all</a>
+        </div>
+        <div class="grid" data-section="movies" data-state="success">
+          <article class="card" data-id="20954">
+            <a class="card__link" href="detail.html?id=20954">
+              <img
+                class="card__cover"
+                src="https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx20954-sYRfE5jQRtSB.jpg"
+                alt="Cover of A Silent Voice"
+                width="400"
+                height="600"
+                loading="lazy"
+                decoding="async"
+              />
+              <div class="card__body">
+                <h3 class="card__title">A Silent Voice</h3>
+                <p class="card__meta">
+                  <span class="card__score">88</span
+                  ><span class="card__format">MOVIE</span>
+                </p>
+              </div>
+            </a>
+            <button
+              class="card__save"
+              type="button"
+              aria-pressed="false"
+              aria-label="Bookmark: A Silent Voice"
+            >
+              Bookmark
+            </button>
+          </article>
+          <article class="card" data-id="21519">
+            <a class="card__link" href="detail.html?id=21519">
+              <img
+                class="card__cover"
+                src="https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx21519-SUo3ZQuCbYhJ.png"
+                alt="Cover of Your Name."
+                width="400"
+                height="600"
+                loading="lazy"
+                decoding="async"
+              />
+              <div class="card__body">
+                <h3 class="card__title">Your Name.</h3>
+                <p class="card__meta">
+                  <span class="card__score">85</span
+                  ><span class="card__format">MOVIE</span>
+                </p>
+              </div>
+            </a>
+            <button
+              class="card__save"
+              type="button"
+              aria-pressed="false"
+              aria-label="Bookmark: Your Name."
+            >
+              Bookmark
+            </button>
+          </article>
+          <article class="card" data-id="112151">
+            <a class="card__link" href="detail.html?id=112151">
+              <img
+                class="card__cover"
+                src="https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx112151-1qlQwPB1RrJe.png"
+                alt="Cover of Demon Slayer -Kimetsu no Yaiba- The Movie: Mugen Train"
+                width="400"
+                height="600"
+                loading="lazy"
+                decoding="async"
+              />
+              <div class="card__body">
+                <h3 class="card__title">
+                  Demon Slayer -Kimetsu no Yaiba- The Movie: Mugen Train
+                </h3>
+                <p class="card__meta">
+                  <span class="card__score">84</span
+                  ><span class="card__format">MOVIE</span>
+                </p>
+              </div>
+            </a>
+            <button
+              class="card__save"
+              type="button"
+              aria-pressed="false"
+              aria-label="Bookmark: Demon Slayer -Kimetsu no Yaiba- The Movie: Mugen Train"
+            >
+              Bookmark
+            </button>
+          </article>
+          <article class="card" data-id="199">
+            <a class="card__link" href="detail.html?id=199">
+              <img
+                class="card__cover"
+                src="https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx199-sWefXJvXkDOb.jpg"
+                alt="Cover of Spirited Away"
+                width="400"
+                height="600"
+                loading="lazy"
+                decoding="async"
+              />
+              <div class="card__body">
+                <h3 class="card__title">Spirited Away</h3>
+                <p class="card__meta">
+                  <span class="card__score">86</span
+                  ><span class="card__format">MOVIE</span>
+                </p>
+              </div>
+            </a>
+            <button
+              class="card__save"
+              type="button"
+              aria-pressed="false"
+              aria-label="Bookmark: Spirited Away"
+            >
+              Bookmark
+            </button>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <!-- ============================================================ 页脚 -->
+    <footer class="site-footer">
+      <div class="container site-footer__inner">
+        <p>
+          Data from <a href="https://anilist.co" rel="noopener">AniList</a>.
+          Built for a university assignment, not affiliated with AniList.
+        </p>
+        <p>MikuFansAnime · 2026</p>
+      </div>
+    </footer>
+
+    <!-- ============================================================ 收藏抽屉（PRD #06）
+       inert：没打开时不能被 Tab 进去，bookmarks.js 打开时移除它 -->
+    <aside
+      class="drawer"
+      id="bookmark-drawer"
+      data-open="false"
+      aria-labelledby="drawer-title"
+      inert
+    >
+      <div class="drawer__head">
+        <h2 class="drawer__title" id="drawer-title">Bookmarks</h2>
+        <button class="btn drawer__close" type="button" id="close-bookmarks">
+          Close
+        </button>
+      </div>
+      <ul class="drawer__list" id="bookmark-list">
+        <li class="drawer__empty">
+          Nothing saved yet. Tap Bookmark on any card.
+        </li>
+      </ul>
+    </aside>
+    <button
+      class="drawer-backdrop"
+      type="button"
+      id="bookmark-backdrop"
+      aria-label="Close bookmarks"
+      hidden
+    ></button>
+
+    <!-- ============================================================ 移动 tab bar -->
+    <nav class="tabbar" aria-label="Mobile">
+      <a class="tabbar__item" href="index.html" aria-current="page">
+        <span class="tabbar__icon" aria-hidden="true">◆</span>
+        Home
+      </a>
+      <a class="tabbar__item" href="catalog.html">
+        <span class="tabbar__icon" aria-hidden="true">▤</span>
+        Catalog
+      </a>
+      <a class="tabbar__item" href="rankings.html">
+        <span class="tabbar__icon" aria-hidden="true">▮</span>
+        Rankings
+      </a>
+      <button class="tabbar__item" type="button" id="open-bookmarks-tab">
+        <span class="tabbar__icon" aria-hidden="true">★</span>
+        Saved
+      </button>
+    </nav>
+
+    <script type="module" src="js/home.js"></script>
+  </body>
+</html>

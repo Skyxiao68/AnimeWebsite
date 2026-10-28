@@ -1,0 +1,95 @@
+/* css/tokens.css —— 设计 token（S2 骨架）
+ * 只放「值」，不放任何选择器以外的规则。改视觉先改这里，别去 style.css 里翻魔法数。
+ * 8px 间距刻度；正文色 #978FA3 来自 PLAN.md:103（与 Handoff 一致）。
+ * 断点写死在媒体查询里（CSS 变量不能用在媒体查询条件中）：<600 移动 / 600–991 平板 / ≥992 桌面。
+ */
+
+:root {
+  /* ---- 颜色角色（对齐已交 PRD / Figma 设计系统：bg #141018 / surface #1A1424 / accent #BD91C8）---- */
+  --bg: #141018; /* 页面底色 */
+  --bg-soft: #17121F; /* 分段底色（hero 下方过渡），落在 bg 与 surface 之间 */
+  --surface: #1A1424; /* 卡片、面板 */
+  --surface-2: #231B2F; /* 悬停、输入框，比 surface 提一档 */
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.16);
+
+  --text: #f2eef9; /* 主文字：标题、正文重点 */
+  --text-muted: #978fa3; /* 正文 / 次要信息（PLAN.md:103 指定，与 bg/surface 均 ≥ 4.5:1） */
+  --text-dim: #6f6880; /* 占位、禁用 */
+
+  --accent: #BD91C8; /* 主强调：按钮、分数、当前页（PRD accent） */
+  --accent-soft: rgba(189, 145, 200, 0.16);
+  --accent-ink: #1A0F1E; /* 强调色上的文字：深墨，保证对比 */
+  --focus: #8b7bf7; /* 焦点环，别跟强调色混用 */
+  --ok: #4ec9a4;
+  --warn: #f0b456;
+  --danger: #ff6b6b;
+
+  /* ---- 间距（8px 刻度）---- */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --sp-8: 64px;
+  --sp-9: 96px;
+
+  /* ---- 字号 / 行高 ---- */
+  --fs-xs: 12px;
+  --fs-sm: 14px;
+  --fs-md: 16px;
+  --fs-lg: 20px;
+  --fs-xl: clamp(24px, 2.4vw, 32px);
+  --fs-2xl: clamp(32px, 4vw, 48px);
+  --fs-3xl: clamp(40px, 6vw, 72px);
+
+  --lh-tight: 1.15;
+  --lh-snug: 1.35;
+  --lh-body: 1.6;
+
+  --tracking-wide: 0.08em;
+
+  /* ---- 圆角 / 阴影 ---- */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 16px;
+  --r-pill: 999px;
+
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-3: 0 16px 48px rgba(0, 0, 0, 0.55);
+
+  /* ---- 布局 ---- */
+  --container: 1200px;
+  --gutter: var(--sp-5); /* 移动端由媒体查询降到 16px */
+  --header-h: 64px;
+  --tabbar-h: 56px; /* 移动底部 tab bar 高度，body 要给它留 padding */
+  --card-cover-ratio: 2 / 3; /* PRD #08：封面统一 2:3 */
+
+  /* ---- 层级 ---- */
+  --z-header: 100;
+  --z-tabbar: 100;
+  --z-drawer: 200;
+  --z-toast: 300;
+
+  /* ---- 动效（GSAP 接管后仍复用这些时长做 CSS 过渡）---- */
+  --t-fast: 120ms;
+  --t-base: 200ms;
+  --t-slow: 320ms;
+  --ease: cubic-bezier(0.2, 0.6, 0.2, 1);
+
+  /* ---- 字体 ---- */
+  --font-sans: "Inter", "Segoe UI", "Noto Sans SC", system-ui, -apple-system, sans-serif;
+  --font-display: "Space Grotesk", "Inter", "Segoe UI", system-ui, sans-serif;
+}
+
+/* 系统偏好减少动效：所有过渡退化，GSAP 那边另有一段判断（motion.js） */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --t-fast: 0ms;
+    --t-base: 0ms;
+    --t-slow: 0ms;
+  }
+}
