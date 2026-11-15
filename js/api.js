@@ -280,3 +280,178 @@ export function userMessage(err) {
       return '加载失败，再试一次。';
   }
 }
+
+// ---------------------------------------------------------------- 搜索 / 筛选（Catalog）
+// 谁用：js/filters.js（你写）。
+// 这一层只做一件事：把「关键词 + 一组筛选条件」变成一个请求，再把 items 和
+// hasNextPage 一起交出去。筛选状态存哪、URL 怎么同步、Reset 怎么写，都不在这层。
+
+const SEARCH_QUERY = `query ($page: Int, $perPage: Int, $search: String, $genre: [String],
+    $format: [MediaFormat], $status: [MediaStatus], $country: CountryCode,
+    $year: Int, $sort: [MediaSort]) {
+    Page(page: $page, perPage: $perPage) {
+      pageInfo { hasNextPage }
+      media(
+        type: ANIME
+        isAdult: false
+        search: $search
+        genre_in: $genre
+        format_in: $format
+        status_in: $status
+        countryOfOrigin: $country
+        seasonYear: $year
+        sort: $sort
+      ) {${MEDIA_FIELDS}      }
+    }
+  }`;
+
+// URL 上只放这四个短名，别把 AniList 的枚举直接写进地址栏。
+// 四个 key 就是 URL 与 catalog.html 里 data-value 用的短名，顺序照设计稿的 Sort 行
+export const SEARCH_SORTS = {
+  popular: 'POPULARITY_DESC',
+  score: 'SCORE_DESC',
+  trending: 'TRENDING_DESC',
+  favourites: 'FAVOURITES_DESC',
+};
+
+/**
+ * @param {string} q  关键词；空串等于不带 search 参数（此时就是纯筛选）
+ * @param {object} f  { country, format, status, genre, year, sort }
+ * @param {object} o  { page, perPage, fresh }
+ * @returns {Promise<{items: Array, hasNextPage: boolean, source: string, cached: boolean}>}
+ */
+export async function search(q, f = {}, { page = 1, perPage = 24, fresh = false } = {}) {
+  // f.sort 是地址栏和 data-value 用的短名（popular / score / trending / favourites），
+  // AniList 要的是枚举值（POPULARITY_DESC…）。直接塞短名接口会回 400。
+  const sort = SEARCH_SORTS[f.sort] || SEARCH_SORTS.popular;
+  const vars = { page, perPage, sort: [sort] };
+
+  const text = (q || '').trim();
+  if (text) vars.search = text;
+  if (f.genre) vars.genre = [f.genre];
+  if (f.format) vars.format = [f.format];
+  if (f.status) vars.status = [f.status];
+  if (f.country) vars.country = f.country; // 单值，不是数组
+  if (f.year) vars.year = Number(f.year);
+
+  const key = `search:${JSON.stringify(vars)}`;
+  if (!fresh) {
+    const hit = cacheGet(key);
+    if (hit) return { ...hit, cached: true, source: 'anilist' };
+  }
+
+  let result;
+  try {
+    const data = await raw(SEARCH_QUERY, vars);
+    result = {
+      items: data?.Page?.media ?? [],
+      hasNextPage: Boolean(data?.Page?.pageInfo?.hasNextPage),
+      source: 'anilist',
+    };
+  } catch (err) {
+    result = await fallbackSearch(err, text, vars);
+  }
+
+  // 注意：这里缓存的是对象（items + hasNextPage），section() 缓存的是数组；
+  // 两者 key 前缀不同（search: / 板块名），不会互相踩。
+  cacheSet(key, result);
+  return { ...result, cached: false };
+}
+
+// Jikan 表达不了 region / format / status / 年份，只能带 q 与分页。
+// 兜底失败时仍然抛 AniList 那个原始错误，别用 Jikan 的错盖掉它。
+async function fallbackSearch(err, text, vars) {
+  if (!(err instanceof ApiError) || !FALLBACK_KINDS.has(err.kind)) throw err;
+
+  const qs = new URLSearchParams({
+    limit: String(vars.perPage),
+    page: String(vars.page),
+  });
+  if (text) qs.set('q', text);
+
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
+
+  try {
+    const res = await fetch(`${JIKAN_BASE}/anime?${qs}`, { signal: ctrl.signal });
+    if (!res.ok) throw new Error(`Jikan ${res.status}`);
+    const json = await res.json();
+    const list = Array.isArray(json?.data) ? json.data : [];
+    if (!list.length) throw new Error('Jikan 返回空列表');
+    return {
+      items: list.map(fromJikan),
+      hasNextPage: Boolean(json?.pagination?.has_next_page),
+      source: 'jikan',
+    };
+  } catch (jikanErr) {
+    const note = `jikan fallback failed: ${jikanErr?.message ?? jikanErr}`;
+    err.detail = err.detail ? `${err.detail} | ${note}` : note;
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// ------------------------------------------------------------------ 详情
+
+// 详情页一次拿齐：简介、关系图、推荐、集数。relations 是 PRD 评审 #01 要的
+// 「相关动画」，只有 AniList 有这个字段。
+const MEDIA_QUERY = `query ($id: Int) {
+  Media(id: $id, type: ANIME) {
+    ${MEDIA_FIELDS}
+    description(asHtml: false)
+    bannerImage
+    season
+    seasonYear
+    episodes
+    duration
+    genres
+    relations {
+      edges {
+        relationType(version: 2)
+        node {
+          id
+          type
+          format
+          averageScore
+          title { romaji english }
+          coverImage { large }
+        }
+      }
+    }
+    recommendations(sort: RATING_DESC, perPage: 6) {
+      nodes {
+        mediaRecommendation {
+          id
+          format
+          averageScore
+          title { romaji english }
+          coverImage { large }
+        }
+      }
+    }
+  }
+}`;
+
+// 详情页没有 Jikan 兜底：Jikan 用 MyAnimeList 的 id，我们手上只有 AniList 的 id，
+// 两者之间没有便宜的映射。硬拿标题去搜会给出错位的简介和关系图，比报错更糟。
+// 所以这里失败就失败，页面显示错误态 + 重试。
+export async function media(id, { fresh = false } = {}) {
+  const numeric = Number(id);
+  if (!Number.isInteger(numeric) || numeric <= 0) {
+    throw new ApiError(KIND.CLIENT, 'Missing or malformed title id');
+  }
+
+  const key = `media:${numeric}`;
+  if (!fresh) {
+    const hit = cacheGet(key);
+    if (hit) return { ...hit, cached: true };
+  }
+
+  const data = await raw(MEDIA_QUERY, { id: numeric });
+  const item = data?.Media;
+  if (!item) throw new ApiError(KIND.CLIENT, 'AniList returned no title for that id');
+
+  cacheSet(key, item);
+  return { ...item, cached: false };
+}

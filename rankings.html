@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rankings · MikuFansAnime</title>
+    <meta
+      name="description"
+      content="What people are watching now, the all-time popular list, and the highest rated anime, with a genre filter."
+    />
+    <link rel="stylesheet" href="css/tokens.css" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand" href="index.html">
+          <span class="brand__mark" aria-hidden="true">M</span>
+          MikuFansAnime
+        </a>
+
+        <nav class="site-nav" aria-label="Main">
+          <a class="site-nav__link" href="index.html">Home</a>
+          <a class="site-nav__link" href="catalog.html">Catalog</a>
+          <a class="site-nav__link" href="rankings.html" aria-current="page"
+            >Rankings</a
+          >
+        </nav>
+
+        <div class="header-actions">
+          <button
+            class="btn"
+            type="button"
+            id="open-bookmarks"
+            aria-expanded="false"
+            aria-controls="bookmark-drawer"
+          >
+            Bookmarks
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main id="main" class="container">
+      <header class="page-head">
+        <h1 class="page-head__title">Rankings</h1>
+        <p class="page-head__lede">
+          Three lists rather than four: AniList does not publish a weekly chart,
+          so a "this week" tab would have to be invented. Trending, all-time
+          popular and highest rated are the lists the data actually supports.
+        </p>
+      </header>
+
+      <div class="rank-bar">
+        <div class="rank-tabs" role="group" aria-label="Which list">
+          <button
+            class="rank-tab"
+            type="button"
+            data-list="trending"
+            aria-pressed="true"
+          >
+            Trending now
+          </button>
+          <button class="rank-tab" type="button" data-list="popular" aria-pressed="false">
+            All-time popular
+          </button>
+          <button class="rank-tab" type="button" data-list="score" aria-pressed="false">
+            Highest rated
+          </button>
+        </div>
+
+        <label class="rank-genre">
+          Genre
+          <select id="rank-genre">
+            <option value="">All genres</option>
+          </select>
+        </label>
+      </div>
+
+      <p class="rank-count" id="rank-count" role="status" aria-live="polite">
+        Loading…
+      </p>
+
+      <div class="grid rank-grid" id="rank-grid" data-state="loading" aria-busy="true">
+        <div class="rank-skeleton" aria-hidden="true"></div>
+        <div class="rank-skeleton" aria-hidden="true"></div>
+        <div class="rank-skeleton" aria-hidden="true"></div>
+        <div class="rank-skeleton" aria-hidden="true"></div>
+      </div>
+
+      <div class="load-more-wrap">
+        <button class="btn load-more" type="button" id="rank-more" hidden>
+          Load more
+        </button>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container site-footer__inner">
+        <p>
+          Data from <a href="https://anilist.co" rel="noopener">AniList</a>.
+          Built for a university assignment, not affiliated with AniList.
+        </p>
+        <p>MikuFansAnime · 2026</p>
+      </div>
+    </footer>
+
+    <aside
+      class="drawer"
+      id="bookmark-drawer"
+      data-open="false"
+      aria-labelledby="drawer-title"
+      inert
+    >
+      <div class="drawer__head">
+        <h2 class="drawer__title" id="drawer-title">Bookmarks</h2>
+        <button class="btn drawer__close" type="button" id="close-bookmarks">
+          Close
+        </button>
+      </div>
+      <ul class="drawer__list" id="bookmark-list">
+        <li class="drawer__empty">
+          Nothing saved yet. Tap Bookmark on any card.
+        </li>
+      </ul>
+    </aside>
+    <button
+      class="drawer-backdrop"
+      type="button"
+      id="bookmark-backdrop"
+      aria-label="Close bookmarks"
+      hidden
+    ></button>
+
+    <nav class="tabbar" aria-label="Mobile">
+      <a class="tabbar__item" href="index.html">
+        <span class="tabbar__icon" aria-hidden="true">◆</span>
+        Home
+      </a>
+      <a class="tabbar__item" href="catalog.html">
+        <span class="tabbar__icon" aria-hidden="true">▤</span>
+        Catalog
+      </a>
+      <a class="tabbar__item" href="rankings.html" aria-current="page">
+        <span class="tabbar__icon" aria-hidden="true">▮</span>
+        Rankings
+      </a>
+      <button class="tabbar__item" type="button" id="open-bookmarks-tab">
+        <span class="tabbar__icon" aria-hidden="true">★</span>
+        Saved
+      </button>
+    </nav>
+
+    <script src="vendor/gsap.min.js"></script>
+    <script src="vendor/ScrollTrigger.min.js"></script>
+    <script src="vendor/MotionPathPlugin.min.js"></script>
+    <script src="vendor/Draggable.min.js"></script>
+    <script type="module" src="js/motion.js"></script>
+    <script type="module" src="js/rankings.js"></script>
+  </body>
+</html>

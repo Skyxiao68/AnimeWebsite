@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Catalog · MikuFansAnime</title>
+    <meta
+      name="description"
+      content="Search and filter anime by region, format, status, genre and year — live from AniList."
+    />
+    <link rel="stylesheet" href="css/tokens.css" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <!-- ============================================================ 顶栏（与首页同一套） -->
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand" href="index.html">
+          <span class="brand__mark" aria-hidden="true">M</span>
+          MikuFansAnime
+        </a>
+
+        <nav class="site-nav" aria-label="Main">
+          <a class="site-nav__link" href="index.html">Home</a>
+          <a class="site-nav__link" href="catalog.html" aria-current="page"
+            >Catalog</a
+          >
+          <a class="site-nav__link" href="rankings.html">Rankings</a>
+        </nav>
+
+        <div class="header-actions">
+          <button
+            class="btn"
+            type="button"
+            id="open-bookmarks"
+            aria-expanded="false"
+            aria-controls="bookmark-drawer"
+          >
+            Bookmarks
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- ============================================================ 搜索条
+       首页那条是导航入口（action="catalog.html"），这里是真的搜索框。 -->
+    <div class="search-bar">
+      <div class="container">
+        <form class="search" action="catalog.html" method="get" role="search">
+          <label class="search__label" for="q">Search anime</label>
+          <input
+            class="search__input"
+            id="q"
+            name="q"
+            type="search"
+            placeholder="Search anime, e.g. Frieren"
+            autocomplete="off"
+          />
+          <button class="search__submit" type="submit">Search</button>
+        </form>
+      </div>
+    </div>
+
+    <main id="main" class="container">
+      <!-- ==================================================== 筛选区
+        结构照 Figma HiFi「Filter Out Your Anime」：每行 = 组名 + All + 选项值，
+        长行（Genre）折叠，Reset 在右上角。组名和值是两列，值不用胶囊边框。
+
+        filters.js 在这一个容器上做事件委托：
+          button[data-value]  → 选中该值，同组其它项 aria-pressed=false
+          button[data-all]    → 清空这一组
+          button[data-expand] → 切 aria-expanded + 行上的 data-expanded（不发请求）
+          #year (input)       → 监听 change，不是 click
+      -->
+      <section class="filters" id="filters" aria-labelledby="filters-title">
+        <div class="filters__head">
+          <div class="filters__intro">
+            <h1 class="filters__title" id="filters-title">
+              Filter Out Your Anime
+            </h1>
+            <p class="filters__lede">
+              Select different combinations of tags to find anime you'll be
+              interested in.
+            </p>
+          </div>
+          <button class="filters__reset" type="button" id="reset-filters">
+            <span class="filters__reset-icon" aria-hidden="true">↺</span> Reset
+          </button>
+        </div>
+
+        <div class="filters__row" data-group="country">
+          <span class="filters__label" id="label-country">Region</span>
+          <button
+            class="filters__all"
+            type="button"
+            data-all="country"
+            aria-pressed="true"
+          >
+            All
+          </button>
+          <div
+            class="filters__options"
+            role="group"
+            aria-labelledby="label-country"
+          >
+            <button class="opt" type="button" data-value="JP" aria-pressed="false">Japan</button>
+            <button class="opt" type="button" data-value="KR" aria-pressed="false">Korea</button>
+            <button class="opt" type="button" data-value="CN" aria-pressed="false">China</button>
+            <button class="opt" type="button" data-value="TW" aria-pressed="false">Taiwan</button>
+          </div>
+        </div>
+
+        <div class="filters__row" data-group="format">
+          <span class="filters__label" id="label-format">Format</span>
+          <button
+            class="filters__all"
+            type="button"
+            data-all="format"
+            aria-pressed="true"
+          >
+            All
+          </button>
+          <div
+            class="filters__options"
+            role="group"
+            aria-labelledby="label-format"
+          >
+            <button class="opt" type="button" data-value="TV" aria-pressed="false">TV Show</button>
+            <button class="opt" type="button" data-value="MOVIE" aria-pressed="false">Movie</button>
+            <button class="opt" type="button" data-value="OVA" aria-pressed="false">OVA</button>
+            <button class="opt" type="button" data-value="ONA" aria-pressed="false">ONA</button>
+            <button class="opt" type="button" data-value="SPECIAL" aria-pressed="false">Special</button>
+          </div>
+        </div>
+
+        <div
+          class="filters__row"
+          data-group="status"
+          data-collapsible="3"
+          data-expanded="false"
+        >
+          <span class="filters__label" id="label-status">Status</span>
+          <button
+            class="filters__all"
+            type="button"
+            data-all="status"
+            aria-pressed="true"
+          >
+            All
+          </button>
+          <div
+            class="filters__options"
+            role="group"
+            aria-labelledby="label-status"
+          >
+            <button class="opt" type="button" data-value="RELEASING" aria-pressed="false">Airing</button>
+            <button class="opt" type="button" data-value="FINISHED" aria-pressed="false">Finished</button>
+            <button class="opt" type="button" data-value="NOT_YET_RELEASED" aria-pressed="false">Upcoming</button>
+            <button class="opt" type="button" data-value="CANCELLED" aria-pressed="false">Cancelled</button>
+          </div>
+          <button
+            class="filters__expand"
+            type="button"
+            data-expand="status"
+            aria-expanded="false"
+            aria-controls="label-status"
+          >
+            Expand <span class="filters__caret" aria-hidden="true">⌄</span>
+          </button>
+        </div>
+
+        <!-- Genre 是长行：前 8 个直接显示，其余折叠。折叠是纯 CSS 的
+             （data-expanded="false" 时 :nth-child(n+9) 隐藏），JS 只切属性。 -->
+        <div
+          class="filters__row"
+          data-group="genre"
+          data-collapsible="5"
+          data-expanded="false"
+        >
+          <span class="filters__label" id="label-genre">Genre</span>
+          <button
+            class="filters__all"
+            type="button"
+            data-all="genre"
+            aria-pressed="true"
+          >
+            All
+          </button>
+          <div
+            class="filters__options"
+            role="group"
+            aria-labelledby="label-genre"
+          >
+            <button class="opt" type="button" data-value="Action" aria-pressed="false">Action</button>
+            <button class="opt" type="button" data-value="Adventure" aria-pressed="false">Adventure</button>
+            <button class="opt" type="button" data-value="Comedy" aria-pressed="false">Comedy</button>
+            <button class="opt" type="button" data-value="Drama" aria-pressed="false">Drama</button>
+            <button class="opt" type="button" data-value="Fantasy" aria-pressed="false">Fantasy</button>
+            <button class="opt" type="button" data-value="Mystery" aria-pressed="false">Mystery</button>
+            <button class="opt" type="button" data-value="Romance" aria-pressed="false">Romance</button>
+            <button class="opt" type="button" data-value="Sci-Fi" aria-pressed="false">Sci-Fi</button>
+            <button class="opt" type="button" data-value="Slice of Life" aria-pressed="false">Slice of Life</button>
+            <button class="opt" type="button" data-value="Sports" aria-pressed="false">Sports</button>
+            <button class="opt" type="button" data-value="Supernatural" aria-pressed="false">Supernatural</button>
+            <button class="opt" type="button" data-value="Mecha" aria-pressed="false">Mecha</button>
+            <button class="opt" type="button" data-value="Music" aria-pressed="false">Music</button>
+            <button class="opt" type="button" data-value="Horror" aria-pressed="false">Horror</button>
+            <button class="opt" type="button" data-value="Psychological" aria-pressed="false">Psychological</button>
+            <button class="opt" type="button" data-value="Thriller" aria-pressed="false">Thriller</button>
+          </div>
+          <button
+            class="filters__expand"
+            type="button"
+            data-expand="genre"
+            aria-expanded="false"
+            aria-controls="label-genre"
+          >
+            Expand <span class="filters__caret" aria-hidden="true">⌄</span>
+          </button>
+        </div>
+
+        <!-- 年份故意偏离设计稿：稿里是 2026→2005 一长串 + Expand，
+             PRD 评审第 19 条要求「year selection → type-in box instead of list」。
+             这是 20 条评论之一，不改就是「未回应 PRD 反馈」上限 69%。 -->
+        <div class="filters__row" data-group="year">
+          <span class="filters__label" id="label-year">Year</span>
+          <button
+            class="filters__all"
+            type="button"
+            data-all="year"
+            aria-pressed="true"
+          >
+            All
+          </button>
+          <div class="filters__options" role="group" aria-labelledby="label-year">
+            <label class="visually-hidden" for="year"
+              >Release year, four digits</label
+            >
+            <input
+              class="filters__number"
+              id="year"
+              type="number"
+              inputmode="numeric"
+              min="1960"
+              max="2026"
+              step="1"
+              placeholder="e.g. 2019"
+            />
+            <span class="filters__hint">Type a year, or leave empty for any.</span>
+          </div>
+        </div>
+
+        <!-- Sort 没有可用的 All：它总有一个值（默认 Popularity） -->
+        <div class="filters__row" data-group="sort">
+          <span class="filters__label" id="label-sort">Sort</span>
+          <span class="filters__all is-static" aria-hidden="true">All</span>
+          <div class="filters__options" role="group" aria-labelledby="label-sort">
+            <button class="opt" type="button" data-value="popular" aria-pressed="true">Popularity</button>
+            <button class="opt" type="button" data-value="score" aria-pressed="false">Average Score</button>
+            <button class="opt" type="button" data-value="trending" aria-pressed="false">Trending</button>
+            <button class="opt" type="button" data-value="favourites" aria-pressed="false">Favorites</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 结果头：条数（role=status，筛选后读屏也能听到变化） -->
+      <div class="catalog-head">
+        <p
+          class="result-count"
+          id="result-count"
+          role="status"
+          aria-live="polite"
+        >
+          Loading…
+        </p>
+      </div>
+
+      <!-- 渲染进这个 .grid；四态用 data-state 表达（loading / success / error / empty） -->
+      <div
+        class="grid"
+        id="catalog-grid"
+        data-state="loading"
+        aria-busy="true"
+      ></div>
+
+      <div class="load-more-wrap">
+        <button class="btn load-more" type="button" id="load-more" hidden>
+          Load more
+        </button>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container site-footer__inner">
+        <p>
+          Data from <a href="https://anilist.co" rel="noopener">AniList</a>.
+          Built for a university assignment, not affiliated with AniList.
+        </p>
+        <p>MikuFansAnime · 2026</p>
+      </div>
+    </footer>
+
+    <!-- 收藏抽屉结构同首页；行为在 js/bookmarks.js -->
+    <aside
+      class="drawer"
+      id="bookmark-drawer"
+      data-open="false"
+      aria-labelledby="drawer-title"
+      inert
+    >
+      <div class="drawer__head">
+        <h2 class="drawer__title" id="drawer-title">Bookmarks</h2>
+        <button class="btn drawer__close" type="button" id="close-bookmarks">
+          Close
+        </button>
+      </div>
+      <ul class="drawer__list" id="bookmark-list">
+        <li class="drawer__empty">
+          Nothing saved yet. Tap Bookmark on any card.
+        </li>
+      </ul>
+    </aside>
+    <button
+      class="drawer-backdrop"
+      type="button"
+      id="bookmark-backdrop"
+      aria-label="Close bookmarks"
+      hidden
+    ></button>
+
+    <nav class="tabbar" aria-label="Mobile">
+      <a class="tabbar__item" href="index.html">
+        <span class="tabbar__icon" aria-hidden="true">◆</span>
+        Home
+      </a>
+      <a class="tabbar__item" href="catalog.html" aria-current="page">
+        <span class="tabbar__icon" aria-hidden="true">▤</span>
+        Catalog
+      </a>
+      <a class="tabbar__item" href="rankings.html">
+        <span class="tabbar__icon" aria-hidden="true">▮</span>
+        Rankings
+      </a>
+      <button class="tabbar__item" type="button" id="open-bookmarks-tab">
+        <span class="tabbar__icon" aria-hidden="true">★</span>
+        Saved
+      </button>
+    </nav>
+
+    <!-- catalog.js pulls in filters.js and bookmarks.js, so this is the only
+         module the page needs; a second tag would boot the same graph twice. -->
+    <script src="vendor/gsap.min.js"></script>
+    <script src="vendor/ScrollTrigger.min.js"></script>
+    <script src="vendor/MotionPathPlugin.min.js"></script>
+    <script src="vendor/Draggable.min.js"></script>
+    <script type="module" src="js/motion.js"></script>
+    <script type="module" src="js/catalog.js"></script>
+  </body>
+</html>
