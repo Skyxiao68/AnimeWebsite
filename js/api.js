@@ -86,18 +86,41 @@ const PAGE_QUERY_BY_FORMAT = `query ($page: Int, $perPage: Int, $type: MediaType
     }
   }`;
 
+// TV / Movies 按「最新」排（客户 2026-11-16 定的）。直接 START_DATE_DESC 会先吐出
+// 一堆 NOT_YET_RELEASED 的无日期条目（连封面都没有），所以两条 shelf 都要加收口：
+//   TV    -> status_in: [RELEASING]，只看还在播的，按开播日倒序
+//   Movies-> status_in: [FINISHED] + startDate_greater(一年前)，只看已上映的
+const LATEST_QUERY = `query ($page: Int, $perPage: Int, $type: MediaType, $format: MediaFormat, $sort: [MediaSort], $statusIn: [MediaStatus], $startedAfter: FuzzyDateInt) {
+    Page(page: $page, perPage: $perPage) {
+      media(type: $type, format: $format, sort: $sort, status_in: $statusIn, startDate_greater: $startedAfter, isAdult: false) {${MEDIA_FIELDS}      }
+    }
+  }`;
+
+// FuzzyDateInt 是 YYYYMMDD 的整数，不是 unix 秒；传错会被当成 1970 年前，静默返回空。
+function fuzzyDaysAgo(days) {
+  const d = new Date(Date.now() - days * 86400000);
+  return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+}
+
 // 四段 Home（PLAN.md:25）：Weekly / Top Rated / TV / Movies
 const SECTION_SPECS = {
   weekly: { label: 'Weekly', type: 'ANIME', sort: 'TRENDING_DESC' },
   topRated: { label: 'Top Rated', type: 'ANIME', sort: 'SCORE_DESC' },
-  tv: { label: 'TV', type: 'ANIME', format: 'TV', sort: 'POPULARITY_DESC' },
-  movies: { label: 'Movies', type: 'ANIME', format: 'MOVIE', sort: 'POPULARITY_DESC' },
+  tv: { label: 'TV', type: 'ANIME', format: 'TV', sort: 'START_DATE_DESC', statusIn: ['RELEASING'] },
+  movies: {
+    label: 'Movies',
+    type: 'ANIME',
+    format: 'MOVIE',
+    sort: 'START_DATE_DESC',
+    statusIn: ['FINISHED'],
+    startedWithinDays: 365,
+  },
 };
 
 const QUERIES = Object.fromEntries(
   Object.entries(SECTION_SPECS).map(([name, spec]) => [
     name,
-    spec.format ? PAGE_QUERY_BY_FORMAT : PAGE_QUERY,
+    spec.format ? (spec.statusIn ? LATEST_QUERY : PAGE_QUERY_BY_FORMAT) : PAGE_QUERY,
   ]),
 );
 
@@ -112,6 +135,8 @@ export function variablesFor(section, page = 1, perPage = 12) {
   if (!spec) return null;
   const vars = { page, perPage, type: spec.type, sort: [spec.sort] };
   if (spec.format) vars.format = spec.format; // 没有 format 的段绝不能带这个键
+  if (spec.statusIn) vars.statusIn = spec.statusIn;
+  if (spec.startedWithinDays) vars.startedAfter = fuzzyDaysAgo(spec.startedWithinDays);
   return vars;
 }
 
@@ -288,7 +313,7 @@ export function userMessage(err) {
 
 const SEARCH_QUERY = `query ($page: Int, $perPage: Int, $search: String, $genre: [String],
     $format: [MediaFormat], $status: [MediaStatus], $country: CountryCode,
-    $year: Int, $sort: [MediaSort]) {
+    $year: Int, $season: MediaSeason, $sort: [MediaSort]) {
     Page(page: $page, perPage: $perPage) {
       pageInfo { hasNextPage }
       media(
@@ -300,10 +325,201 @@ const SEARCH_QUERY = `query ($page: Int, $perPage: Int, $search: String, $genre:
         status_in: $status
         countryOfOrigin: $country
         seasonYear: $year
+        season: $season
         sort: $sort
       ) {${MEDIA_FIELDS}      }
     }
   }`;
+
+// 首页整幅海报。单独一条查询，因为 banner、genres 这些字段只有首页用得上，
+// 塞进 MEDIA_FIELDS 会让每个卡片请求都变胖。
+const HERO_FIELDS = `
+      id
+      title { romaji english }
+      bannerImage
+      trailer { id site }
+      coverImage { large extraLarge }
+      averageScore
+      genres
+      format
+      description(asHtml: false)`;
+
+const HERO_BY_IDS = `query ($ids: [Int]) {
+  Page(page: 1, perPage: 25) {
+    media(type: ANIME, id_in: $ids, isAdult: false) {${HERO_FIELDS}
+    }
+  }
+}`;
+
+// 主视觉要「今天热度最高的三张」（客户 2026-11-16 定的）。
+// AniList 没有现成的「今日热度」字段，所以先拿当天的放送表，再按 popularity 自己排；
+// 主题、banner、简介这些只有这里要的字段，按 id 回查一次 —— 放送表那层不带它们。
+export async function hero({ count = 3 } = {}) {
+  const today = await airingWindow({ days: 1 });
+  const ids = today.slice(0, count).map((m) => m.id);
+
+  // 周中某天排片可能不足三张（放送表按分钟切，冷门日会稀疏），用一周窗口补齐，
+  // 别让主视觉缺一张图或少一个按钮。
+  if (ids.length < count) {
+    for (const m of await airingWindow({ days: 7 })) {
+      if (ids.length >= count) break;
+      if (!ids.includes(m.id)) ids.push(m.id);
+    }
+  }
+
+  const data = await raw(HERO_BY_IDS, { ids });
+  const byId = new Map(((data && data.Page && data.Page.media) || []).map((m) => [m.id, m]));
+  return ids.map((id) => byId.get(id)).filter(Boolean);
+}
+
+// 每周放送表：Weekly Keep Ups 的 Mon–Sun 用它。AniList 的 airingSchedule 能给
+// 「某一天正在播什么」，所以日期条是真的在切数据，不是装饰。
+const SCHEDULE_QUERY = `query ($from: Int, $to: Int) {
+  Page(page: 1, perPage: 30) {
+    airingSchedules(airingAt_greater: $from, airingAt_lesser: $to, sort: TIME) {
+      airingAt
+      media {
+        id
+        type
+        format
+        averageScore
+        title { romaji english }
+        coverImage { large }
+      }
+    }
+  }
+}`;
+
+export async function airingDay(dayOffset = 0) {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() + dayOffset);
+  const from = Math.floor(start.getTime() / 1000);
+  const data = await raw(SCHEDULE_QUERY, { from, to: from + 86400 });
+  const rows = (data && data.Page && data.Page.airingSchedules) || [];
+  const seen = new Set();
+  const out = [];
+  for (const row of rows) {
+    const m = row.media;
+    if (!m || m.type !== 'ANIME' || seen.has(m.id)) continue;
+    seen.add(m.id);
+    out.push(m);
+  }
+  return out;
+}
+
+// 首页 Ranks 的五个窗口。AniList 没有「日榜/周榜」这种现成的接口，但它有放送表：
+// 取某一段时间内播出的番，再按 popularity 自己排一次，口径就是「这段时间更新里最热的」。
+// Season/Year 反而有现成过滤条件（season + seasonYear、seasonYear），用得着就不用自己排。
+const WINDOW_QUERY = `query ($from: Int, $to: Int, $page: Int) {
+  Page(page: $page, perPage: 50) {
+    pageInfo { hasNextPage }
+    airingSchedules(airingAt_greater: $from, airingAt_lesser: $to, sort: TIME) {
+      media {
+        id
+        type
+        format
+        averageScore
+        popularity
+        title { romaji english }
+        coverImage { large }
+      }
+    }
+  }
+}`;
+
+const CHART_QUERY = `query ($season: MediaSeason, $seasonYear: Int, $sort: [MediaSort]) {
+  Page(page: 1, perPage: 30) {
+    media(type: ANIME, isAdult: false, season: $season, seasonYear: $seasonYear, sort: $sort) {
+      id
+      type
+      format
+      averageScore
+      title { romaji english }
+      coverImage { large }
+    }
+  }
+}`;
+
+function startOfDay(date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function byPopularity(a, b) {
+  return (b.popularity || 0) - (a.popularity || 0);
+}
+
+// days=1 是「今天播的」，days=7 是「最近一周播的」。
+//
+// 一页只给 50 条放送记录，而一天通常有一百多条，只取第一页等于只看到当天前半段，
+// 晚上播的高人气番会整段缺席（首页主视觉和 Day 榜都吃这个数）。所以往下翻，
+// 最多三页（150 条）足够盖住一天。
+//
+// 同一天的结果缓存起来：主视觉和 Ranks 的 Day 问的是同一段时间，不该打两遍。
+const airingCache = new Map();
+
+async function airingWindow({ days = 1 } = {}) {
+  const now = new Date();
+  const from = Math.floor(startOfDay(now).getTime() / 1000);
+  const to = days <= 1 ? from + 86400 : Math.floor(now.getTime() / 1000);
+
+  const key = `${days}:${from}`;
+  const cached = airingCache.get(key);
+  if (cached) return cached;
+
+  const seen = new Map();
+  for (let page = 1; page <= 3; page += 1) {
+    const data = await raw(WINDOW_QUERY, { from, to, page });
+    const pageData = (data && data.Page) || {};
+    const rows = pageData.airingSchedules || [];
+    for (const row of rows) {
+      const m = row.media;
+      if (!m || m.type !== 'ANIME') continue;
+      if (!seen.has(m.id)) seen.set(m.id, m);
+    }
+    if (!rows.length || !pageData.pageInfo || !pageData.pageInfo.hasNextPage) break;
+  }
+
+  const list = [...seen.values()].sort(byPopularity);
+  airingCache.set(key, list);
+  return list;
+}
+
+function currentSeason(date = new Date()) {
+  const month = date.getMonth(); // 0 是一月
+  if (month <= 2) return 'WINTER';
+  if (month <= 5) return 'SPRING';
+  if (month <= 8) return 'SUMMER';
+  return 'FALL';
+}
+
+/**
+ * 首页 Ranks 的数据源。window: day | week | season | year
+ * @returns {Promise<Array>} 按窗口排好的条目
+ */
+export async function chart(windowName, { perPage = 4, fresh = false } = {}) {
+  const key = `chart:${windowName}:${perPage}`;
+  if (!fresh) {
+    const hit = cacheGet(key);
+    if (hit) return hit;
+  }
+
+  let items;
+  if (windowName === 'day' || windowName === 'week') {
+    items = await airingWindow({ days: windowName === 'day' ? 1 : 7 });
+  } else if (windowName === 'season' || windowName === 'year') {
+    const now = new Date();
+    const vars = { seasonYear: now.getFullYear(), sort: ['POPULARITY_DESC'] };
+    if (windowName === 'season') vars.season = currentSeason(now);
+    const data = await raw(CHART_QUERY, vars);
+    items = (data && data.Page && data.Page.media) || [];
+  } else {
+    throw new ApiError(KIND.CLIENT, `没有这个榜单窗口：${windowName}`);
+  }
+
+  const cut = items.slice(0, perPage);
+  cacheSet(key, cut);
+  return cut;
+}
 
 // URL 上只放这四个短名，别把 AniList 的枚举直接写进地址栏。
 // 四个 key 就是 URL 与 catalog.html 里 data-value 用的短名，顺序照设计稿的 Sort 行
@@ -333,6 +549,7 @@ export async function search(q, f = {}, { page = 1, perPage = 24, fresh = false 
   if (f.status) vars.status = [f.status];
   if (f.country) vars.country = f.country; // 单值，不是数组
   if (f.year) vars.year = Number(f.year);
+  if (f.season) vars.season = f.season; // WINTER / SPRING / SUMMER / FALL
 
   const key = `search:${JSON.stringify(vars)}`;
   if (!fresh) {
@@ -405,6 +622,11 @@ const MEDIA_QUERY = `query ($id: Int) {
     seasonYear
     episodes
     duration
+    status
+    title { native }
+    coverImage { extraLarge }
+    studios { nodes { name isAnimationStudio } }
+    externalLinks { id site url type }
     genres
     relations {
       edges {
@@ -419,7 +641,7 @@ const MEDIA_QUERY = `query ($id: Int) {
         }
       }
     }
-    recommendations(sort: RATING_DESC, perPage: 6) {
+    recommendations(sort: RATING_DESC, perPage: 12) {
       nodes {
         mediaRecommendation {
           id

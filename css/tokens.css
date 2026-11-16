@@ -4,12 +4,35 @@
  * 断点写死在媒体查询里（CSS 变量不能用在媒体查询条件中）：<600 移动 / 600–991 平板 / ≥992 桌面。
  */
 
+/* Inter（latin 子集，48KB，变量字体）：自托管，不走第三方 CDN。
+ * 直接从 Google Fonts 取回同一份文件，48KB 覆盖 100–900 全部字重。 */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("../fonts/inter-var.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* 品牌字标：渲染图里是一个手写笔刷体的 MikuFansAnime，
+ * 不是正文字体排出来的。Caveat 700 的笔形和间距最接近，24KB，同样自托管。 */
+@font-face {
+  font-family: "Caveat";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../fonts/caveat-700.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 :root {
   /* ---- 颜色角色（对齐已交 PRD / Figma 设计系统：bg #141018 / surface #1A1424 / accent #BD91C8）---- */
   --bg: #141018; /* 页面底色 */
   --bg-soft: #17121F; /* 分段底色（hero 下方过渡），落在 bg 与 surface 之间 */
   --surface: #1A1424; /* 卡片、面板 */
   --surface-2: #231B2F; /* 悬停、输入框，比 surface 提一档 */
+  --main: #2A1F3A; /* PRD 的 main 色，页脚整条底色用 */
   --line: rgba(255, 255, 255, 0.08);
   --line-strong: rgba(255, 255, 255, 0.16);
 
@@ -37,10 +60,10 @@
   --sp-9: 96px;
 
   /* ---- 字号 / 行高 ---- */
-  --fs-xs: 12px;
-  --fs-sm: 14px;
-  --fs-md: 16px;
-  --fs-lg: 20px;
+  --fs-xs: 13px;
+  --fs-sm: 15px;
+  --fs-md: 17px;
+  --fs-lg: 22px;
   --fs-xl: clamp(24px, 2.4vw, 32px);
   --fs-2xl: clamp(32px, 4vw, 48px);
   --fs-3xl: clamp(40px, 6vw, 72px);
@@ -62,11 +85,13 @@
   --shadow-3: 0 16px 48px rgba(0, 0, 0, 0.55);
 
   /* ---- 布局 ---- */
-  --container: 1200px;
+  /* 设计交接稿是 1200 居中。中途跟 cycani 试过按窗口放宽到 1560，
+     但设计稿的留白和换行都按 1200 排的，放宽后面板和中缝都散了。 */
+  --container: clamp(1200px, 50vw + 600px, 1440px);
   --gutter: var(--sp-5); /* 移动端由媒体查询降到 16px */
   --header-h: 64px;
   --tabbar-h: 56px; /* 移动底部 tab bar 高度，body 要给它留 padding */
-  --card-cover-ratio: 2 / 3; /* PRD #08：封面统一 2:3 */
+  --card-cover-ratio: 3 / 4; /* PRD #08：封面统一 2:3 */
 
   /* ---- 层级 ---- */
   --z-header: 100;
@@ -82,7 +107,8 @@
 
   /* ---- 字体 ---- */
   --font-sans: "Inter", "Segoe UI", "Noto Sans SC", system-ui, -apple-system, sans-serif;
-  --font-display: "Space Grotesk", "Inter", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Inter", "Segoe UI", "Noto Sans SC", system-ui, sans-serif;
+  --font-brand: "Caveat", "Segoe Script", cursive;
 }
 
 /* 系统偏好减少动效：所有过渡退化，GSAP 那边另有一段判断（motion.js） */

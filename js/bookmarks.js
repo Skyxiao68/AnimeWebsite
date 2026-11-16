@@ -67,13 +67,27 @@ export function remove(id) {
 // ---------------------------------------------------------------- buttons
 
 function paintButton(btn, saved) {
+  // The control is an icon now, so only the state and the labels change;
+  // writing textContent here would wipe the bookmark glyph out.
   btn.setAttribute('aria-pressed', saved ? 'true' : 'false');
-  btn.textContent = saved ? 'Bookmarked' : 'Bookmark';
+  const label = btn.getAttribute('aria-label') || '';
+  if (!btn.dataset.name) btn.dataset.name = label.replace(/^(Remove bookmark|Bookmark): /, '');
+  const name = btn.dataset.name;
+  btn.setAttribute('aria-label', saved ? `Remove bookmark: ${name}` : `Bookmark: ${name}`);
+  btn.title = saved ? 'Remove bookmark' : 'Bookmark';
 }
 
 function paintCount(count) {
   const header = document.getElementById('open-bookmarks');
-  if (header) header.textContent = count ? `Bookmarks · ${count}` : 'Bookmarks';
+  if (header) {
+    // The control is an icon, so the number rides on an attribute and CSS
+    // paints the badge; writing textContent would wipe the icon out.
+    header.dataset.count = String(count);
+    header.setAttribute(
+      'aria-label',
+      count ? `Bookmarks, ${count} saved` : 'Bookmarks, nothing saved yet'
+    );
+  }
 
   const tab = document.getElementById('open-bookmarks-tab');
   if (tab) {
@@ -175,6 +189,113 @@ function closeDrawer() {
   opener?.focus();
 }
 
+// ---------------------------------------------------------------- recent views
+// The clock icon in the design opens "what I looked at last". Same store idea as
+// bookmarks, but capped and trimmed on every visit, and only written by detail.js.
+
+const RECENT_KEY = 'mf.recent.v1';
+const RECENT_KEEP = 24; // history.html 一页能放下的量
+const RECENT_POP = 6; // 顶栏那个小面板只露最近几条
+
+function readRecent() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
+    return Array.isArray(raw) ? raw.filter((row) => row && row.id) : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeRecent(list) {
+  try {
+    localStorage.setItem(RECENT_KEY, JSON.stringify(list.slice(0, RECENT_KEEP)));
+  } catch {
+    /* private mode: the panel simply stays empty */
+  }
+}
+
+export function recordView(media) {
+  const id = String(media?.id ?? '');
+  if (!id) return;
+
+  const list = readRecent().filter((row) => String(row.id) !== id);
+  list.unshift({
+    id: media.id,
+    title: media.title?.english || media.title?.romaji || `#${media.id}`,
+    cover: media.coverImage?.large || media.coverImage?.medium || '',
+    score: typeof media.averageScore === 'number' ? media.averageScore : undefined,
+  });
+  writeRecent(list);
+  paintRecent();
+}
+
+/** history.html 直接拿这份列表铺页面，跟顶栏小面板是同一份数据 */
+export function recentList() {
+  return readRecent();
+}
+
+function paintRecent() {
+  const pop = document.getElementById('recent-pop');
+  if (!pop) return;
+
+  const rows = readRecent().slice(0, RECENT_POP);
+  const head = document.createElement('p');
+  head.className = 'recent-pop__head';
+  head.textContent = 'Recently viewed';
+
+  if (!rows.length) {
+    const empty = document.createElement('p');
+    empty.className = 'recent-pop__empty';
+    empty.textContent = 'Nothing yet — open any title and it shows up here.';
+    pop.replaceChildren(head, empty);
+    return;
+  }
+
+  const list = document.createElement('ul');
+  list.className = 'recent-pop__list';
+  list.append(
+    ...rows.map((row) => {
+      const item = document.createElement('li');
+      const link = document.createElement('a');
+      link.className = 'recent-pop__link';
+      link.href = `detail.html?id=${encodeURIComponent(row.id)}`;
+
+      const cover = document.createElement('img');
+      cover.src = row.cover;
+      cover.alt = '';
+      cover.loading = 'lazy';
+
+      const name = document.createElement('span');
+      name.textContent = row.title;
+
+      link.append(cover, name);
+      item.append(link);
+      return item;
+    }),
+  );
+  pop.replaceChildren(head, list);
+}
+
+function closeRecent() {
+  const pop = document.getElementById('recent-pop');
+  if (!pop || pop.hidden) return;
+  pop.hidden = true;
+  document.getElementById('open-recent')?.setAttribute('aria-expanded', 'false');
+}
+
+function toggleRecent() {
+  const pop = document.getElementById('recent-pop');
+  if (!pop) return;
+
+  if (pop.hidden) {
+    paintRecent();
+    pop.hidden = false;
+    document.getElementById('open-recent')?.setAttribute('aria-expanded', 'true');
+  } else {
+    closeRecent();
+  }
+}
+
 let mounted = false;
 
 export function mountBookmarks() {
@@ -201,9 +322,19 @@ export function mountBookmarks() {
     }
 
     if (event.target.closest('#open-bookmarks, #open-bookmarks-tab')) {
+      closeRecent();
       openDrawer();
       return;
     }
+
+    if (event.target.closest('#open-recent')) {
+      toggleRecent();
+      return;
+    }
+
+    // Any click that is neither the clock nor its panel closes the panel, the
+    // same way the drawer behaves.
+    if (!event.target.closest('#recent-pop')) closeRecent();
 
     if (event.target.closest('#close-bookmarks, #bookmark-backdrop')) closeDrawer();
   });
@@ -212,9 +343,11 @@ export function mountBookmarks() {
     if (event.key !== 'Escape') return;
     const drawer = document.getElementById('bookmark-drawer');
     if (drawer?.dataset.open === 'true') closeDrawer();
+    closeRecent();
   });
 
   paintAll();
+  paintRecent();
 }
 
 if (document.readyState === 'loading') {

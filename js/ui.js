@@ -56,35 +56,47 @@ export function card(media, { bookmarked = false, href } = {}) {
   h3.className = 'card__title';
   h3.textContent = title;
 
-  const meta = document.createElement('p');
-  meta.className = 'card__meta';
-
+  // 分数做成海报角上的小牌子（cycani 的卡就是这个长相）。
+  // 标题下不再挂分数/格式行：设计稿和 cycani 的卡都只有海报 + 标题，
+  // 多一行灰字会让整排卡片的文字基线参差。
   const score = document.createElement('span');
   score.className = 'card__score';
-  score.textContent = scoreText(media);
+  // 小电视图标 + 分数，跟 cycani 的角标一个长相
+  const glyph = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  glyph.setAttribute('viewBox', '0 0 16 16');
+  glyph.setAttribute('aria-hidden', 'true');
+  glyph.innerHTML = '<rect x="1.5" y="3.5" width="13" height="9" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M6 6.4l4 1.8-4 1.8z" fill="currentColor"/>';
+  score.append(glyph, document.createTextNode(scoreText(media)));
   score.title = `平均分 ${scoreText(media)}`;
 
-  meta.append(score);
-  if (media?.format) {
-    const fmt = document.createElement('span');
-    fmt.className = 'card__format';
-    fmt.textContent = media.format;
-    meta.append(fmt);
-  }
+  // 海报包一层只负责裁切：hover 时图放大 4%，超出的部分被这层剪掉，
+  // 不会盖到下面的标题（卡片本身只裁到自己的圆角边界）。
+  const frame = document.createElement('span');
+  frame.className = 'card__frame';
+  frame.append(img);
 
-  body.append(h3, meta);
-  link.append(img, body);
+  body.append(h3);
+  link.append(frame, body);
 
-  // 收藏按钮：可见文字 + aria-pressed（PRD #05）。
-  // 这里只写初始状态，点击行为归 bookmarks.js —— 它会改 aria-pressed 与 .card__save 的文字。
+  // 收藏按钮：图标 + aria-pressed（PRD #05）。
+  // 这里只写初始状态，点击行为归 bookmarks.js —— 它只改 aria-pressed 和标签，不动图标。
   const save = document.createElement('button');
   save.className = 'card__save';
   save.type = 'button';
   save.setAttribute('aria-pressed', bookmarked ? 'true' : 'false');
-  save.setAttribute('aria-label', `Bookmark: ${title}`);
-  save.textContent = bookmarked ? 'Bookmarked' : 'Bookmark';
+  save.setAttribute('aria-label', bookmarked ? `Remove bookmark: ${title}` : `Bookmark: ${title}`);
+  save.title = bookmarked ? 'Remove bookmark' : 'Bookmark';
+  save.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M6.2 4.4h11.6a1.4 1.4 0 0 1 1.4 1.4V20l-7.2-4.1L4.8 20V5.8a1.4 1.4 0 0 1 1.4-1.4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
 
-  article.append(link, save);
+  // 海报右下角是 Bookmark 的位置（cycani 在那儿放「已完结」这类标签）。
+  // 用一个和封面同比例的覆盖层当锚点，桌面端浮在海报上、手机端拆回文档流。
+  const overlay = document.createElement('div');
+  overlay.className = 'card__overlay';
+  overlay.append(save);
+
+  article.append(link);
+  if (typeof media?.averageScore === 'number') article.append(score);
+  article.append(overlay);
   return article;
 }
 
@@ -176,4 +188,53 @@ export function renderState(container, kind, opts) {
     return;
   }
   container.replaceChildren(statePanel(kind, opts));
+}
+
+/**
+ * 把 AniList 的 description（HTML）变成一行安全的富文本。
+ *
+ * 描述里带 <b>、<br>、&quot; 这类标记：直接 textContent 会把 "<b>" 原样打出来，
+ * 直接 innerHTML 又等于让接口决定我们能插什么。这里只保留加粗，其余标签拆成
+ * 文字、<br> 当一个空格，最后按字数裁断。
+ *
+ * @param {string} html 原始描述
+ * @param {number} [max=190] 最多保留多少字
+ * @returns {string} 可直接塞进 innerHTML 的字符串（已转义）
+ */
+export function synopsisHtml(html, max = 190) {
+  const doc = document.implementation.createHTMLDocument('');
+  const box = doc.createElement('div');
+  box.innerHTML = String(html || '');
+
+  const segments = [];
+  const walk = (node, bold) => {
+    for (const child of node.childNodes) {
+      if (child.nodeType === 3) {
+        segments.push({ text: child.nodeValue.replace(/\s+/g, ' '), bold });
+      } else if (child.nodeType === 1) {
+        const tag = child.tagName.toLowerCase();
+        if (tag === 'br') segments.push({ text: ' ', bold });
+        else walk(child, bold || tag === 'b' || tag === 'strong');
+      }
+    }
+  };
+  walk(box, false);
+
+  const escape = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const parts = [];
+  let left = max;
+  let cut = false;
+
+  for (const seg of segments) {
+    if (!left) { cut = true; break; }
+    if (!seg.text) continue;
+    const piece = seg.text.length > left ? seg.text.slice(0, left) : seg.text;
+    if (piece.length < seg.text.length) cut = true;
+    left -= piece.length;
+    parts.push(seg.bold ? `<strong>${escape(piece)}</strong>` : escape(piece));
+    if (cut) break;
+  }
+
+  const joined = parts.join('').replace(/\s+/g, ' ').trim();
+  return cut ? `${joined.replace(/[\s,.;:-]+$/, '')}…` : joined;
 }
