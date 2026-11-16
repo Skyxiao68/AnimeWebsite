@@ -6,8 +6,9 @@
     <title>Rankings · MikuFansAnime</title>
     <meta
       name="description"
-      content="What people are watching now, the all-time popular list, and the highest rated anime, with a genre filter."
+      content="The most popular, the best rated and the most favourited anime, filtered by region, format and time window."
     />
+    <link rel="preload" href="fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="css/tokens.css" />
     <link rel="stylesheet" href="css/style.css" />
   </head>
@@ -16,95 +17,222 @@
 
     <header class="site-header">
       <div class="site-header__inner">
-        <a class="brand" href="index.html">
-          <span class="brand__mark" aria-hidden="true">M</span>
-          MikuFansAnime
-        </a>
+        <a class="brand" href="index.html">MikuFansAnime</a>
 
         <nav class="site-nav" aria-label="Main">
           <a class="site-nav__link" href="index.html">Home</a>
-          <a class="site-nav__link" href="catalog.html">Catalog</a>
-          <a class="site-nav__link" href="rankings.html" aria-current="page"
-            >Rankings</a
-          >
+          <a class="site-nav__link" href="catalog.html">Categories</a>
+          <a class="site-nav__link" href="rankings.html" aria-current="page">Ranks</a>
         </nav>
 
-        <div class="header-actions">
+        <div class="header-tools">
+          <form class="nav-search" role="search" action="catalog.html" method="get">
+            <label class="visually-hidden" for="q">Search anime</label>
+            <input
+              class="nav-search__input"
+              id="q"
+              name="q"
+              type="search"
+              placeholder="Search for..."
+              autocomplete="off"
+            />
+            <button class="nav-search__go" type="submit">
+              <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.6"/><path d="m19.6 19.6-3.4-3.4"/></svg>
+              <span class="visually-hidden">Search</span>
+            </button>
+          </form>
+
           <button
-            class="btn"
+            class="icon-btn"
+            type="button"
+            id="open-recent"
+            aria-expanded="false"
+            aria-controls="recent-pop"
+            title="Recently viewed"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.4"/><path d="M12 7.6V12l3 1.8"/></svg>
+            <span class="visually-hidden">Recently viewed</span>
+          </button>
+
+          <button
+            class="icon-btn"
             type="button"
             id="open-bookmarks"
             aria-expanded="false"
             aria-controls="bookmark-drawer"
+            title="Bookmarks"
           >
-            Bookmarks
+            <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6.5 4h11v16l-5.5-3.8L6.5 20z"/></svg>
+            <span class="visually-hidden">Bookmarks</span>
           </button>
+
+          <span class="avatar" aria-hidden="true"><svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8.4" r="3.6"/><path d="M5 20c.8-3.6 3.7-5.6 7-5.6s6.2 2 7 5.6"/></svg></span>
+
+          <div class="recent-pop" id="recent-pop" hidden></div>
         </div>
       </div>
     </header>
 
     <main id="main" class="container">
       <header class="page-head">
+        <p class="page-head__kicker">The Popularity of Anime</p>
         <h1 class="page-head__title">Rankings</h1>
         <p class="page-head__lede">
-          Three lists rather than four: AniList does not publish a weekly chart,
-          so a "this week" tab would have to be invented. Trending, all-time
-          popular and highest rated are the lists the data actually supports.
+          Select the tags to see the anime on the Ranking list.
         </p>
       </header>
 
-      <div class="rank-bar">
-        <div class="rank-tabs" role="group" aria-label="Which list">
+      <!-- 结构照 HiFi「Rankings」：一块面板，顶行是排序三选，
+           下面三行是 Region / Format / Time。All 是那行的默认值。 -->
+      <section class="rank-panel" aria-label="Ranking filters">
+        <div class="rank-sorts" role="group" aria-label="Sort by">
           <button
-            class="rank-tab"
+            class="rank-sort"
             type="button"
-            data-list="trending"
+            data-sort="popular"
             aria-pressed="true"
           >
-            Trending now
+            Popularity
           </button>
-          <button class="rank-tab" type="button" data-list="popular" aria-pressed="false">
-            All-time popular
+          <button
+            class="rank-sort"
+            type="button"
+            data-sort="score"
+            aria-pressed="false"
+          >
+            Average Score
           </button>
-          <button class="rank-tab" type="button" data-list="score" aria-pressed="false">
-            Highest rated
+          <button
+            class="rank-sort"
+            type="button"
+            data-sort="favourites"
+            aria-pressed="false"
+          >
+            Favorites
           </button>
         </div>
 
-        <label class="rank-genre">
-          Genre
-          <select id="rank-genre">
-            <option value="">All genres</option>
-          </select>
-        </label>
-      </div>
+        <div class="rank-row" data-group="country">
+          <span class="rank-row__label" id="rank-label-country">Region</span>
+          <div
+            class="rank-row__opts"
+            role="group"
+            aria-labelledby="rank-label-country"
+          >
+            <button class="rank-opt" type="button" data-all="country" aria-pressed="true">
+              All
+            </button>
+            <button class="rank-opt" type="button" data-value="JP" aria-pressed="false">
+              Japan
+            </button>
+            <button class="rank-opt" type="button" data-value="CN" aria-pressed="false">
+              China
+            </button>
+            <button class="rank-opt" type="button" data-value="KR" aria-pressed="false">
+              Korea
+            </button>
+          </div>
+        </div>
+
+        <div class="rank-row" data-group="format">
+          <span class="rank-row__label" id="rank-label-format">Format</span>
+          <div
+            class="rank-row__opts"
+            role="group"
+            aria-labelledby="rank-label-format"
+          >
+            <button class="rank-opt" type="button" data-all="format" aria-pressed="true">
+              All
+            </button>
+            <button class="rank-opt" type="button" data-value="TV" aria-pressed="false">
+              TV Show
+            </button>
+            <button class="rank-opt" type="button" data-value="MOVIE" aria-pressed="false">
+              Movie
+            </button>
+            <button class="rank-opt" type="button" data-value="OVA" aria-pressed="false">
+              OVA
+            </button>
+          </div>
+        </div>
+
+        <!-- Time：All / Year / Season / Week 走真实字段（seasonYear、season、
+             TRENDING_DESC）；Month 和 Day 是两个 AniList 不提供的粒度，
+             保留位置但禁用——宁可明说，也不假装能筛。 -->
+        <div class="rank-row" data-group="time">
+          <span class="rank-row__label" id="rank-label-time">Time</span>
+          <div
+            class="rank-row__opts"
+            role="group"
+            aria-labelledby="rank-label-time"
+          >
+            <button class="rank-opt" type="button" data-all="time" aria-pressed="true">
+              All
+            </button>
+            <button class="rank-opt" type="button" data-value="year" aria-pressed="false">
+              Year
+            </button>
+            <button class="rank-opt" type="button" data-value="season" aria-pressed="false">
+              Season
+            </button>
+            <button
+              class="rank-opt"
+              type="button"
+              data-value="month"
+              aria-pressed="false"
+              disabled
+              title="AniList does not expose a monthly chart"
+            >
+              Month
+            </button>
+            <button class="rank-opt" type="button" data-value="week" aria-pressed="false">
+              Week
+            </button>
+            <button
+              class="rank-opt"
+              type="button"
+              data-value="day"
+              aria-pressed="false"
+              disabled
+              title="AniList does not expose a daily chart"
+            >
+              Day
+            </button>
+          </div>
+        </div>
+      </section>
 
       <p class="rank-count" id="rank-count" role="status" aria-live="polite">
         Loading…
       </p>
 
-      <div class="grid rank-grid" id="rank-grid" data-state="loading" aria-busy="true">
-        <div class="rank-skeleton" aria-hidden="true"></div>
-        <div class="rank-skeleton" aria-hidden="true"></div>
-        <div class="rank-skeleton" aria-hidden="true"></div>
-        <div class="rank-skeleton" aria-hidden="true"></div>
-      </div>
+      <section class="rank-top" aria-labelledby="rank-top-title" hidden>
+        <h2 class="rank-top__title" id="rank-top-title">TOP 5</h2>
+        <ol class="rank-top__row" id="rank-top-row"></ol>
+      </section>
 
-      <div class="load-more-wrap">
-        <button class="btn load-more" type="button" id="rank-more" hidden>
-          Load more
-        </button>
-      </div>
+      <ol class="rank-list" id="rank-list"></ol>
+
+      <div class="state-slot" id="rank-state" hidden></div>
     </main>
 
     <footer class="site-footer">
-      <div class="container site-footer__inner">
-        <p>
-          Data from <a href="https://anilist.co" rel="noopener">AniList</a>.
-          Built for a university assignment, not affiliated with AniList.
-        </p>
-        <p>MikuFansAnime · 2026</p>
+      <div class="site-footer__inner">
+        <a class="brand brand--sm" href="index.html">
+          MikuFansAnime
+        </a>
+        <p class="site-footer__copy">MikuFansAnime @ 2026. All rights reserved.</p>
+        <nav class="site-footer__links" aria-label="Footer">
+          <a href="index.html">Home</a>
+          <a href="catalog.html">Categories</a>
+          <a href="rankings.html">Ranks</a>
+          <a href="history.html">History</a>
+        </nav>
       </div>
+      <p class="site-footer__note">
+        Data from <a href="https://anilist.co" rel="noopener">AniList</a>. Built
+        for a university assignment, not affiliated with AniList.
+      </p>
     </footer>
 
     <aside

@@ -64,6 +64,7 @@ export function onChange(fn) {
 function emit() {
   const values = { ...state, q: getQuery() };
   writeUrl(values);
+  countSelected();
   listeners.forEach((fn) => fn(values));
 }
 
@@ -81,6 +82,54 @@ function paint() {
 
   const year = document.getElementById('year');
   if (year) year.value = state.year || '';
+
+  countSelected();
+}
+
+// ---------------------------------------------------------------- mobile sheet
+
+// Below 600px the six rows would push the grid off screen, so they live in a
+// bottom sheet behind one button (PRD review #11). Desktop never opens it.
+function mountSheet() {
+  const panel = document.getElementById('filters');
+  const toggle = document.getElementById('open-filters');
+  if (!panel || !toggle) return;
+
+  const backdrop = document.getElementById('filters-backdrop');
+  document.body.dataset.filtersReady = 'true';
+
+  const setOpen = (open) => {
+    panel.dataset.open = String(open);
+    toggle.setAttribute('aria-expanded', String(open));
+    document.body.dataset.filtersOpen = String(open);
+    if (backdrop) backdrop.hidden = !open;
+
+    if (open) {
+      panel.setAttribute('tabindex', '-1');
+      panel.focus({ preventScroll: true });
+    } else {
+      toggle.focus({ preventScroll: true });
+    }
+  };
+
+  toggle.addEventListener('click', () => setOpen(panel.dataset.open !== 'true'));
+  document.getElementById('close-filters')?.addEventListener('click', () => setOpen(false));
+  backdrop?.addEventListener('click', () => setOpen(false));
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && panel.dataset.open === 'true') setOpen(false);
+  });
+}
+
+// How many things are actually narrowing the result — tuned groups plus a term.
+function countSelected() {
+  const badge = document.getElementById('filters-count');
+  if (!badge) return;
+
+  const tuned = GROUPS.filter((group) => state[group] && state[group] !== DEFAULTS[group]).length;
+  const total = tuned + (getQuery() ? 1 : 0);
+
+  badge.textContent = String(total);
+  badge.hidden = total === 0;
 }
 
 // ---------------------------------------------------------------- interactions
@@ -164,5 +213,6 @@ export function initFilters() {
   });
 
   paint();
+  mountSheet();
   return () => listeners.clear();
 }

@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>History · MikuFansAnime</title>
+    <meta
+      name="description"
+      content="The titles you opened on this device, newest first."
+    />
+    <link rel="preload" href="fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="css/tokens.css" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body class="page-history">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand" href="index.html">MikuFansAnime</a>
+
+        <nav class="site-nav" aria-label="Main">
+          <a class="site-nav__link" href="index.html">Home</a>
+          <a class="site-nav__link" href="catalog.html">Categories</a>
+          <a class="site-nav__link" href="rankings.html">Ranks</a>
+        </nav>
+
+        <div class="header-tools">
+          <form class="nav-search" role="search" action="catalog.html" method="get">
+            <label class="visually-hidden" for="q">Search anime</label>
+            <input
+              class="nav-search__input"
+              id="q"
+              name="q"
+              type="search"
+              placeholder="Search for..."
+              autocomplete="off"
+            />
+            <button class="nav-search__go" type="submit">
+              <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.6"/><path d="m19.6 19.6-3.4-3.4"/></svg>
+              <span class="visually-hidden">Search</span>
+            </button>
+          </form>
+
+          <button
+            class="icon-btn"
+            type="button"
+            id="open-recent"
+            aria-expanded="false"
+            aria-controls="recent-pop"
+            title="Recently viewed"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.4"/><path d="M12 7.6V12l3 1.8"/></svg>
+            <span class="visually-hidden">Recently viewed</span>
+          </button>
+
+          <button
+            class="icon-btn"
+            type="button"
+            id="open-bookmarks"
+            aria-expanded="false"
+            aria-controls="bookmark-drawer"
+            title="Bookmarks"
+          >
+            <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6.5 4h11v16l-5.5-3.8L6.5 20z"/></svg>
+            <span class="visually-hidden">Bookmarks</span>
+          </button>
+
+          <span class="avatar" aria-hidden="true"><svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8.4" r="3.6"/><path d="M5 20c.8-3.6 3.7-5.6 7-5.6s6.2 2 7 5.6"/></svg></span>
+
+          <div class="recent-pop" id="recent-pop" hidden></div>
+        </div>
+      </div>
+    </header>
+
+    <!-- 设计稿的页脚有 History 这一项，这里就是它的落点：同一份最近浏览数据，
+         只是从小面板摊开成一页。 -->
+    <main id="main" class="container">
+      <section class="history" aria-labelledby="history-title">
+        <div class="section__head">
+          <h1 class="section__title" id="history-title">History</h1>
+          <p class="section__hint">Newest first · stored on this device</p>
+        </div>
+
+        <div class="grid" id="history-grid" data-state="loading"></div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <a class="brand brand--sm" href="index.html">
+          MikuFansAnime
+        </a>
+        <p class="site-footer__copy">MikuFansAnime @ 2026. All rights reserved.</p>
+        <nav class="site-footer__links" aria-label="Footer">
+          <a href="index.html">Home</a>
+          <a href="catalog.html">Categories</a>
+          <a href="rankings.html">Ranks</a>
+          <a href="history.html" aria-current="page">History</a>
+        </nav>
+      </div>
+      <p class="site-footer__note">
+        Data from <a href="https://anilist.co" rel="noopener">AniList</a>. Built
+        for a university assignment, not affiliated with AniList.
+      </p>
+    </footer>
+
+    <aside
+      class="drawer"
+      id="bookmark-drawer"
+      data-open="false"
+      aria-labelledby="drawer-title"
+      inert
+    >
+      <div class="drawer__head">
+        <h2 class="drawer__title" id="drawer-title">Bookmarks</h2>
+        <button class="btn drawer__close" type="button" id="close-bookmarks">
+          Close
+        </button>
+      </div>
+      <ul class="drawer__list" id="bookmark-list">
+        <li class="drawer__empty">
+          Nothing saved yet. Tap Bookmark on any card.
+        </li>
+      </ul>
+    </aside>
+    <button
+      class="drawer-backdrop"
+      type="button"
+      id="bookmark-backdrop"
+      aria-label="Close bookmarks"
+      hidden
+    ></button>
+
+    <nav class="tabbar" aria-label="Mobile">
+      <a class="tabbar__item" href="index.html">
+        <span class="tabbar__icon" aria-hidden="true">◆</span>
+        Home
+      </a>
+      <a class="tabbar__item" href="catalog.html">
+        <span class="tabbar__icon" aria-hidden="true">▤</span>
+        Catalog
+      </a>
+      <a class="tabbar__item" href="rankings.html">
+        <span class="tabbar__icon" aria-hidden="true">▮</span>
+        Rankings
+      </a>
+      <button class="tabbar__item" type="button" id="open-bookmarks-tab">
+        <span class="tabbar__icon" aria-hidden="true">★</span>
+        Saved
+      </button>
+    </nav>
+
+    <script src="vendor/gsap.min.js"></script>
+    <script src="vendor/ScrollTrigger.min.js"></script>
+    <script src="vendor/MotionPathPlugin.min.js"></script>
+    <script src="vendor/Draggable.min.js"></script>
+    <script type="module" src="js/motion.js"></script>
+    <script type="module" src="js/history.js"></script>
+  </body>
+</html>

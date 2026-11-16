@@ -8,6 +8,7 @@
       name="description"
       content="One anime title: score, format, episode count, synopsis, related series and a place to rate it."
     />
+    <link rel="preload" href="fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="css/tokens.css" />
     <link rel="stylesheet" href="css/style.css" />
   </head>
@@ -16,152 +17,152 @@
 
     <header class="site-header">
       <div class="site-header__inner">
-        <a class="brand" href="index.html">
-          <span class="brand__mark" aria-hidden="true">M</span>
-          MikuFansAnime
-        </a>
+        <a class="brand" href="index.html">MikuFansAnime</a>
 
         <nav class="site-nav" aria-label="Main">
           <a class="site-nav__link" href="index.html">Home</a>
-          <a class="site-nav__link" href="catalog.html">Catalog</a>
-          <a class="site-nav__link" href="rankings.html">Rankings</a>
+          <a class="site-nav__link" href="catalog.html">Categories</a>
+          <a class="site-nav__link" href="rankings.html">Ranks</a>
         </nav>
 
-        <div class="header-actions">
+        <div class="header-tools">
+          <form class="nav-search" role="search" action="catalog.html" method="get">
+            <label class="visually-hidden" for="q">Search anime</label>
+            <input
+              class="nav-search__input"
+              id="q"
+              name="q"
+              type="search"
+              placeholder="Search for..."
+              autocomplete="off"
+            />
+            <button class="nav-search__go" type="submit">
+              <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.6"/><path d="m19.6 19.6-3.4-3.4"/></svg>
+              <span class="visually-hidden">Search</span>
+            </button>
+          </form>
+
           <button
-            class="btn"
+            class="icon-btn"
+            type="button"
+            id="open-recent"
+            aria-expanded="false"
+            aria-controls="recent-pop"
+            title="Recently viewed"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.4"/><path d="M12 7.6V12l3 1.8"/></svg>
+            <span class="visually-hidden">Recently viewed</span>
+          </button>
+
+          <button
+            class="icon-btn"
             type="button"
             id="open-bookmarks"
             aria-expanded="false"
             aria-controls="bookmark-drawer"
+            title="Bookmarks"
           >
-            Bookmarks
+            <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6.5 4h11v16l-5.5-3.8L6.5 20z"/></svg>
+            <span class="visually-hidden">Bookmarks</span>
           </button>
+
+          <span class="avatar" aria-hidden="true"><svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8.4" r="3.6"/><path d="M5 20c.8-3.6 3.7-5.6 7-5.6s6.2 2 7 5.6"/></svg></span>
+
+          <div class="recent-pop" id="recent-pop" hidden></div>
         </div>
       </div>
     </header>
 
     <main id="main" class="container detail-page">
-      <a class="back-link" href="catalog.html">
-        <span aria-hidden="true">←</span> All titles
-      </a>
-
-      <!-- 骨架先写死在 HTML 里，detail.js 只负责填字段。
-           也就是说 JS 挂掉时页面仍然有语义结构，而不是一片空白。 -->
-      <article class="detail" id="detail" data-state="loading" aria-busy="true">
-        <div class="detail__media">
-          <img
-            class="detail__cover"
-            id="detail-cover"
-            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='600'%3E%3Crect width='400' height='600' fill='%231A1424'/%3E%3C/svg%3E"
-            alt=""
-            width="400"
-            height="600"
-            decoding="async"
-          />
-        </div>
+      <div class="detail__top">
+        <figure class="detail__poster">
+          <img id="detail-cover" src="" alt="" width="230" height="330" decoding="async" />
+        </figure>
 
         <div class="detail__info">
-          <h1 class="detail__title" id="detail-title">Loading…</h1>
+          <h1 class="detail__title" id="detail-title">Loading&hellip;</h1>
+          <p class="detail__alts" id="detail-alts"></p>
+          <ul class="detail__genres" id="detail-genres"></ul>
+          <p class="detail__meta" id="detail-meta"></p>
+          <p class="detail__meta" id="detail-meta2"></p>
 
-          <p class="detail__meta">
-            <span class="detail__score" id="detail-score">–</span>
-            <span class="detail__dot" aria-hidden="true">·</span>
-            <span id="detail-format">–</span>
-            <span class="detail__dot" aria-hidden="true">·</span>
-            <span id="detail-episodes">–</span>
-            <span class="detail__dot" aria-hidden="true">·</span>
-            <span id="detail-year">–</span>
-            <span class="detail__dot" aria-hidden="true">·</span>
-            <span id="detail-status">–</span>
-          </p>
+          <p class="detail__badge" id="detail-badge" hidden></p>
 
-          <ul class="detail__genres" id="detail-genres" aria-label="Genres"></ul>
-
-          <div class="detail__actions">
-            <button
-              class="btn btn--primary"
-              type="button"
-              id="detail-save"
-              aria-pressed="false"
-            >
-              Bookmark
+          <div class="detail__actions" id="detail-actions" hidden>
+            <button class="pill-btn" type="button" id="detail-save" aria-pressed="false">
+              <span id="detail-save-label">Favorite</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+                <path d="M12 20s-7-4.4-7-9a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 4.6-7 9-7 9z" />
+              </svg>
             </button>
-            <a
-              class="btn detail__external"
-              id="detail-alink"
-              href="https://anilist.co"
-              rel="noopener"
-              target="_blank"
-            >
-              Open on AniList
-            </a>
+
+            <div class="rate">
+              <button class="pill-btn" type="button" id="detail-rate" aria-expanded="false"
+                aria-controls="detail-rating">
+                <span id="detail-rate-label">Rate</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </button>
+              <div class="rate__pop" id="detail-rating" hidden>
+                <p class="rate__hint" id="detail-rate-hint">Your score out of 10</p>
+                <div class="rate__row" id="rating-row" role="group" aria-label="Your score out of 10"></div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <section class="detail__block" aria-labelledby="synopsis-title">
-          <h2 class="detail__h2" id="synopsis-title">Overview</h2>
-          <p class="detail__synopsis" id="detail-synopsis" data-clamped="true">
-            Loading…
-          </p>
-          <button
-            class="detail__more"
-            type="button"
-            id="detail-readmore"
-            aria-expanded="false"
-            aria-controls="detail-synopsis"
-            hidden
-          >
-            Read more
-          </button>
-        </section>
+        <aside class="related" id="related-panel" hidden aria-labelledby="related-title">
+          <h2 class="related__title" id="related-title">Related</h2>
+          <p class="related__count" id="related-count"></p>
+          <ul class="related__list" id="related-list"></ul>
+        </aside>
+      </div>
 
-        <!-- 交互 3：评分表单。存在本地，不上传；PRD 里说明过这是本地评分 -->
-        <section class="detail__block" aria-labelledby="rating-title">
-          <h2 class="detail__h2" id="rating-title">Your rating</h2>
-          <form class="rating" id="rating-form">
-            <fieldset class="rating__set">
-              <legend class="visually-hidden">Rate this title from 1 to 10</legend>
-              <div class="rating__row" id="rating-row"></div>
-            </fieldset>
-            <p class="rating__note" id="rating-note" role="status" aria-live="polite">
-              Ratings stay in this browser.
-            </p>
-          </form>
-        </section>
+      <div class="detail__state" id="detail-state" aria-live="polite"></div>
 
-        <section class="detail__block" aria-labelledby="related-title">
-          <h2 class="detail__h2" id="related-title">Related</h2>
-          <p class="detail__hint" id="related-hint" hidden>
-            AniList has no related titles for this one.
-          </p>
-          <ul class="mini-list" id="related"></ul>
-        </section>
+      <section class="detail__block">
+        <h2 class="detail__h2">Introduction</h2>
+        <div class="detail__copy" id="detail-synopsis" data-clamped="true"></div>
+        <button class="text-btn" type="button" id="detail-more" aria-expanded="false" hidden>
+          Read more
+        </button>
+      </section>
 
-        <section class="detail__block" aria-labelledby="recs-title">
-          <h2 class="detail__h2" id="recs-title">If you liked this</h2>
-          <p class="detail__hint" id="recs-hint" hidden>
-            No recommendations came back.
-          </p>
-          <ul class="mini-list" id="recs"></ul>
-        </section>
-      </article>
+      <section class="detail__block" id="ext-block" hidden>
+        <h2 class="detail__h2">External &amp; Streaming Links</h2>
+        <div class="ext-links" id="detail-links"></div>
+      </section>
 
-      <div class="detail__error" id="detail-error" hidden></div>
+      <section class="detail__block">
+        <h2 class="detail__h2">
+          Recommendations <span class="detail__hint">Chosen based on topic tags</span>
+        </h2>
+        <div class="grid reco-grid" id="reco-grid" data-state="loading" aria-busy="true"></div>
+      </section>
 
-      <button class="to-top" type="button" id="to-top" hidden>
-        Back to top
-      </button>
+      <button class="to-top" type="button" id="to-top" hidden>Back to top</button>
     </main>
 
     <footer class="site-footer">
-      <div class="container site-footer__inner">
-        <p>
-          Data from <a href="https://anilist.co" rel="noopener">AniList</a>.
-          Built for a university assignment, not affiliated with AniList.
-        </p>
-        <p>MikuFansAnime · 2026</p>
+      <div class="site-footer__inner">
+        <a class="brand brand--sm" href="index.html">
+          MikuFansAnime
+        </a>
+        <p class="site-footer__copy">MikuFansAnime @ 2026. All rights reserved.</p>
+        <nav class="site-footer__links" aria-label="Footer">
+          <a href="index.html">Home</a>
+          <a href="catalog.html">Categories</a>
+          <a href="rankings.html">Ranks</a>
+          <a href="history.html">History</a>
+        </nav>
       </div>
+      <p class="site-footer__note">
+        Data from <a href="https://anilist.co" rel="noopener">AniList</a>. Built
+        for a university assignment, not affiliated with AniList.
+      </p>
     </footer>
 
     <aside

@@ -1,293 +1,322 @@
-import { media, userMessage } from './api.js';
-import { renderState } from './ui.js';
-import { all, isBookmarked, mountBookmarks, syncWithin, toggle } from './bookmarks.js';
+// One title: fetch it, then paint every slot. Descriptions arrive as HTML, so
+// everything goes in via textContent or createElement — no innerHTML anywhere.
+import { media } from './api.js';
+import { card, renderCards, renderState } from './ui.js';
+import { isBookmarked, recordView, toggle as toggleSave, syncWithin, mountBookmarks } from './bookmarks.js';
 
 const RATING_KEY = 'mf.ratings.v1';
+const FORMAT = { TV: 'TV Show', TV_SHORT: 'TV Short', MOVIE: 'Movie', OVA: 'OVA', ONA: 'ONA', SPECIAL: 'Special', MUSIC: 'Music' };
+const STATUS = { FINISHED: 'Finished', RELEASING: 'Airing', NOT_YET_RELEASED: 'Upcoming', CANCELLED: 'Cancelled' };
 
-const el = (id) => document.getElementById(id);
-const article = el('detail');
-const errorBox = el('detail-error');
+const $ = (id) => document.getElementById(id);
+const els = {
+  cover: $('detail-cover'),
+  badge: $('detail-badge'),
+  title: $('detail-title'),
+  alts: $('detail-alts'),
+  genres: $('detail-genres'),
+  meta: $('detail-meta'),
+  meta2: $('detail-meta2'),
+  actions: $('detail-actions'),
+  save: $('detail-save'),
+  saveLabel: $('detail-save-label'),
+  rate: $('detail-rate'),
+  rateLabel: $('detail-rate-label'),
+  ratePop: $('detail-rating'),
+  rateRow: $('rating-row'),
+  related: $('related-panel'),
+  relatedCount: $('related-count'),
+  relatedList: $('related-list'),
+  state: $('detail-state'),
+  synopsis: $('detail-synopsis'),
+  more: $('detail-more'),
+  extBlock: $('ext-block'),
+  links: $('detail-links'),
+  reco: $('reco-grid'),
+  toTop: $('to-top'),
+};
 
-const titleOf = (m) => m?.title?.english || m?.title?.romaji || 'Untitled';
-const scoreOf = (m) => (m?.averageScore ? String(m.averageScore) : '–');
-const formatOf = (m) => (m?.format ? m.format.replace(/_/g, ' ') : '–');
-
-function metaLine(m) {
-  el('detail-score').textContent = scoreOf(m);
-  el('detail-format').textContent = formatOf(m);
-  el('detail-episodes').textContent = m.episodes
-    ? `${m.episodes} ${m.episodes === 1 ? 'episode' : 'episodes'}`
-    : m.duration
-      ? `${m.duration} min`
-      : '–';
-  el('detail-year').textContent = m.seasonYear || '–';
-  el('detail-status').textContent = m.status
-    ? m.status.charAt(0) + m.status.slice(1).toLowerCase().replace(/_/g, ' ')
-    : '–';
+function idFromUrl() {
+  const n = Number(new URLSearchParams(location.search).get('id'));
+  return Number.isInteger(n) && n > 0 ? n : null;
 }
 
-function paintGenres(genres) {
-  const list = el('detail-genres');
-  list.replaceChildren(
-    ...(genres || []).map((g) => {
-      const li = document.createElement('li');
-      li.className = 'detail__genre';
-      li.textContent = g;
-      return li;
-    }),
-  );
-}
-
-// ------------------------------------------------------------------ 相关 / 推荐
-
-function paintMini(containerId, hintId, items) {
-  const list = el(containerId);
-  const hint = el(hintId);
-
-  if (!items.length) {
-    list.replaceChildren();
-    hint.hidden = false;
-    return;
-  }
-
-  hint.hidden = true;
-  list.replaceChildren(
-    ...items.map((m) => {
-      const li = document.createElement('li');
-      li.className = 'mini';
-
-      const a = document.createElement('a');
-      a.className = 'mini__link';
-      a.href = `detail.html?id=${m.id}`;
-
-      const img = document.createElement('img');
-      img.className = 'mini__cover';
-      img.src = m.coverImage?.large || '';
-      img.alt = '';
-      img.width = 200;
-      img.height = 300;
-      img.loading = 'lazy';
-      img.decoding = 'async';
-
-      const span = document.createElement('span');
-      span.className = 'mini__title';
-      span.textContent = titleOf(m);
-
-      const note = document.createElement('span');
-      note.className = 'mini__note';
-      note.textContent = `${scoreOf(m)} · ${formatOf(m)}`;
-
-      a.append(img, span, note);
-      li.append(a);
-      return li;
-    }),
-  );
-}
-
-// ------------------------------------------------------------------ 简介
-
-function paintSynopsis(description) {
-  const p = el('detail-synopsis');
-  const more = el('detail-readmore');
-
-  // AniList 的简介里带 <br> 和少量标签，asHtml:false 之后还有实体；先收成纯文本。
-  const text = (description || '')
-    .replace(/<br\s*\/?>/gi, ' ')
+function plainText(html) {
+  return String(html || '')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n\n')
     .replace(/<[^>]+>/g, '')
     .replace(/&quot;/g, '"')
-    .replace(/&amp;/g, '&')
     .replace(/&#039;|&apos;/g, "'")
+    .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
-    .replace(/\s+/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
     .trim();
-
-  p.textContent = text || 'AniList does not have a synopsis for this title.';
-  p.dataset.clamped = 'true';
-  more.setAttribute('aria-expanded', 'false');
-  more.textContent = 'Read more';
-  // 只有真被截断才给按钮，短简介不该出现「Read more」
-  more.hidden = p.textContent.length < 420;
 }
 
-// ------------------------------------------------------------------ 评分（交互 3）
+const nameOf = (media) =>
+  media.title?.english || media.title?.romaji || media.title?.native || 'Untitled';
 
 function readRatings() {
   try {
-    const raw = localStorage.getItem(RATING_KEY);
-    const parsed = raw ? JSON.parse(raw) : {};
-    return parsed && typeof parsed === 'object' ? parsed : {};
+    const raw = JSON.parse(localStorage.getItem(RATING_KEY) || '{}');
+    return raw && typeof raw === 'object' ? raw : {};
   } catch {
     return {};
   }
 }
 
-function writeRatings(map) {
+function writeRating(id, score) {
+  const all = readRatings();
+  if (score) all[id] = score;
+  else delete all[id];
   try {
-    localStorage.setItem(RATING_KEY, JSON.stringify(map));
+    localStorage.setItem(RATING_KEY, JSON.stringify(all));
   } catch {
-    // 隐私模式或写满：评分只是锦上添花，不许把页面弄崩
+    /* private mode: the click still works for this page view */
   }
 }
 
 function paintRating(id) {
-  const row = el('rating-row');
-  const saved = Number(readRatings()[id]) || 0;
-
-  row.replaceChildren(
+  const score = readRatings()[id] || 0;
+  els.rateRow.replaceChildren(
     ...Array.from({ length: 10 }, (_, i) => {
-      const value = i + 1;
+      const n = i + 1;
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'rating__pill';
-      btn.dataset.value = String(value);
-      btn.textContent = String(value);
-      btn.setAttribute('aria-pressed', String(value === saved));
-      btn.setAttribute('aria-label', `Rate ${value} out of 10`);
+      btn.dataset.score = String(n);
+      btn.textContent = String(n);
+      btn.setAttribute('aria-pressed', String(n === score));
+      btn.setAttribute('aria-label', `Rate ${n} out of 10`);
       return btn;
-    }),
+    })
   );
-
-  const note = el('rating-note');
-  note.textContent = saved
-    ? `You rated this ${saved} / 10. Saved in this browser only.`
-    : 'Ratings stay in this browser.';
+  els.rateLabel.textContent = score ? `Your score ${score}/10` : 'Rate';
+  els.rate.setAttribute('aria-pressed', String(Boolean(score)));
 }
 
-function wireRating(id) {
-  el('rating-form').addEventListener('click', (event) => {
+function paintRelated(item) {
+  const edges = (item.relations?.edges || []).filter((e) => e.node?.type === 'ANIME');
+  if (!edges.length) {
+    els.related.hidden = true;
+    return;
+  }
+  const rows = edges.slice(0, 3).map((edge) => {
+    const node = edge.node;
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    a.className = 'related__link';
+    a.href = `detail.html?id=${node.id}`;
+    const img = document.createElement('img');
+    img.src = node.coverImage?.large || '';
+    img.alt = '';
+    img.loading = 'lazy';
+    img.width = 42;
+    img.height = 60;
+    const span = document.createElement('span');
+    span.textContent = node.title?.english || node.title?.romaji || 'Untitled';
+    a.append(img, span);
+    li.append(a);
+    return li;
+  });
+  els.relatedList.replaceChildren(...rows);
+  els.relatedCount.textContent = `Total of ${edges.length} ${edges.length === 1 ? 'Title' : 'Titles'}`;
+  els.related.hidden = false;
+}
+
+function paintLinks(item) {
+  const links = (item.externalLinks || []).filter((l) => l?.url).slice(0, 5);
+  if (!links.length) {
+    els.extBlock.hidden = true;
+    return;
+  }
+  els.links.replaceChildren(
+    ...links.map((link) => {
+      const a = document.createElement('a');
+      a.className = 'ext-link';
+      a.href = link.url;
+      a.rel = 'noopener';
+      a.target = '_blank';
+      const name = document.createElement('span');
+      name.textContent = link.site || 'Link';
+      a.append(name);
+      if (link.type && link.type !== 'STREAMING') {
+        const kind = document.createElement('span');
+        kind.className = 'ext-link__kind';
+        kind.textContent = 'Info';
+        a.append(kind);
+      }
+      return a;
+    })
+  );
+  els.extBlock.hidden = false;
+}
+
+function paintActions(item) {
+  const id = item.id;
+  const row = {
+    id,
+    title: nameOf(item),
+    cover: item.coverImage?.large || '',
+    score: item.averageScore || undefined,
+  };
+
+  const sync = () => {
+    const on = isBookmarked(id);
+    els.save.setAttribute('aria-pressed', String(on));
+    els.saveLabel.textContent = on ? 'Favorited' : 'Favorite';
+  };
+  sync();
+
+  els.save.addEventListener('click', () => {
+    toggleSave(row);
+    sync();
+  });
+
+  els.actions.hidden = false;
+}
+
+function paintDetails(item) {
+  const title = nameOf(item);
+  document.title = `${title} · MikuFansAnime`;
+
+  els.title.textContent = title;
+  recordView(item);
+
+  const alts = [item.title?.native, item.title?.english && item.title.english !== title ? item.title.english : null]
+    .filter(Boolean)
+    .join('  |  ');
+  els.alts.textContent = alts;
+
+  if (item.coverImage?.extraLarge || item.coverImage?.large) {
+    els.cover.src = item.coverImage.extraLarge || item.coverImage.large;
+    els.cover.alt = `${title} cover`;
+  }
+
+  if (item.averageScore) {
+    els.badge.textContent = `${(item.averageScore / 10).toFixed(1)}/10`;
+    els.badge.hidden = false;
+  }
+
+  els.genres.replaceChildren(
+    ...(item.genres || []).slice(0, 4).map((genre) => {
+      const li = document.createElement('li');
+      li.className = 'detail__genre';
+      li.textContent = genre;
+      return li;
+    })
+  );
+
+  const line1 = [FORMAT[item.format] || item.format, item.seasonYear, STATUS[item.status] || item.status]
+    .filter(Boolean)
+    .join(' · ');
+  els.meta.textContent = line1;
+
+  const studio = (item.studios?.nodes || []).find((s) => s.isAnimationStudio)?.name;
+  const length = item.episodes
+    ? `${item.episodes} Episodes`
+    : item.duration
+      ? `${item.duration} min`
+      : null;
+  els.meta2.textContent = [studio, length].filter(Boolean).join(' · ');
+
+  const text = plainText(item.description);
+  els.synopsis.textContent = text || 'No synopsis has been written for this title yet.';
+  els.synopsis.dataset.clamped = 'true';
+  els.more.hidden = text.length < 520;
+  els.more.textContent = 'Read more';
+  els.more.setAttribute('aria-expanded', 'false');
+
+  paintRelated(item);
+  paintLinks(item);
+  paintActions(item);
+  paintRating(item.id);
+
+  const recs = (item.recommendations?.nodes || [])
+    .map((n) => n.mediaRecommendation)
+    .filter(Boolean);
+  renderCards(els.reco, recs, { isBookmarked: (m) => isBookmarked(m.id) });
+  els.reco.dataset.state = recs.length ? 'success' : 'empty';
+  els.reco.setAttribute('aria-busy', 'false');
+  syncWithin(els.reco);
+}
+
+function wire() {
+  els.more.addEventListener('click', () => {
+    const open = els.more.getAttribute('aria-expanded') === 'true';
+    els.more.setAttribute('aria-expanded', String(!open));
+    els.synopsis.dataset.clamped = String(open);
+    els.more.textContent = open ? 'Read more' : 'Show less';
+  });
+
+  els.rate.addEventListener('click', () => {
+    const open = els.rate.getAttribute('aria-expanded') === 'true';
+    els.rate.setAttribute('aria-expanded', String(!open));
+    els.ratePop.hidden = open;
+  });
+
+  els.rateRow.addEventListener('click', (event) => {
     const btn = event.target.closest('.rating__pill');
     if (!btn) return;
-
-    const map = readRatings();
-    const value = Number(btn.dataset.value);
-    const current = Number(map[id]) || 0;
-
-    // 再点一次同一个分数 = 取消评分
-    if (current === value) delete map[id];
-    else map[id] = value;
-
-    writeRatings(map);
+    const id = idFromUrl();
+    if (!id) return;
+    const picked = Number(btn.dataset.score);
+    const current = readRatings()[id] || 0;
+    writeRating(id, current === picked ? 0 : picked); // clicking the same number clears it
     paintRating(id);
   });
-}
 
-// ------------------------------------------------------------------ 主流程
-
-function paint(detail) {
-  document.title = `${titleOf(detail)} · MikuFansAnime`;
-  el('detail-title').textContent = titleOf(detail);
-
-  const cover = el('detail-cover');
-  if (detail.coverImage?.large) cover.src = detail.coverImage.large;
-  cover.alt = `Cover of ${titleOf(detail)}`;
-
-  metaLine(detail);
-  paintGenres(detail.genres);
-  paintSynopsis(detail.description);
-
-  el('detail-alink').href = `https://anilist.co/anime/${detail.id}`;
-
-  const save = el('detail-save');
-  save.dataset.mediaId = String(detail.id);
-
-  const edges = (detail.relations?.edges || []).filter(
-    (edge) => edge?.node?.type === 'ANIME' && edge.node.id,
-  );
-  paintMini('related', 'related-hint', edges.map((edge) => edge.node));
-
-  const recs = (detail.recommendations?.nodes || [])
-    .map((node) => node?.mediaRecommendation)
-    .filter((node) => node?.id);
-  paintMini('recs', 'recs-hint', recs);
-
-  paintRating(detail.id);
-  wireRating(detail.id);
-}
-
-function showError(err, id) {
-  article.hidden = true;
-  article.setAttribute('aria-busy', 'false');
-  errorBox.hidden = false;
-  errorBox.replaceChildren();
-
-  const panel = document.createElement('div');
-  errorBox.append(panel);
-  renderState(panel, 'error', {
-    title: 'This title did not load',
-    message: userMessage(err),
-    actionLabel: 'Try again',
-    onAction: () => window.location.reload(),
+  document.addEventListener('click', (event) => {
+    if (!event.target.closest('.rate')) {
+      els.rate.setAttribute('aria-expanded', 'false');
+      els.ratePop.hidden = true;
+    }
   });
 
-  document.title = 'Title not found · MikuFansAnime';
-  console.warn('[detail] failed for id', id, err);
-}
-
-// 回到顶部：PRD 评审 #02 说那个圆形箭头看不懂，所以这里用带文字的按钮
-function wireToTop() {
-  const btn = el('to-top');
   const onScroll = () => {
-    btn.hidden = window.scrollY < 600;
+    els.toTop.hidden = scrollY < 600;
   };
-  window.addEventListener('scroll', onScroll, { passive: true });
+  addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 
-  btn.addEventListener('click', () => {
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
-  });
-}
-
-// PRD 评审 #03：简介要能展开
-function wireReadMore() {
-  const more = el('detail-readmore');
-  const p = el('detail-synopsis');
-
-  more.addEventListener('click', () => {
-    const clamped = p.dataset.clamped === 'true';
-    p.dataset.clamped = clamped ? 'false' : 'true';
-    more.setAttribute('aria-expanded', String(clamped));
-    more.textContent = clamped ? 'Show less' : 'Read more';
-  });
-}
-
-function wireBookmark() {
-  // 详情页这颗按钮走 bookmarks.js 的同一套存储，卡片与抽屉保持一致
-  el('detail-save').addEventListener('click', () => {
-    const btn = el('detail-save');
-    const id = Number(btn.dataset.mediaId);
-    if (!id) return;
-
-    const known = all().find((row) => row.id === id);
-    toggle(
-      known || {
-        id,
-        title: el('detail-title').textContent,
-        cover: el('detail-cover').src,
-        score: el('detail-score').textContent,
-      },
-    );
-    syncWithin(document.querySelector('main'));
+  els.toTop.addEventListener('click', () => {
+    const soft = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    scrollTo({ top: 0, behavior: soft ? 'smooth' : 'auto' });
   });
 }
 
 async function boot() {
   mountBookmarks();
-  wireToTop();
-  wireReadMore();
-  wireBookmark();
+  wire();
 
-  const id = new URLSearchParams(window.location.search).get('id');
+  const id = idFromUrl();
+  if (!id) {
+    renderState(els.state, 'error', {
+      title: 'No title selected',
+      message: 'Open a title from the catalogue or the rankings.',
+      actionLabel: 'Go to catalogue',
+      onAction: () => { location.href = 'catalog.html'; },
+    });
+    els.title.textContent = 'Nothing to show';
+    els.reco.dataset.state = 'empty';
+    return;
+  }
 
   try {
-    const detail = await media(id);
-    paint(detail);
-    article.dataset.state = 'success';
-    article.setAttribute('aria-busy', 'false');
-    syncWithin(document.querySelector('main'));
+    els.reco.dataset.state = 'loading';
+    const item = await media(id);
+    paintDetails(item);
   } catch (err) {
-    showError(err, id);
+    els.title.textContent = 'Could not load this title';
+    renderState(els.state, 'error', {
+      title: 'Could not load this title',
+      message: 'The data request failed. Check the connection and try again.',
+      actionLabel: 'Try again',
+      onAction: () => location.reload(),
+    });
+    els.reco.dataset.state = 'error';
   }
 }
 
