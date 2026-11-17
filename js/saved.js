@@ -2,7 +2,7 @@
 // a text filter and a sort. Storage lives in bookmarks.js; this file only reads
 // it, asks it to change, and paints the result.
 
-import { card, statePanel } from './ui.js';
+import { card, statePanel, mountToTop } from './ui.js';
 import {
   all,
   collections,
@@ -472,4 +472,5 @@ sort.addEventListener('change', () => {
 
 render();
 mountBookmarks();
+mountToTop();
 document.addEventListener('mf:bookmarks', render);

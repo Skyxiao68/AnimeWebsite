@@ -238,3 +238,25 @@ export function synopsisHtml(html, max = 190) {
   const joined = parts.join('').replace(/\s+/g, ' ').trim();
   return cut ? `${joined.replace(/[\s,.;:-]+$/, '')}…` : joined;
 }
+
+/**
+ * 回到顶部：滚过一屏才出现，见到页脚就收起。
+ * fixed 元素抬多少都会跟着页面滚，只有收起来才真不压版权行。
+ */
+export function mountToTop(button) {
+  const btn = button || document.getElementById('to-top');
+  if (!btn) return;
+
+  const footer = document.querySelector('.site-footer');
+  const onScroll = () => {
+    const footerTop = footer ? footer.getBoundingClientRect().top : Infinity;
+    btn.hidden = scrollY < 600 || footerTop < innerHeight;
+  };
+  addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  btn.addEventListener('click', () => {
+    const soft = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    scrollTo({ top: 0, behavior: soft ? 'smooth' : 'auto' });
+  });
+}

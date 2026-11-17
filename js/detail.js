@@ -1,7 +1,7 @@
 // One title: fetch it, then paint every slot. Descriptions arrive as HTML, so
 // everything goes in via textContent or createElement — no innerHTML anywhere.
 import { media } from './api.js';
-import { card, renderCards, renderState } from './ui.js';
+import { card, mountToTop, renderCards, renderState } from './ui.js';
 import { isBookmarked, recordView, toggle as toggleSave, syncWithin, mountBookmarks } from './bookmarks.js';
 
 const RATING_KEY = 'mf.ratings.v1';
@@ -322,21 +322,9 @@ function wire() {
     }
   });
 
-  // 到页脚就收起：它是 fixed，抬多少都会跟着页面一起滚，只有收起来才真不压版权行。
-  const footer = document.querySelector('.site-footer');
-  const onScroll = () => {
-    const footerTop = footer ? footer.getBoundingClientRect().top : Infinity;
-    els.toTop.hidden = scrollY < 600 || footerTop < innerHeight;
-  };
-  addEventListener('scroll', onScroll, { passive: true });
-  onScroll();
+  mountToTop(els.toTop);
 
   els.relatedList.addEventListener('scroll', syncRelatedFade, { passive: true });
-
-  els.toTop.addEventListener('click', () => {
-    const soft = !matchMedia('(prefers-reduced-motion: reduce)').matches;
-    scrollTo({ top: 0, behavior: soft ? 'smooth' : 'auto' });
-  });
 }
 
 async function boot() {

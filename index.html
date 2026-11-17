@@ -29,6 +29,21 @@
         </nav>
 
         <div class="header-tools">
+          <form class="nav-search" role="search" action="catalog.html" method="get">
+            <label class="visually-hidden" for="nav-q">Search anime</label>
+            <input
+              class="nav-search__input"
+              id="nav-q"
+              name="q"
+              type="search"
+              placeholder="Search for..."
+              autocomplete="off"
+            />
+            <button class="nav-search__go" type="submit">
+              <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.6"/><path d="m19.6 19.6-3.4-3.4"/></svg>
+              <span class="visually-hidden">Search</span>
+            </button>
+          </form>
           <button
             class="icon-btn"
             type="button"
@@ -59,25 +74,6 @@
         </div>
       </div>
     </header>
-
-    <!-- 首页的搜索条：PRD #20 要首页的搜索够大（720 宽、56 高），#13 要移动端首屏
-         就看得见它。条子放在 header 外面，滚过整幅 hero 之后仍贴在顶栏下面。 -->
-    <div class="search-bar" id="home-search">
-      <div class="container">
-        <form class="search" role="search" action="catalog.html" method="get">
-          <label class="search__label" for="home-q">Search anime</label>
-          <input
-            class="search__input"
-            id="home-q"
-            name="q"
-            type="search"
-            placeholder="Search anime, e.g. Frieren"
-            autocomplete="off"
-          />
-          <button class="search__submit" type="submit">Search</button>
-        </form>
-      </div>
-    </div>
 
     <main id="main">
       <!-- 整幅海报 hero：趋势第一名。标题、标签、简介、箭头、三张缩略图都由 home.js 填 -->
@@ -229,21 +225,23 @@
       hidden
     ></button>
 
+    <button class="to-top" type="button" id="to-top" hidden>Back to top</button>
+
     <nav class="tabbar" aria-label="Mobile">
       <a class="tabbar__item" href="index.html" aria-current="page">
-        <span class="tabbar__icon" aria-hidden="true">◆</span>
+        <span class="tabbar__icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M4.4 10.2 12 4.4l7.6 5.8V19.6H4.4z"/><path d="M9.8 19.6v-4.8h4.4v4.8"/></svg></span>
         Home
       </a>
       <a class="tabbar__item" href="catalog.html">
-        <span class="tabbar__icon" aria-hidden="true">▤</span>
+        <span class="tabbar__icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M4.4 5.6h15.2l-5.8 6.8v5.4l-3.6 2v-7.4z"/></svg></span>
         Catalog
       </a>
       <a class="tabbar__item" href="rankings.html">
-        <span class="tabbar__icon" aria-hidden="true">▮</span>
+        <span class="tabbar__icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5.2 19.4v-5.6"/><path d="M12 19.4V9"/><path d="M18.8 19.4V4.6"/></svg></span>
         Rankings
       </a>
       <a class="tabbar__item" href="saved.html">
-        <span class="tabbar__icon" aria-hidden="true">★</span>
+        <span class="tabbar__icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6.5 4h11v16l-5.5-3.8L6.5 20z"/></svg></span>
         Saved
       </a>
     </nav>

@@ -2,7 +2,7 @@
 // single failing request cannot blank the page.
 
 import { homeFeed, hero, airingDay, chart, userMessage } from './api.js';
-import { card, titleText, synopsisHtml } from './ui.js';
+import { card, titleText, synopsisHtml, mountToTop } from './ui.js';
 import { isBookmarked, mountBookmarks, syncWithin } from './bookmarks.js';
 
 const WEEK = 4;
@@ -36,11 +36,13 @@ ghost.alt = '';
 ghost.setAttribute('aria-hidden', 'true');
 el.img.after(ghost);
 
-// YouTube 缺 maxres 时会回一张 120px 的灰图；加载完发现尺寸不对就退回 banner。
+// YouTube 缺 maxres 时会回一张 120px 的灰图，只有 PV 帧才按尺寸判废；
+// 海报本来就窄（cover/large 约 460px），拿 1000 去卡会把手机端的主视觉换成横幅。
 [el.img, ghost].forEach((img) => {
   img.addEventListener('load', () => {
     const banner = img.dataset.banner || '';
-    if (img.naturalWidth && img.naturalWidth < 1000 && banner && img.getAttribute('src') !== banner) {
+    if (!img.classList.contains('hero__img--pv')) return;
+    if (img.naturalWidth && img.naturalWidth < 1000 && banner) {
       img.classList.remove('hero__img--pv');
       img.src = banner;
     }
@@ -422,6 +424,7 @@ async function boot() {
 
 mountBookmarks();
 boot();
+mountToTop();
 
 let refillTimer = 0;
 window.addEventListener('resize', () => {
