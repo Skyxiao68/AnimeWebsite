@@ -522,6 +522,176 @@ Evidence: docs/evidence/_new/home-search-1440.png, home-search-375.png, rankings
 
 **Not verified**: keyboard submission from the home field (Tab to Search, Enter) — the submit path was exercised by clicking; and the sticky band's behaviour over the hero on iOS Safari's collapsing toolbar.
 
+**Addendum, later the same day.** The one-bar-per-site rule was read as "put the search where every other page keeps it", so the band came off `index.html` and `.nav-search` went back into `.header-tools` on both `index.html` and `catalog.html` (ids `nav-q` and `q` so the catalog keeps two distinct fields). At 1440 the home header now carries a 264px search field, the hero starts at y0 under the glass again, and typing Frieren in it lands on `catalog.html?q=frieren` with 6 results. The gap this opens: `.nav-search` is hidden at `max-width: 899px` (css/style.css:2849), so the mobile home page currently has no search field at all — the desktop-only fix was not finished for phones, and the decision (restore the band below 900px vs. record the omission against PRD #13/#20) is still open with the client.
+
+## 41. On phones the bookmark sits on the poster, not under the title
+
+The first mobile pass put the save button in the document flow under the title (`.card__overlay` went `position: static; display: contents` at `max-width: 599px`), so every card in a two-column grid carried a 34px button of its own row: the poster lost height, the title row and the button row made the grid look like a list of buttons, and on the bookmarks page the button pushed the "Move to…" control further down. The client asked for it inside the card ("这个bookmark 放在卡片里面", 2026-11-17).
+
+Now the overlay stays with the poster at every width and only the button's position changes. At `max-width: 599px` `.grid .card__save` is pinned 8px from the poster's bottom-right (the score badge already owns the top-right), 30×30, radius 9, `rgb(10 8 14 / 0.62)` behind the icon so it reads over any art, `opacity: 1` because a touch screen has no hover, and `pointer-events: auto` so taps reach it through the `pointer-events: none` overlay. Saved cards fill it with `--accent` and `#1a0f1e` ink, the same pressed look the detail page uses.
+
+Measured at 390×844 (device emulation, `mobile: true`): button 30×30, 8px from the poster's right and bottom edges, fully inside the cover, `position: absolute`, `opacity: 1`; card height 321px on the catalog and 318px on the bookmarks page; saved grid still two columns with a 172px Move button; horizontal overflow 0 on the catalog, home and saved pages and on the detail page's recommendation grid. Clicking the button toggles `aria-pressed` and the store (3 → 2 → 3 rows) without navigating away from `catalog.html`. At 1440 nothing changed: the button is still the 30px hover-only overlay 9px from the card's top-left, card height 318px.
+
+Evidence: docs/evidence/_new/mobile-card-bookmark-390.png, mobile-card-bookmark-saved-390.png, mobile-card-bookmark-home-390.png.
+
+**Not verified**: a real finger tap on a device (the toggle was driven through CDP mouse events), and whether the accent-filled saved state is too loud on a page full of saved cards.
+
+## 42. The phone hero shows the poster, full bleed
+
+The hero was built for a 16:9 desktop frame: the wide art is the anime's own promotion, and on a phone the same shot was cropped into a 3:4 column, so the page opened on a zoomed fragment of a banner. The client asked for the poster art on phones ("在手机上, 这个hero 做成像卡片海报的" → "我的意思是使用卡片的海报", 2026-11-18). A first attempt also framed it as an inset rounded card; that framing was rejected the same evening ("卡片布局不要"), so the hero keeps its edge-to-edge shape and only the image source changed.
+
+The art picker already had the branch — `artFor(m, portrait)` in js/home.js:95 returns `coverImage.extraLarge || coverImage.large` when the viewport is at most 639px and the PV frame or banner otherwise — so no CSS was needed for the switch, and the existing `@media (max-width: 639px)` block still owns the 3:4 frame and the mobile gradient.
+
+**The real bug was the fallback.** js/home.js:39 watches `load` on the hero images because YouTube returns a 120px grey frame when `maxresdefault.jpg` is missing, and swaps to the banner when `naturalWidth < 1000`. That threshold is fine for a 1280-wide PV frame and wrong for a poster: `cover/large` is 460×647, so every mobile paint was immediately replaced by the banner the branch had just avoided. Measured before the fix: at 390 and 596 `matchMedia('(max-width: 639px)')` was true, `coverImage.extraLarge` existed in the API response, `localStorage` was cleared and `Network.setCacheDisabled: true` was set — and `#hero-img` still resolved to `.../banner/159042-X0mqyaUFBkms.jpg`. The fallback now runs only on `img.hero__img--pv`, which is the case it was written for.
+
+**Measured after the revert to full bleed.** 390×844: media 390×520 (3:4, left edge 0, radius 0), hero top 0 so the art still bleeds under the glass header, source `.../cover/large/bx159042-GGFwlDskc5vR.png`, horizontal overflow 0. 375 keeps the same shape at 375×500. Pressing `#hero-next` brings the next cover (`.../cover/large/bx152677-gtJbgjE94lCN.png`, "The Detective Is Already Dead Season 2") and stays on a cover image. 1440 unchanged: the PV frame `maxresdefault.jpg` at 1425×864 with radius 0.
+
+Evidence: docs/evidence/_new/mobile-hero-bleed-390.png, mobile-hero-poster-375.png, mobile-hero-poster-596.png, mobile-hero-poster-390-next.png, desktop-hero-pv-1440.png.
+
+**Not verified**: a real phone (all widths here are device emulation), and auto-advance on a phone — the second pick was driven by clicking the next arrow, not by the 7s timer.
+
+## 43. The mobile tab bar floats, and it is frosted
+
+The tab bar was a full-width strip glued to the bottom edge with a 92% opaque fill and a 1px rule on top — the same shape as the header, which read as a second chrome band rather than as a control over the page. The client asked for it to float and to be glass ("这个做成悬浮, 和毛玻璃的", 2026-11-18).
+
+Now at `max-width: 599px` the bar is an island: `inset-inline: 12px`, `inset-block-end: calc(env(safe-area-inset-bottom, 0px) + 10px)`, 20px radius, one `--line` hairline, `color-mix(in srgb, var(--main) 58%, transparent)` behind `backdrop-filter: blur(18px) saturate(125%)`, and a `0 12px 30px rgb(0 0 0 / 0.45)` shadow so it separates from the art instead of relying on a rule. `overflow: hidden` keeps the active item's colour wash inside the radius. The old `padding-block-end: env(safe-area-inset-bottom, 0)` came off — the safe area now lives in the offset, so the bar never grows a taller foot on gesture phones.
+
+Floating it also moved what sits behind it, so two offsets grew with it: `body` and `main` reserve `--tabbar-h + 16 + 10px + env(safe-area-inset-bottom, 0)` (the extra 10 is the gap under the bar; measured padding is 82px), and `.to-top` on the detail page moved up by the same 10px so it does not land on the bar's shoulder.
+
+**Measured at 390×844** on the home, catalog, saved, rankings and detail pages: bar at x12, width 366, bottom edge 834 (10px of page visible under it), 20px radius, 1px `rgba(255,255,255,0.08)` border, background `color(srgb 0.164706 0.121569 0.227451 / 0.58)`, `blur(18px) saturate(1.25)`, horizontal overflow 0 everywhere. Scrolled to the very bottom, the footer's last line sits 13–14px above the bar on all three pages. On the detail page the Back to top button measures 13px above the bar, i.e. it still floats free.
+
+Evidence: docs/evidence/_new/mobile-tabbar-float-390.png, mobile-tabbar-index-390.png, mobile-tabbar-catalog-390.png, mobile-tabbar-saved-390.png, mobile-tabbar-rankings-390.png, mobile-tabbar-detail-390.png.
+
+**Not verified**: how the glass reads over a fully white poster area (the sampled pages are all dark art), and iOS Safari's `backdrop-filter` on a rounded fixed element with a shadow — only Chromium was measured.
+
+## 44. Tab bar icons are line drawings, and the current tab has a block behind it
+
+The four tabs used text glyphs — `◆ ▤ ▮ ★` — which render as whatever the system font decides, carry no meaning for Catalog or Rankings, and did not match the 1.8px line icons in the header (bookmark, clock, avatar). The client sent a reference with a house, a funnel, a bar chart and a bookmark, each with the label underneath and a rounded block behind the current one ("那些Icon 改一下, 这些icon可以", 2026-11-18).
+
+The glyphs are replaced with inline SVGs on all five pages that carry the bar (index, catalog, detail, rankings, saved): house with a door for Home, funnel for Catalog, three rising bars for Rankings, and the same bookmark outline the header uses for Saved. All are 20×20, `viewBox="0 0 24 24"`, `fill="none"`, `stroke="currentColor"`, `stroke-width="1.8"`, so the icon inherits the item colour instead of being a fixed-shape glyph. `.tabbar__icon` became a flex box sized to the svg.
+
+**The current tab is now a block, not just tinted text.** `.tabbar__item` gained `margin: 5px 4px`, `padding-block: 3px`, a 14px radius and a colour/background transition; `[aria-current="page"]` paints `color-mix(in srgb, var(--accent) 18%, transparent)` behind the icon and label, the way the reference does. Because the items now carry their own margin, the bar sits at 62px tall instead of 56 — measured at 390×844: bar x12, width 366, height 62, active item 50px tall, 20px icons, horizontal overflow 0 on every page, footer still 11px clear of the bar when scrolled to the bottom.
+
+Evidence: docs/evidence/_new/mobile-tabbar-icons-390.png.
+
+**Not verified**: the icons at the 1.5px effective stroke a 2x phone screen shows after downscaling (they were sized on a 2x emulated viewport), and nothing on the bar was re-measured on iOS Safari.
+
+## 45. Back to top is on every page, not just the detail page
+
+The button was built for the detail page (its scroll handler lived in js/detail.js) and the other four pages had no way back to the top except dragging — which got worse once the floating tab bar started covering the first row of cards. The client noticed the gap ("其他页面没有back to top 按钮", 2026-11-18).
+
+The behaviour moved into js/ui.js as `mountToTop(button)`, because it is a piece of page furniture rather than detail-page logic: it finds `#to-top`, listens to `scroll` passively, sets `hidden` when `scrollY < 600` or when the footer's top reaches the viewport (the button is `position: fixed`, so moving it up only moves it over the copyright line), and scrolls to `{ top: 0 }` with `behavior: smooth` unless the user asked for reduced motion. `index.html`, `catalog.html`, `rankings.html` and `saved.html` gained the same `<button class="to-top" id="to-top" hidden>Back to top</button>` the detail page already had, and their entry scripts (js/home.js, js/catalog.js, js/rankings.js, js/saved.js) call `mountToTop()` once at boot; js/detail.js went from twenty lines of its own handler to `mountToTop(els.toTop)`, so the five pages cannot drift apart.
+
+**Measured at 390×844** on all five pages: hidden at the top of the page; after scrolling to 900 the button is visible at `right: 16px`, bottom edge 762, i.e. 10px above the floating tab bar; clicking it returns `scrollY` to 0; scrolled to the very bottom it hides again so the footer's last line is readable. On the bookmarks page, which is short, the button never appears because the footer is already on screen at `scrollY` 900 — the same rule doing its job rather than a special case.
+
+Evidence: docs/evidence/_new/mobile-to-top-catalog-390.png.
+
+**Not verified**: the smooth scroll's feel on a real device, and whether the button is reachable on a page that is only slightly taller than the viewport (between 600px and one screen of scroll there is no button at all, by design).
+
+## 46. The filter sheet is placed before the markup paints
+
+On a phone, reloading the catalogue showed the six filter rows for a moment and then they vanished. That was the bottom sheet arriving late rather than a rendering glitch: the sheet only becomes a sheet when `body[data-filters-ready="true"]` is set (css/style.css:2155), and that flag used to be written by js/filters.js — a module, which the browser fetches and evaluates after the markup is already parsed. For one frame the rows sat in normal flow in the middle of the page, then the flag landed and `transform: translateY(101%)` took them off screen.
+
+The flag is now set by a three-line inline script at the top of `<body>` in catalog.html, before the filter block is parsed, so the rows never exist in the flow at any frame. js/filters.js still sets it in `mountSheet()`; the second write is a no-op and keeps the function usable on its own.
+
+The no-JS fallback survives, which is why the inline script rather than a CSS-only default: with scripting off the line never runs, no flag is set, and the panel stays a plain block that still filters on form submit.
+
+**Proved with JS actually blocked**, not just by reading the rule: with `Network.setBlockedURLs` stopping both modules, `#filters` computes to `position: fixed` with `matrix(1, 0, 0, 1, 0, 716.043)` and its box top at 851 — off screen on the first paint, before any module could run. With scripts allowed, the sheet still opens: `data-open="true"`, transform back to `matrix(1, 0, 0, 1, 0, 0)`, top 135, height 709, backdrop `block`, 48 cards underneath. Desktop at 1440 is untouched: `position: static`, `transform: none`, top 227, height 452, toggle `display: none`, no horizontal overflow.
+
+**Not verified**: the flash itself on a real phone at a real network speed — I can no longer observe the frame that used to be wrong, only that the state it depended on is now set before parsing.
+
+## 47. The ranking filters were briefly a matrix on phones — reverted
+
+For one round the mobile ranking panel was rebuilt as an equal-width grid: three fixed columns for the sort pills, one chip matrix per row, `More` pinned to the label line, hairline rules between rows (measured 343×555 at 390×844, every chip 103×33, no truncation).
+
+The client rejected it on sight ("回退吧, 不喜欢.", 2026-11-18). The CSS went back to the ragged-chip layout it had before — `.rank-panel { padding: var(--sp-3) }` and `.rank-row` as a single-column grid, chips flowing on text width — and the two narrow-width breakpoints added to keep the sort row on one line were removed with it.
+
+What it cost and what it bought, for anyone tempted again: the matrix made both edges straight but grew the panel by 41px, because three equal columns push Region and Format's fourth option onto a second row, and it shrank the chips to 33px tall — below the 44px a thumb wants. Four narrower columns would have avoided the orphan rows but truncated `Psychological` and `Supernatural`.
+
+## 48. The mobile genre row shows four chips, and More moved up to the label line
+
+One follow-up on the reverted panel: the client asked for fewer genres on a phone ("genre 显示少一点?", 2026-11-18). Nothing else changed — the ragged chip flow is still the layout.
+
+Inside the same `@media (max-width: 599px)` block, a second collapse rule drops the genre row to `All` plus three: `.rank-row[data-collapsible="8"][data-expanded="false"] .rank-opt:nth-child(n + 5)` (the desktop rule, which starts at `n + 10`, still shows eight). Four chips fit one line and the panel drops from 514 to 442 tall.
+
+Showing four also broke something the old count hid: `More ⌄` no longer fits beside the chips, so it wrapped onto a line of its own and `margin-inline-start: auto` pushed it to the right — a stray word under the row. On mobile `.rank-row` is now `position: relative` and `.rank-more` is absolutely positioned at the label line's top-right, which is where the button stays once the row is expanded and reads `Less ⌃`. Desktop keeps it at the end of the chip line, where there is room.
+
+**Measured at 390×844**: four genre chips (`All`, `Action`, `Adventure`, `Comedy`) on one line at the same height as the rest of the row, `More ⌄` 5px above the label's top and flush with the panel's right edge (346), panel 442 tall. Expanding still gives 18 chips over six rows with `Less ⌃` in the same corner. Desktop at 1440 is untouched: nine chips on one line, `More` at the end of that line, panel 266.
+
+Evidence: docs/evidence/_new/mobile-rank-genre4-390.png.
+
+## 49. Between 600 and 899 there was no navigation at all
+
+The client opened the deployed site in an 854px window and found neither a top navigation nor a bottom one. Both halves were true and neither was a bug on its own: the mobile tab bar was switched off from `min-width: 600px` (css/style.css, old line 1678), while the top navigation and the header search were switched off up to `max-width: 899px`. Every width in between got an empty header and no bar — a 300px-wide dead zone, most visibly a browser window that is not phone-sized but not wide either.
+
+The two handovers are now one handover, at 900px. `@media (min-width: 600px)` keeps only the tablet grid and hero padding; a new `min-width: 900px` block resets the body's bottom padding, hides `.tabbar`, and shows `.site-nav`; and the tab bar stays on screen through 899. Because a 780px-wide phone bar looks like a desktop footer, the bar is capped at `min(620px, 100% - 24px)` and centred via `left: 50%` + `translate: -50% 0` in a `600px–899px` band, so it reads as a floating strip rather than a full-width bar.
+
+**Measured at 900px tall** on index.html: 599 → tab bar only (560 wide, left 12); 600 → tab bar 561 wide, body bottom padding 82; 768 → bar 620 wide, left 67; 854 → 620, left 110; 899 → 620, left 132; 900 and 1440 → top navigation, no bar, body padding 0. Exactly one navigation entry point at every width, no horizontal overflow at any of them. Catalog at 854 keeps its sticky search bar above the panel and gains the same centred tab bar.
+
+Evidence: docs/evidence/_new/nav-854-index.png, nav-854-index-bottom.png, nav-854-catalog.png.
+
+**Not verified**: 600–899 in portrait tablet orientation on a real device (the same rules, but the bar sits closer to the thumb).
+
+## 50. The catalog grid got the home page's column ladder
+
+In an 842px window the catalog put the same posters Home shows at four or six across into **two** very large columns, so the two pages looked like different sites. The cause was two different ladders: Home's wide shelves step 3 → 4 (640) → 6 (1024), while the shared `.grid` (which catalog used) steps 1 → 2 (600) → 3 (992) → 6 (1280).
+
+`#catalog-grid` now uses the shelf ladder directly: 2 columns below 600 (unchanged, 24 cards in one column would be a 16000px page), 3 from 600, 4 from 640, 6 from 1024. The id selector keeps winning over the shared `.grid` rules at every breakpoint, so the generic ladder is untouched for detail's recommendation strip.
+
+**Measured catalog at 900px tall**: 390 → 2 columns, card 167; 599 → 2, 271; 600 → 3, 168; 640 → 4, 132; 842 → 4, 183; 900 → 4, 197; 1024 → 6, 144; 1280 → 6, 183; 1440 → 6, 200 (unchanged). At 842 Home's TV Shows grid measures the same 4 × 182.75px tracks with a 16px gap, so the two pages now agree to the pixel; cards stay flat (transparent background, no border) on both.
+
+Evidence: docs/evidence/_new/catalog-842-cards.png.
+
+**Not verified**: 1024–1279 with a full 48-card load on a real tablet; the 144px cards there are the narrowest this page ever gets.
+
+## 51. The header search came back for tablets, and stopped doubling up on the catalog
+
+After the 600–899 dead zone was fixed, an 813px window still had no way to search from the home page: the header search was hidden up to 899px, and the home search band had been removed when the search moved into the header. The header at that width only holds brand, the search field and three icons, so the field fits — it is now hidden only below 600px.
+
+Two numbers keep it from crowding the bar: `.nav-search` gets `width: clamp(180px, 25vw, 264px)` in the 600–899 band, so it never squeezes the brand at 600 and never runs into the icons at 899.
+
+The catalog page then had two search fields on screen (header field plus its own sticky one). The page already starts with a full-size search field pinned above the results, so `body.page-catalog .nav-search` is hidden at every width; catalog.html now carries a `page-catalog` body class for that rule.
+
+**Measured at 900px tall**: header field visible at 600 (180px), 640 (180), 768 (192), 813 (203), 899 (225), 900 (200 — desktop width rule), 1440 (264); hidden at 599 and 390. `.site-header__inner` scroll width equals client width at every one of those widths, so nothing is clipped; horizontal overflow stays at the scrollbar's 15px. Catalog: header field hidden and page field visible at both 813 and 1440; index: header field visible at 813, none at 390.
+
+Evidence: docs/evidence/_new/nav-search-813-index.png, nav-search-813-catalog.png.
+
+**Open**: below 600px the home page still has no search entry; the catalog's own field is the only one on a phone. Left alone pending the client's call.
+
+## 52. Search on a phone: the bar could not fit, so the band came back
+
+The header search cannot live below ~520px: at 390px the brand is 146px and the three tool buttons 122px, leaving 75px inside the header — not enough for a field. The home page therefore had no search at all on a phone, which is exactly the width the client photographed at 578px and at 390px.
+
+Two mechanisms, one per range. From 520px up the header field is used again: `width: clamp(150px, 27vw, 264px)` keeps the header from clipping (measured overflow of `.site-header__inner` is 0 from 520px on; at 480px it was 27px, which is why 520 is the boundary and not 480). Below 520px the home page gets a `.search-bar--phone` strip under the header — the same `.search` component the catalog page already uses, 73px tall with a 46px input.
+
+Because that band is the first block on the phone screen, the hero can no longer pull itself up under the header on this range: `@media (max-width: 519px) { .page-hero .hero { margin-block-start: 0 } }` sits after the base pull-up rule. Measured at 900px tall: 360 / 390 / 430 / 479 / 519 → band `block`, 73px tall, hero starts exactly at its bottom edge (137px), header search hidden; 520 / 578 / 640 / 813 / 1440 → header field `flex`, band hidden, hero back under the header (top 0), header overflow 0 everywhere.
+
+The catalog page still uses its own full-width field plus the header one hidden by `body.page-catalog`, so only one search field is ever visible per page.
+
+Evidence: docs/evidence/_new/home-search-phone-390.png.
+
+**Not verified**: real iOS Safari safe-area behaviour of the band against the top edge.
+
+## 53. TOP 5 folds 5 / 3 / 2 instead of 3 / 2
+
+The rankings podium was three columns from 899px down, so an 897px window showed three oversized covers with two orphans underneath. It now keeps five across until 768, drops to three between 520 and 767, and two below 520 — the same "fill the row" logic the rest of the site uses.
+
+**Measured on rankings.html at 900px tall**: 390 → 2 columns, cover 166; 519 → 2, 230; 520 → 3, 150; 640 → 3, 184; 767 → 3, 227; 768 → 5, 131; 897 → 5, 157; 900 → 5, 158; 1440 → 5, 254. Five items render at every width, no horizontal overflow.
+
+The single-column ranking list below 900px is unchanged — only the podium row moved.
+
+Evidence: docs/evidence/_new/rankings-top5-897.png.
+
+## 54. The avatar button is gone
+
+The translucent person icon in the header sat between the bookmark button and the recently-viewed panel and did nothing: the site has no accounts, no sign-in and no profile page (PRD has none, and the README says as much). The client asked for it to be removed ("这个移除掉吧", 2026-11-18).
+
+Removed from all five pages (index, catalog, detail, rankings, saved) together with the `.avatar` rule; `.header-tools` is now the search field plus the clock and bookmark buttons. Nothing in `js/` referenced it, so no script changed.
+
+**Measured**: `.header-tools` children are `nav-search, icon-btn, icon-btn, recent-pop` on all five pages, `.avatar` count 0, horizontal overflow unchanged. The earlier header measurements in §17 of this file still describe the old three-icon row; this section supersedes them for the avatar.
+
+Evidence: docs/evidence/_new/header-no-avatar-1440.png.
+
 ## What was *not* changed
 
 - Four states (loading / success / error / empty), skeleton geometry and `aria-busy`.

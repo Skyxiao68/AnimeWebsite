@@ -1,6 +1,6 @@
 // Catalogue page entry: request cycle, the four interface states, Load More.
 import { search, userMessage } from './api.js';
-import { card, renderCards, renderState } from './ui.js';
+import { card, renderCards, renderState, mountToTop } from './ui.js';
 import { getQuery, getState, initFilters, onChange, resetAll } from './filters.js';
 import { isBookmarked, mountBookmarks, syncWithin } from './bookmarks.js';
 
@@ -177,6 +177,7 @@ function init() {
   if (!grid) return;
 
   mountBookmarks();
+  mountToTop();
   initFilters();
 
   onChange(() => load({ reset: true }));

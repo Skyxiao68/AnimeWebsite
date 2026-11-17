@@ -66,8 +66,8 @@ body {
   font-family: var(--font-sans);
   font-size: var(--fs-md);
   line-height: var(--lh-body);
-  /* 移动端底部 tab bar 会压住内容 */
-  padding-block-end: calc(var(--tabbar-h) + var(--sp-4));
+  /* 移动端底部 tab bar 会压住内容；它悬浮离底 10px，这里连那 10px 一起让开 */
+  padding-block-end: calc(var(--tabbar-h) + var(--sp-4) + 10px + env(safe-area-inset-bottom, 0px));
 }
 
 h1,
@@ -205,11 +205,6 @@ h3 {
   transition: border-color var(--t-fast) var(--ease);
 }
 
-/* 首页的占位文案长，胶囊跟着变宽（渲染图 1440 下 471px）。 */
-.nav-search--long {
-  width: clamp(260px, 33vw, 470px);
-}
-
 .nav-search:focus-within {
   border-color: var(--accent);
 }
@@ -287,17 +282,6 @@ h3 {
 .icon-btn:hover,
 .icon-btn[aria-expanded="true"] {
   color: var(--accent);
-}
-
-.avatar {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: rgb(255 255 255 / 0.16);
-  color: #fff;
 }
 
 /* 「时钟」= 最近看过的详情页。图标在渲染图里就在，点开是一个小面板。 */
@@ -1173,6 +1157,15 @@ h3 {
   }
 }
 
+/* 手机首页那条搜索只在 520 以下出现（520 以上顶栏放得下），见 index.html。 */
+@media (min-width: 520px) {
+  .search-bar--phone {
+    display: none;
+  }
+}
+
+
+
 /* ---------------------------------------------------------------- 四段 */
 main {
   display: flex;
@@ -1549,18 +1542,23 @@ body.page-saved main {
 /* ---------------------------------------------------------------- 移动 tab bar */
 /* 层级：--z-tabbar 100 < --z-drawer 200，抽屉/遮罩打开时盖住它；不跟 header 抢层。
  * 只有 <600 存在（≥600 的媒体查询里 display:none），不靠 JS 挂载。 */
+/* 悬浮玻璃条：离屏幕三边各留一段，圆角收口，糊的是它下面的内容而不是页面底色。
+ * 底下那条 env() 是给全面屏手势区让位的。 */
 .tabbar {
   position: fixed;
-  inset-block-end: 0;
-  inset-inline: 0;
+  inset-block-end: calc(env(safe-area-inset-bottom, 0px) + 10px);
+  inset-inline: 12px;
   z-index: var(--z-tabbar);
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   min-height: var(--tabbar-h);
-  padding-block-end: env(safe-area-inset-bottom, 0);
-  background: color-mix(in srgb, var(--bg) 92%, transparent);
-  backdrop-filter: blur(12px);
-  border-block-start: 1px solid var(--line);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--main) 58%, transparent);
+  backdrop-filter: blur(18px) saturate(125%);
+  -webkit-backdrop-filter: blur(18px) saturate(125%);
+  box-shadow: 0 12px 30px rgb(0 0 0 / 0.45);
+  overflow: hidden;
 }
 
 .tabbar__item {
@@ -1568,23 +1566,34 @@ body.page-saved main {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-  padding-block: var(--sp-2);
+  gap: 3px;
+  margin: 5px 4px;
+  padding-block: 3px;
   border: 0;
+  border-radius: 14px;
   background: transparent;
   color: var(--text-muted);
   font-size: var(--fs-xs);
   font-weight: 600;
   cursor: pointer;
+  transition: background-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
 }
 
+/* 选中项自己带一块底色，跟参考稿一样是「圆角小块」而不是整格高亮 */
 .tabbar__item[aria-current="page"] {
   color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
 }
 
 .tabbar__icon {
-  font-size: 18px;
+  display: flex;
   line-height: 1;
+}
+
+.tabbar__icon svg {
+  display: block;
+  width: 20px;
+  height: 20px;
 }
 
 /* ---------------------------------------------------------------- 页脚 */
@@ -1649,7 +1658,7 @@ body.page-saved main {
   /* tab bar 遮挡兜底：body 已留 --tabbar-h + 16（footer 也够），main 再补一段，
      保证最后一张卡的 Bookmark 按钮不贴着 bar。 */
   main {
-    padding-block-end: calc(var(--tabbar-h) + var(--sp-4));
+    padding-block-end: calc(var(--tabbar-h) + var(--sp-4) + 10px);
   }
 
   /* sticky 搜索条压在顶栏下面，别让它盖住 header 的下边线 */
@@ -1658,8 +1667,31 @@ body.page-saved main {
   }
 }
 
-/* ≥600：平板双列，tab bar 收起，桌面导航出现 */
+/* ≥600：平板双列。导航仍然交给底部 tab bar，到 900 才交接给顶栏。 */
 @media (min-width: 600px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .hero {
+    padding-block: 0 var(--sp-6);
+  }
+}
+
+/* 600–899 这一档原来两边都没有导航：tab bar 在 600 被收掉、顶栏要 900 才出来，
+   中间 300px 宽的窗口里一个导航入口都没有。tab bar 现在留到 899，
+   只是限宽居中——满屏横着一条会像桌面底栏，收窄才像手机和平板的手势条。 */
+@media (min-width: 600px) and (max-width: 899px) {
+  .tabbar {
+    inset-inline: auto;
+    left: 50%;
+    width: min(620px, calc(100% - 24px));
+    translate: -50% 0;
+  }
+}
+
+/* ≥900：桌面导航出现，底部 tab bar 让位 */
+@media (min-width: 900px) {
   body {
     padding-block-end: 0;
   }
@@ -1670,14 +1702,6 @@ body.page-saved main {
 
   .site-nav {
     display: flex;
-  }
-
-  .grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .hero {
-    padding-block: 0 var(--sp-6);
   }
 }
 
@@ -2061,7 +2085,7 @@ body.page-saved main {
 /* =================================================================== 详情页 */
 
 
-.to-top { position:fixed; right:1rem; bottom:calc(var(--tabbar-h) + 1rem); z-index:30; padding:.6rem .9rem; border:1px solid var(--line-strong); border-radius:999px; background: var(--surface-2); color: var(--text); font: inherit; font-size:.8125rem; font-weight:600; cursor:pointer; box-shadow:0 8px 24px rgb(0 0 0 / .35); }
+.to-top { position:fixed; right:1rem; bottom:calc(var(--tabbar-h) + 1rem + 10px + env(safe-area-inset-bottom, 0px)); z-index:30; padding:.6rem .9rem; border:1px solid var(--line-strong); border-radius:999px; background: var(--surface-2); color: var(--text); font: inherit; font-size:.8125rem; font-weight:600; cursor:pointer; box-shadow:0 8px 24px rgb(0 0 0 / .35); }
 .to-top:hover { border-color: var(--accent); }
 
 @media (min-width: 768px) {
@@ -2480,12 +2504,22 @@ body.page-saved main {
 }
 
 @media (max-width: 899px) {
+  .rank-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* TOP 5 在窄窗里折行：一间只剩三张就变成两张大图加一只孤儿，
+   所以按 5 / 3 / 2 分档，897 这种宽度仍然是一整排五张。 */
+@media (max-width: 767px) {
   .rank-top__row {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+}
 
-  .rank-list {
-    grid-template-columns: minmax(0, 1fr);
+@media (max-width: 519px) {
+  .rank-top__row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -2495,12 +2529,24 @@ body.page-saved main {
   }
 
   .rank-row {
+    position: relative;
     grid-template-columns: minmax(0, 1fr);
     gap: 2px;
   }
 
-  .rank-top__row {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  /* 手机上 Genre 只露 4 个（All + 3），整块面板因此矮一截；点 More 仍铺开 17 个。
+     桌面保持 8 个，那条规则在上面的基础样式里。 */
+  .rank-row[data-collapsible="8"][data-expanded="false"] .rank-opt:nth-child(n + 5) {
+    display: none;
+  }
+
+  /* 只留 4 个以后，More 在 chip 那一行放不下会掉到下一行单独成行，
+     所以手机上把它挂到标签行右端（和展开后的 Less 同一个位置）。 */
+  .rank-more {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-end: 0;
+    margin-inline-start: 0;
   }
 
   .rank-item__link {
@@ -2844,17 +2890,34 @@ body.page-saved main {
 
 /* ---------------------------------------------------------------- 窄屏 */
 
-/* 900px 以下不再放顶部导航和导航搜索：底部 tab bar 承担导航，
-   搜索留在目录页和首页表单里，头部只留品牌 + 书签 + 头像。 */
+/* 900px 以下顶部导航让给底部 tab bar，头部只留品牌 + 工具。
+   搜索还留着：600–899 这一档（平板与窄窗）品牌 + 搜索 + 三个图标摆得下，
+   收掉以后这个宽度就只能绕到目录页才能搜。手机再收。 */
 @media (max-width: 899px) {
-  .site-nav,
-  .nav-search {
+  .site-nav {
     display: none;
   }
 
   .header-tools {
     margin-inline-start: auto;
   }
+
+  .nav-search {
+    /* 600 起放宽一点，480–599 这一档品牌 + 工具已经占掉 268，只能给到 150–190 */
+    width: clamp(150px, 27vw, 264px);
+  }
+}
+
+@media (max-width: 519px) {
+  .nav-search {
+    display: none;
+  }
+}
+
+/* 目录页自己就有一条大搜索框黏在顶上，顶栏再放一个会并排两个搜索框。
+   这一页只留下面那条。 */
+body.page-catalog .nav-search {
+  display: none;
 }
 
 @media (max-width: 599px) {
@@ -2874,10 +2937,30 @@ body.page-saved main {
   }
 }
 
-/* 375 下目录页两列，一列 24 张会拖到一万六千像素 */
+/* 目录页的列数跟着首页 TV Shows / Movies 走：3 / 4 / 6。
+   原来用的是通用阶梯 2 / 3 / 6，842 这种窗口里只有两列，
+   两张大卡把整屏撑满，和首页同一批卡摆出来完全不像一套。 */
 @media (max-width: 599px) {
   #catalog-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 600px) {
+  #catalog-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 640px) {
+  #catalog-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  #catalog-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 }
 
@@ -2909,6 +2992,13 @@ body.page-saved main {
   margin-block-start: calc(-1 * var(--header-h));
   /* 图底下不再留内边距：多出 32px 就把整块顶过一屏，海报掉到折线以下。 */
   padding-block: 0;
+}
+
+/* 520 以下首页多了一条搜索带，hero 不能再往顶栏里抽 64，否则压掉带子。 */
+@media (max-width: 519px) {
+  .page-hero .hero {
+    margin-block-start: 0;
+  }
 }
 
 /* ---------------------------------------------------------------- 响应式列数
@@ -2953,10 +3043,33 @@ body.page-saved main {
 }
 
 @media (max-width: 599px) {
-  /* 手机上 Bookmark 回到标题下面，覆盖层顺势拆掉 */
-  .card__overlay {
-    position: static;
-    display: contents;
+  /* 手机上 Bookmark 贴在海报上，不再单独占标题下面一行。
+     覆盖层还是和海报同框（基础规则里就是 absolute），这里只是把按钮钉到右下角：
+     右上角归分数角标，右下角空着。触屏没有 hover，所以常驻显示。 */
+  .grid .card__save {
+    position: absolute;
+    inset-block-start: auto;
+    inset-block-end: 8px;
+    inset-inline-start: auto;
+    inset-inline-end: 8px;
+    z-index: 3;
+    pointer-events: auto;
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 9px;
+    background: rgb(10 8 14 / 0.62);
+    color: #f2eef9;
+    opacity: 1;
+  }
+
+  .grid .card__save[aria-pressed="true"] {
+    background: var(--accent);
+    color: #1a0f1e;
   }
 }
 

@@ -2,7 +2,7 @@
 // badges, then ranks 6-25 as a two-column list. AniList supplies the numbers.
 
 import { search, userMessage } from './api.js';
-import { renderState, titleText } from './ui.js';
+import { renderState, titleText, mountToTop } from './ui.js';
 import { mountBookmarks } from './bookmarks.js';
 
 const TOP = 5;
@@ -195,5 +195,6 @@ panel.addEventListener('click', (e) => {
 });
 
 mountBookmarks();
+mountToTop();
 syncPressed();
 load();
