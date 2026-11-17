@@ -128,6 +128,12 @@ h3 {
   border-block-end: 1px solid var(--line);
 }
 
+/* 和搜索条贴在一起时（catalog），两段是同一层玻璃，中间那条线去掉，
+   分界只留搜索条下面那条——否则顶栏底边 + 搜索条底边会读成两条线。 */
+.site-header--joined {
+  border-block-end-color: transparent;
+}
+
 .site-header__inner {
   display: flex;
   align-items: center;
@@ -172,9 +178,10 @@ h3 {
   color: var(--accent);
 }
 
-/* 渲染图里当前页没有药丸也没有颜色差别，aria-current 只留给读屏器。 */
+/* 渲染图里当前页和别的链接没差别（没有药丸、没有颜色）。2026-11-17 客户要能一眼看出
+   自己在哪一页，于是当前页改用主色；形状仍不加，避免又长出一个渲染图里没有的元素。 */
 .site-nav__link[aria-current="page"] {
-  color: inherit;
+  color: var(--accent);
 }
 
 /* ---------------------------------------------------------------- 顶栏右侧 */
@@ -370,6 +377,11 @@ h3 {
   backdrop-filter: none;
 }
 
+/* 顶栏压在插画上时，白链接要能读出来；只给字加影，不动画面亮度。 */
+.page-hero .site-header .site-nav__link {
+  text-shadow: 0 1px 3px rgb(10 8 14 / 0.62), 0 1px 14px rgb(10 8 14 / 0.5);
+}
+
 .hero {
   /* 照 cycani 的口径：hero 高度就是 60vw（实测 800 宽 486、877 宽 531），
      文案和海报压在图上、底对齐，图绝对铺满整条带子。 */
@@ -394,6 +406,7 @@ h3 {
        只把「减 40px」和 980 的封顶去掉，矮窗口仍由 560 地板兜住。 */
     min-height: max(560px, min(60vw, 100dvh));
   }
+
 }
 
 /* 又宽又矮的窗口（笔记本外接屏常见）：hero 内容本身就 600 多高，
@@ -507,22 +520,43 @@ h3 {
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  /* 2026-11-17：客户要 cycani 那种「插画原样铺开」+ 底部一层带颗粒的磨砂。
+     毛玻璃只负责质感（blur 7px 不糊掉人物），压光交给底下那层渐变（::before）。
+     再叠一层很淡的底把毛玻璃压一点，字才咬得住。 */
+  background:
+    linear-gradient(0deg, rgb(10 8 14 / 0.42) 0 18%, rgb(10 8 14 / 0.18) 34%, rgb(10 8 14 / 0) 52%),
+    /* 颗粒：SVG 噪声贴在蒙版里，像磨砂玻璃的油墨感 */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.34'/%3E%3C/svg%3E");
+  background-blend-mode: normal, soft-light;
+  backdrop-filter: blur(7px) saturate(108%) brightness(0.8);
+  -webkit-backdrop-filter: blur(7px) saturate(108%) brightness(0.8);
+  /* 蒙版让毛玻璃往上渐隐，和原画之间没有硬边 */
+  /* 底部留一条透明带：最下面几行只留下层渐变，正好等于页面底色，
+     否则毛玻璃的压光会一直压到底边，和下一段接出一条硬线。 */
+  mask-image: linear-gradient(0deg, transparent 0 4%, #000 12% 24%, rgb(0 0 0 / 0.6) 38%, transparent 56%);
+  -webkit-mask-image: linear-gradient(0deg, transparent 0 4%, #000 12% 24%, rgb(0 0 0 / 0.6) 38%, transparent 56%);
+}
+
+/* 磨砂底下的那层渐变：把画面收到页面底色，毛玻璃再把它糊一遍，
+   两块内容之间就没有硬边。z-index 比 ::after 低，所以是「渐变在下、磨砂在上」。 */
+.hero__media::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* 换片时推进来的 ghost 图是 z-index 1，这层必须比它高，
+     否则 650ms 的交叉淡化里渐变会被新图盖住、看着像「消失又出现」。 */
   z-index: 2;
   pointer-events: none;
-  background:
-    /* PV 封面图比 banner 亮得多，左侧压深一点，标题才咬得住 */
-    linear-gradient(180deg, rgb(10 8 14 / 0.42) 0%, rgb(10 8 14 / 0) 20%),
-    linear-gradient(90deg, rgb(10 8 14 / 0.72) 0%, rgb(10 8 14 / 0.34) 34%, rgb(10 8 14 / 0) 62%),
-    /* 底部过渡跟着文案留白走：名字压在渐变上才读得出来，整块压暗又会把画面闷死 */
-    linear-gradient(
-      0deg,
-      var(--bg) 0,
-      rgb(10 8 14 / 0.88) calc(var(--hero-fade) * 0.55),
-      rgb(10 8 14 / 0.4) calc(var(--hero-fade) * 0.82),
-      rgb(10 8 14 / 0) var(--hero-fade)
-    ),
-    /* PV 封面右下角常年压着「本PV」白框，用一层角落暗角盖掉 */
-    radial-gradient(circle at 100% 100%, rgb(10 8 14 / 0.94) 0 12%, rgb(10 8 14 / 0.6) 26%, rgb(10 8 14 / 0) 56%);
+  /* 底部先留 ~10% 的纯页面底色，再往上收：接下一段时是一条宽缓坡，不是一条线。 */
+  background: linear-gradient(
+    0deg,
+    var(--bg) 0 10%,
+    rgb(10 8 14 / 0.58) 22%,
+    rgb(10 8 14 / 0.2) 34%,
+    rgb(10 8 14 / 0) 46%
+  );
 }
 
 .hero__body {
@@ -534,6 +568,15 @@ h3 {
   z-index: 1;
   /* cycani 名字下到 hero 底边恒定 ~52px；上面留出导航条 + 一档间距兜底。 */
   padding-block: calc(var(--header-h) + var(--sp-4)) var(--sp-4);
+}
+
+/* hero 满了整屏之后，文案+缩略图整块贴底（只留 16px），1080 高的窗口里
+   文案顶会掉到屏幕中线以下。这里把底距按视口高放一档，整块往上抬 20–30px；
+   窗口越矮抬得越少，1366×768 那种基本不动。 */
+@media (min-width: 1200px) {
+  .hero__body {
+    padding-block-end: clamp(var(--sp-4), 4vh, 48px);
+  }
 }
 
 .hero__tags {
@@ -564,7 +607,8 @@ h3 {
   font-size: 1.25rem;
   line-height: 1.2;
   letter-spacing: -0.02em;
-  text-shadow: 0 2px 18px rgb(0 0 0 / 0.45);
+  /* 顶部不再压暗后，标题会落在浅色画面上；细影压住字边，大范围那层托住整体。 */
+  text-shadow: 0 1px 3px rgb(0 0 0 / 0.6), 0 2px 18px rgb(0 0 0 / 0.6), 0 4px 34px rgb(0 0 0 / 0.45);
 }
 
 /* 标题本身就是去详情页的入口（cycani 也这样）；下划线只在悬停/聚焦时出现，免得抢视线。 */
@@ -587,7 +631,8 @@ h3 {
   /* 设计稿副文是 muted 灰紫（取色 rgb(138,129,152)），比纯白暗一档。 */
   /* 画面上半是浅色（婚纱、白衬衫）时 muted 灰字糊成一片，
      所以正文加一档字重、提一档亮度，并给两层影子：细描边压住亮部，大范围压暗兜底。 */
-  color: var(--text-muted);
+  /* 2026-11-17：PV 越来越亮，muted 灰字在浅色画面上糊；提到近白，靠影子压边。 */
+  color: rgb(246 242 252 / 0.94);
   font-size: 15px;
   font-weight: 600;
   line-height: 1.45;
@@ -805,6 +850,25 @@ h3 {
   font-size: 14px;
 }
 
+/* 目录、书签页、详情推荐用同一套卡语言：不套卡底，海报和标题直接落在页面底色上，
+   跟首页 TV Shows / Movies 一致——那里也是 .shelf--wide 去掉卡底后的样子。 */
+.grid > .card {
+  background: none;
+  border-color: transparent;
+}
+
+/* 无框卡片 hover 时整块浮起会浮出一个透明方块，跟首页一样只让海报抬手 */
+.grid > .card:hover,
+.grid > .card:focus-within {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+/* 卡底没了，标题的左右内边距也归零，否则文字比海报往里缩一截 */
+.grid > .card .card__body {
+  padding: var(--sp-3) 0 0;
+}
+
 /* 面板只有半屏宽，标题 + 7 个日选 + More 要挤在一行：字号和间距都比整页时小一档 */
 .pair .shelf__title {
   font-size: 22px;
@@ -991,11 +1055,10 @@ h3 {
     opacity: 1;
   }
 
-  /* 已收藏：图标变实心，且不用 hover 也看得见状态 */
+  /* 已收藏：变实心，但同样等 hover 才出现——海报上不想常驻一块紫色 */
   .grid .card__save[aria-pressed="true"] {
     background: var(--accent);
     color: #1a0f1e;
-    opacity: 1;
   }
 }
 
@@ -1012,7 +1075,9 @@ h3 {
   top: var(--header-h);
   z-index: calc(var(--z-header) - 1);
   padding-block: var(--sp-3);
-  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  /* 底色和模糊跟 .site-header 同一个口径：两条 bar 上下相接，透明度不一样就
+     会在接缝处看出一个台阶。 */
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
   backdrop-filter: blur(12px);
   border-block-end: 1px solid var(--line);
 }
@@ -1066,6 +1131,12 @@ h3 {
   color: var(--text-muted);
 }
 
+/* 聚焦信号由外层 .search 负责（边框转紫 + 3px ring）；输入框自己再画一圈
+   outline 会在胶囊里套出第二个圆角圈，看着像叠了两层。 */
+.search__input:focus-visible {
+  outline: none;
+}
+
 .search__submit {
   min-height: 48px;
   padding-inline: var(--sp-5);
@@ -1080,6 +1151,26 @@ h3 {
 
 .search__submit:hover {
   background: color-mix(in srgb, var(--accent) 88%, white);
+}
+
+/* 手机上搜索条要常驻在首屏，太高会把 hero 挤下去：输入框 46、按钮 40，
+   加起来一条 62 的带子，和顶栏一样高。 */
+@media (max-width: 599px) {
+  .search-bar {
+    padding-block: var(--sp-2);
+  }
+
+  .search__input {
+    height: 46px;
+    padding-inline: var(--sp-3);
+    font-size: var(--fs-sm);
+  }
+
+  .search__submit {
+    min-height: 40px;
+    padding-inline: var(--sp-3);
+    font-size: var(--fs-sm);
+  }
 }
 
 /* ---------------------------------------------------------------- 四段 */
@@ -1150,26 +1241,26 @@ main {
   gap: 10px;
 }
 
-/* 历史页沿用同一套卡与同一套列数阶梯（6 / 4 / 3），只是不限行数 */
-#history-grid {
+/* 书签页沿用同一套卡与同一套列数阶梯（6 / 4 / 3），只是不限行数 */
+#saved-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 @media (min-width: 640px) {
-  #history-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  #saved-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
 @media (min-width: 1024px) {
-  #history-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  #saved-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 }
 
 /* 这一页常常只有几张卡，页脚要压在窗口底部，不能半途浮起来 */
-body.page-history {
+body.page-saved {
   display: flex;
   flex-direction: column;
 }
 
-body.page-history main {
+body.page-saved main {
   flex: 1 0 auto;
 }
 
@@ -1638,18 +1729,31 @@ body.page-history main {
   margin-block-end: var(--sp-3);
 }
 
+/* 渲染图在标题上面还有一行小字，用的是主色；手机端同一处也是它。 */
+.filters__kicker {
+  margin: 0 0 4px;
+  color: var(--accent);
+  font-size: var(--fs-md);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+/* 标题要撑得起面板：22px 比渲染图小了一档（客户端嫌小，2026-11-17），
+   上限仍卡在 36px，跟首页区块标题同一梯子。 */
 .filters__title {
   margin: 0;
-  font-size: var(--fs-lg);
+  font-size: clamp(1.6rem, 2.4vw, 2.25rem);
+  line-height: 1.15;
   font-weight: 700;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
 }
 
 .filters__lede {
-  max-width: 60ch;
-  margin: 2px 0 0;
+  max-width: 64ch;
+  margin: 6px 0 0;
   color: var(--text-muted);
-  font-size: var(--fs-sm);
+  font-size: var(--fs-md);
+  line-height: 1.55;
 }
 
 .filters__reset {
@@ -1698,6 +1802,18 @@ body.page-history main {
   border-bottom: 1px solid var(--line);
 }
 
+/* 六组筛选坐在一块比页面亮一档的面板里，横向留白由面板给 */
+.filters__panel {
+  margin-block-start: var(--sp-4);
+  padding: 4px var(--sp-5);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+}
+
+.filters__panel > .filters__row:first-child { border-top: 0; }
+.filters__panel > .filters__row:last-child { border-bottom: 0; }
+
 .filters__label {
   padding-block-start: 2px;
   color: var(--text);
@@ -1713,8 +1829,9 @@ body.page-history main {
   padding: 2px 10px;
   border: 0;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--accent) 28%, transparent);
-  color: var(--text);
+  /* 设计渲染里选中的胶囊是实心 accent + 深字，不是半透明紫配浅字（2026-11-17 修）。 */
+  background: var(--accent);
+  color: #1a0f1e;
   font: inherit;
   font-size: var(--fs-xs);
   font-weight: 700;
@@ -1772,8 +1889,9 @@ body.page-history main {
 }
 
 .opt[aria-pressed="true"] {
-  background: color-mix(in srgb, var(--accent) 30%, transparent);
-  color: var(--text);
+  /* 同 .chip-chip[aria-pressed="true"]：实心 accent 底 + 深字，对比 8.4:1。 */
+  background: var(--accent);
+  color: #1a0f1e;
   font-weight: 700;
 }
 
@@ -1837,15 +1955,68 @@ body.page-history main {
   font-size: var(--fs-xs);
 }
 
-/* 结果头：只剩条数（Reset 已经搬进筛选区右上角） */
+/* 结果头：左边「选了哪些标签」，右边「找到多少条」。两边都是 13px 灰字，
+   只有数字那句加粗上主色 —— 照渲染图。Reset 在筛选区右上角。 */
 .catalog-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-2) var(--sp-4);
   margin-block-end: var(--sp-3);
 }
 
+.catalog-head__tags,
 .result-count {
+  margin: 0;
   color: var(--text-muted);
-  font-size: var(--fs-sm);
+  font-size: var(--fs-xs);
+}
+
+.result-count {
   font-variant-numeric: tabular-nums;
+}
+
+/* 「A Total of 24」这一段是主色粗体，后半句保持灰字 */
+.result-count__lead {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ---------------------------------------------------------------- 按钮
+   之前 .btn 没有任何规则，按钮拿的是浏览器默认的灰底方块——在深色页面上
+   看着像禁用态。统一成描边按钮：主色边 + 主色字，hover 才填实。 */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  padding: 11px 26px;
+  border: 1px solid var(--accent);
+  border-radius: var(--r-md);
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: background-color var(--t-base) var(--ease), color var(--t-base) var(--ease),
+    border-color var(--t-base) var(--ease);
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--accent);
+  color: #1a0f1e;
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: default;
 }
 
 /* Load more：靠 [hidden] 控制显示，别用 display:none 的类名，否则 JS 要同步两处 */
@@ -1906,14 +2077,23 @@ body.page-history main {
 .page-head__title { margin:0 0 .4rem; font-size: clamp(1.8rem, 3.6vw, 2.6rem); letter-spacing:-.02em; }
 .page-head__lede { margin:0; max-width:64ch; color: var(--text-muted); line-height:1.6; }
 
-/* 收藏抽屉每一行（bookmarks.js 生成，之前没有样式） */
-.drawer__item { display:flex; gap:.6rem; align-items:center; padding:.5rem 0; border-bottom:1px solid var(--line); }
-.drawer__link { display:flex; gap:.6rem; align-items:center; flex:1 1 auto; min-width:0; color:inherit; text-decoration:none; }
-.drawer__link img { width:38px; height:56px; object-fit:cover; border-radius:6px; background: var(--surface); flex:none; }
-.drawer__link span { font-size:.8125rem; line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-.drawer__remove { flex:none; padding:4px 8px; border:1px solid var(--line-strong); border-radius:8px; background:transparent; color: var(--text-muted); font: inherit; font-size:.75rem; cursor:pointer; }
-.drawer__remove:hover { border-color:#F87171; color:#F87171; }
-
+/* 收藏抽屉每一行（bookmarks.js 生成）：封面 + 标题 + 分数，右侧是单个图标按钮 */
+.drawer__list { align-content: start; gap:4px; }
+.drawer__item { display:flex; align-items:center; gap:2px; padding:8px; border-radius:14px; transition: background-color var(--t-fast) var(--ease); }
+.drawer__item:hover, .drawer__item:focus-within { background: var(--surface); }
+.drawer__link { display:flex; align-items:center; gap:12px; flex:1 1 auto; min-width:0; color:inherit; text-decoration:none; }
+.drawer__count { margin-inline-start:8px; color: var(--text-muted); font-size: var(--fs-sm); font-weight:600; font-variant-numeric: tabular-nums; }
+.drawer__cover { flex:none; width:44px; height:62px; object-fit:cover; border-radius:8px; background: var(--surface-2); box-shadow: inset 0 0 0 1px rgb(255 255 255 / .06); }
+.drawer__cover--blank { background: linear-gradient(160deg, var(--surface-2), var(--surface)); }
+.drawer__text { display:flex; flex-direction:column; gap:3px; min-width:0; }
+.drawer__name { font-size:.875rem; line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.drawer__meta { color: var(--text-muted); font-size: var(--fs-xs); font-variant-numeric: tabular-nums; }
+.drawer__remove { flex:none; display:grid; place-items:center; width:32px; height:32px; padding:0; border:0; border-radius:9px; background:transparent; color: var(--text-muted); cursor:pointer; transition: color var(--t-fast) var(--ease), background-color var(--t-fast) var(--ease); }
+.drawer__remove:hover, .drawer__remove:focus-visible { color:#F87171; background: color-mix(in srgb, #F87171 14%, transparent); }
+.drawer__empty { display:grid; justify-items:center; gap:6px; padding:34px 8px; text-align:center; color: var(--text-muted); }
+.drawer__empty-mark { color: var(--line-strong); }
+.drawer__empty strong { color: var(--text); font-size:.95rem; }
+.drawer__empty span:last-child { font-size:.8125rem; line-height:1.45; max-width:30ch; }
 /* 手机上 Weekly 变成可以横拖的一条（motion.js 会把它标成 data-drag="true"） */
 @media (max-width: 599px) {
   .grid[data-drag="true"] { display:flex; gap: var(--sp-3); overflow-x:hidden; grid-template-columns:none; padding-bottom:.25rem; cursor:grab; }
@@ -1964,25 +2144,47 @@ body.page-history main {
   body[data-filters-ready="true"] .filters {
     position: fixed;
     inset: auto 0 0 0;
-    z-index: 60;
     max-height: 84vh;
     overflow-y: auto;
     margin: 0;
     border: 0;
     border-radius: 18px 18px 0 0;
+    /* 抽屉要盖过 sticky 搜索条（--z-header - 1）和 tab bar（--z-tabbar），
+       跟收藏抽屉同一个层：抽屉 200 / 遮罩 199。 */
+    z-index: var(--z-drawer);
+    padding-inline: var(--sp-4);
     padding-block-end: calc(var(--sp-5) + env(safe-area-inset-bottom, 0px));
+    background: var(--surface);
     transform: translateY(101%);
     transition: transform .28s var(--ease);
   }
 
+  /* 抽屉本身已是一块面板，里面的六行不再叠第二层底 */
+  .filters__panel {
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: 0;
+    border-radius: 0;
+  }
+
   body[data-filters-ready="true"] .filters[data-open="true"] { transform: translateY(0); }
 
+  /* 标题放大后，抽屉里两个按钮会把 intro 挤到 156px 宽（标题断两行、副文五行）。
+     手机上让 intro 独占一行，Reset / Done 退到第二行右侧。 */
   .filters__head {
     position: sticky;
     top: 0;
     z-index: 1;
+    flex-wrap: wrap;
     background: var(--surface);
   }
+
+  .filters__intro { flex: 1 1 100%; }
+  .filters__reset { margin-inline-start: auto; }
+  .filters__kicker { font-size: var(--fs-sm); }
+  .filters__title { font-size: 1.5rem; }
+  .filters__lede { font-size: var(--fs-sm); line-height: 1.5; }
 
   .filters__close {
     display: inline-flex;
@@ -2005,7 +2207,7 @@ body.page-history main {
     display: block;
     position: fixed;
     inset: 0;
-    z-index: 55;
+    z-index: calc(var(--z-drawer) - 1);
     border: 0;
     background: rgb(8 6 12 / .62);
   }
@@ -2104,6 +2306,29 @@ body.page-history main {
   cursor: not-allowed;
 }
 
+/* Genre 行折叠：All + 前 8 个题材。data-expanded="true" 就 17 个全铺开。
+   nth-child 从 All 开始数，所以第 10 个 chip 才是第 9 个题材。 */
+.rank-row[data-collapsible="8"][data-expanded="false"] .rank-opt:nth-child(n + 10) {
+  display: none;
+}
+
+.rank-more {
+  margin-inline-start: auto;
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  transition: color var(--t-fast) var(--ease);
+}
+
+.rank-more:hover {
+  color: var(--accent);
+}
+
 .rank-count {
   margin-block: var(--sp-4) var(--sp-3);
   color: var(--text-muted);
@@ -2187,7 +2412,7 @@ body.page-history main {
 
 .rank-item__link {
   display: grid;
-  grid-template-columns: 2.5rem 46px minmax(0, 1fr);
+  grid-template-columns: 2.5rem 82px minmax(0, 1fr);
   align-items: center;
   gap: var(--sp-3);
   padding: 8px;
@@ -2215,9 +2440,9 @@ body.page-history main {
 }
 
 .rank-item__thumb {
-  width: 46px;
-  height: 69px;
-  border-radius: 8px;
+  width: 82px;
+  height: 123px;
+  border-radius: 10px;
   object-fit: cover;
   background: var(--surface-2);
 }
@@ -2238,7 +2463,7 @@ body.page-history main {
 }
 
 .rank-item.is-loading {
-  height: 85px;
+  height: 139px;
   border-radius: var(--r-lg);
   background: linear-gradient(100deg, var(--surface) 30%, var(--surface-2) 50%, var(--surface) 70%);
   background-size: 220% 100%;
@@ -2279,7 +2504,7 @@ body.page-history main {
   }
 
   .rank-item__link {
-    grid-template-columns: 2rem 40px minmax(0, 1fr);
+    grid-template-columns: 2rem 96px minmax(0, 1fr);
   }
 
   .rank-item__num {
@@ -2288,8 +2513,13 @@ body.page-history main {
   }
 
   .rank-item__thumb {
-    width: 40px;
-    height: 60px;
+    width: 96px;
+    height: 144px;
+  }
+
+  /* 96 的封面撑高了行，骨架也跟着长，数据落地时不会跳。 */
+  .rank-item.is-loading {
+    height: 160px;
   }
 }
 
@@ -2386,6 +2616,11 @@ body.page-history main {
   background: color-mix(in srgb, var(--accent) 18%, transparent);
 }
 
+/* 已收藏时图标实心，和卡片角上的收藏状态同一个读法。 */
+#detail-save[aria-pressed="true"] path {
+  fill: currentColor;
+}
+
 .rate { position: relative; }
 
 .rate__pop {
@@ -2438,10 +2673,44 @@ body.page-history main {
   background: var(--surface-2);
 }
 
+/* 已收藏时整块填 accent，和评分胶囊、卡片角标同一个读法，按下去看得出来。 */
+#detail-save[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #1a0f1e;
+}
+
 .related__title { margin: 0; font-size: 1.375rem; }
 .related__count { margin: 2px 0 var(--sp-3); color: var(--text-muted); font-size: var(--fs-xs); }
 
-.related__list { display: grid; gap: var(--sp-2); margin: 0; padding: 0; list-style: none; }
+/* 相关作品可能十几条，多到一定程度就在面板里滚，不把右栏撑成一条长条。
+   高度 = 三整行（82×3 + 8×2 = 262）再多露一点第四行，滚不滚一眼看得出来。
+   四周留 4px 是给 focus 描边（2px outline + 2px offset）腾地方，不然会被裁掉。 */
+.related__list {
+  display: grid;
+  gap: var(--sp-2);
+  margin: -4px;
+  padding: 4px;
+  max-height: 288px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+/* 只有还能往下滚时才淡出底部（detail.js 维护 data-more），避免把最后一条也糊掉。 */
+.related__list[data-more="true"] {
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 26px), transparent);
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 26px), transparent);
+}
+
+.related__list::-webkit-scrollbar { width: 6px; }
+.related__list::-webkit-scrollbar-track { background: transparent; }
+.related__list::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: var(--line-strong);
+}
 
 .related__link {
   display: grid;
@@ -2526,7 +2795,17 @@ body.page-history main {
 
 .ext-link:hover { border-color: var(--accent); color: var(--accent); }
 
-.ext-link__kind { margin-inline-start: auto; color: var(--text-muted); font-size: var(--fs-xs); }
+.ext-link__name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.ext-link__kind { flex: none; margin-inline-start: auto; color: var(--text-muted); font-size: var(--fs-xs); }
+
+/* 胶囊里的图标跟着文字一起灰，hover 时一起变 accent。 */
+.ext-link__icon { flex: none; width: 16px; height: 16px; color: var(--text-muted); }
+
+.ext-link:hover .ext-link__icon { color: var(--accent); }
+
+/* 品牌图标是图片，颜色跟着它自己的来，只把范围收干净。 */
+.ext-link__icon--brand { border-radius: 3px; object-fit: contain; }
 
 .reco-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 
@@ -2555,7 +2834,11 @@ body.page-history main {
 
 /* 旧的 .detail-page 是 flex 布局 + 96px 的 gap，段落间距全被它撑开了，
    改回普通块级流，间距交给各段自己的 padding。 */
-.detail-page { display: block; padding-block: var(--sp-6) 0; }
+.detail-page {
+  display: block;
+  /* 底部留一档和别的页一致（曾经写 0，卡片最后一行直接贴住页脚）。 */
+  padding-block: var(--sp-6) var(--sp-7);
+}
 .detail__top { padding-block: 0; }
 .detail__block { padding-block-start: var(--sp-5); }
 
@@ -2607,15 +2890,18 @@ body.page-history main {
 .page-hero .site-header {
   position: sticky;
   min-height: 64px;
-  /* 渲染图里顶栏压着 hero 有一层薄暗，图本身透出来一点；贴上去之后换成不透明的。 */
-  background: linear-gradient(180deg, rgb(10 8 14 / 0.55), rgb(10 8 14 / 0.25));
+  /* 2026-11-17：客户要顶栏也是毛玻璃 —— 和 hero 底部那条用同一个口径，
+     图从后面透出来、糊一层，导航字压在磨砂上。 */
+  background: rgb(10 8 14 / 0.42);
   border-block-end-color: transparent;
-  backdrop-filter: none;
+  backdrop-filter: blur(14px) saturate(115%) brightness(0.86);
+  -webkit-backdrop-filter: blur(14px) saturate(115%) brightness(0.86);
   transition: background-color 0.3s ease, border-block-end-color 0.3s ease;
 }
 
+/* 贴顶后背景还不够，滚过 hero 的时候下面就没有图可糊了，补一点不透明度兜底。 */
 .page-hero .site-header.is-stuck {
-  background: rgb(18 18 18 / 0.95);
+  background: rgb(10 8 14 / 0.72);
   border-block-end-color: transparent;
 }
 
@@ -2712,11 +2998,19 @@ body.page-history main {
     aspect-ratio: 3 / 4;
   }
 
-  /* 竖版海报是满屏插画，文案直接压在角色身上；底部拉长渐变才读得清。 */
+  /* 竖版海报是满屏插画，文案直接压在角色身上；底部拉长渐变才读得清。
+     手机端不用毛玻璃：糊得面积太大，而且 blur 在移动端吃性能。 */
   .hero__media::after {
     background:
       linear-gradient(0deg, var(--bg) 0, rgb(10 8 14 / 0.86) 26%, rgb(10 8 14 / 0.2) 62%, rgb(10 8 14 / 0.32) 100%);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    mask-image: none;
+    -webkit-mask-image: none;
   }
+
+  /* 手机上这层渐变会把插画底部压两遍（::after 已经收到页面底色）。 */
+  .hero__media::before { display: none; }
 
   /* 缩略图在手机上不显示，底部留白收一档，文案仍贴着插画底边。 */
   .hero__body {
@@ -2732,4 +3026,507 @@ body.page-history main {
   .hero__thumbs {
     display: none;
   }
+}
+
+/* ---------------------------------------------------------------- 书签页
+   顶部是标题块 + 搜索/排序，下面一排集合 chip（选中态用 accent 实底），
+   再下面是卡片网格。整理动作都发生在这两条带上，卡片本身只多一个
+   「移动到…」按钮，避免每张卡都长出三四个图标。 */
+.saved {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.saved__head {
+  max-width: 62ch;
+}
+
+.saved__kicker {
+  color: var(--accent);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.saved__title {
+  margin-block: 2px 0;
+  font-size: clamp(1.9rem, 2.6vw, 2.6rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.saved__lede {
+  margin-block-start: var(--sp-2);
+  color: var(--text-muted);
+  font-size: var(--fs-md);
+  line-height: 1.55;
+  max-width: 56ch;
+}
+
+.saved__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+
+.saved__search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 280px;
+  min-height: 44px;
+  padding-inline: var(--sp-4);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  transition: border-color var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+}
+
+.saved__search:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.saved__search-icon {
+  flex: none;
+  color: var(--text-muted);
+}
+
+.saved__search-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-block: 10px;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: var(--fs-sm);
+}
+
+.saved__search-input::placeholder {
+  color: var(--text-dim);
+}
+
+.saved__search-input:focus-visible {
+  outline: none;
+}
+
+.saved__sort {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: none;
+}
+
+.saved__sort-select {
+  appearance: none;
+  min-height: 44px;
+  padding: 0 38px 0 var(--sp-4);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.saved__sort-select:hover {
+  border-color: var(--line-strong);
+}
+
+.saved__sort-select:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.saved__sort-caret {
+  position: absolute;
+  right: 16px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.saved__collections {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+
+.saved__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex: 1 1 auto;
+}
+
+.saved__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding-inline: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease),
+    background-color var(--t-fast) var(--ease);
+}
+
+.saved__chip:hover {
+  color: var(--text);
+  border-color: var(--line-strong);
+}
+
+.saved__chip[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+.saved__chip-count {
+  color: var(--text-dim);
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.saved__chip[aria-pressed="true"] .saved__chip-count {
+  color: color-mix(in srgb, var(--accent-ink) 66%, transparent);
+}
+
+.saved__chip--new {
+  border-style: dashed;
+  color: var(--accent);
+}
+
+.saved__chip--new:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.saved__manage {
+  display: flex;
+  gap: 6px;
+  flex: none;
+}
+
+.saved__manage[hidden] {
+  display: none;
+}
+
+.saved__manage-btn {
+  height: 36px;
+  padding-inline: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.saved__manage-btn:hover {
+  color: var(--text);
+  border-color: var(--line-strong);
+}
+
+.saved__manage-btn--danger:hover {
+  color: #f87171;
+  border-color: color-mix(in srgb, #f87171 42%, transparent);
+}
+
+.saved__meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+
+.saved__status {
+  min-height: 1.2em;
+  color: var(--accent);
+  font-size: var(--fs-sm);
+}
+
+.saved__count {
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.saved__form {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+  padding: var(--sp-3);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+}
+
+.saved__form[hidden],
+.saved__confirm[hidden] {
+  display: none;
+}
+
+.saved__form-input {
+  flex: 1 1 240px;
+  min-height: 40px;
+  padding-inline: var(--sp-3);
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--fs-sm);
+}
+
+.saved__form-input:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.saved__confirm {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+  padding: var(--sp-3) var(--sp-4);
+  background: color-mix(in srgb, #f87171 8%, var(--surface));
+  border: 1px solid color-mix(in srgb, #f87171 34%, transparent);
+  border-radius: var(--r-md);
+}
+
+.saved__confirm-text {
+  font-size: var(--fs-sm);
+}
+
+.saved__confirm-actions {
+  display: flex;
+  gap: var(--sp-2);
+}
+
+.saved__danger {
+  color: #f87171;
+  border-color: color-mix(in srgb, #f87171 42%, transparent);
+}
+
+.saved__danger:hover {
+  background: #f87171;
+  border-color: #f87171;
+  color: #170f16;
+}
+
+/* 每张卡底板上的「移动到…」：低存在感，点开才浮菜单 */
+.saved .card__body {
+  padding-block-end: var(--sp-2);
+}
+
+.card__foot {
+  padding: 0 var(--sp-3) var(--sp-3);
+}
+
+.card__move {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: 32px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  cursor: pointer;
+  transition: color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease),
+    background-color var(--t-fast) var(--ease);
+}
+
+.card__move-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card__move:hover {
+  color: var(--text);
+  border-color: var(--line-strong);
+  background: var(--surface-2);
+}
+
+.card__move[aria-expanded="true"] {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* 浮层菜单：fixed 定位，位置由 js 按触发按钮算 */
+.menu {
+  position: fixed;
+  z-index: calc(var(--z-drawer) + 10);
+  min-width: 208px;
+  max-width: 260px;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 6px;
+  background: var(--surface-2);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  box-shadow: 0 18px 40px rgb(0 0 0 / 0.45);
+  overscroll-behavior: contain;
+}
+
+.menu[hidden] {
+  display: none;
+}
+
+.menu__head {
+  padding: 6px 10px 4px;
+  color: var(--text-dim);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.menu__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: var(--fs-sm);
+  text-align: left;
+  cursor: pointer;
+}
+
+.menu__item:hover,
+.menu__item:focus-visible {
+  background: var(--accent-soft);
+  outline: none;
+}
+
+.menu__item[aria-checked="true"] {
+  color: var(--accent);
+}
+
+.menu__tick {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  flex: none;
+  color: var(--accent);
+}
+
+.menu__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.menu__sep {
+  height: 1px;
+  margin: 6px 4px;
+  background: var(--line);
+}
+
+@media (max-width: 599px) {
+  .saved__title {
+    font-size: 1.6rem;
+  }
+
+  .saved__bar {
+    gap: 8px;
+  }
+
+  .saved__search {
+    flex-basis: 100%;
+  }
+
+  .saved__sort {
+    flex: 1 1 auto;
+  }
+
+  .saved__sort-select {
+    width: 100%;
+  }
+
+  /* 集合多了就横滑，别把标题块越推越低 */
+  .saved__chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-block-end: 2px;
+    scrollbar-width: none;
+  }
+
+  .saved__chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  .saved__chip {
+    flex: none;
+  }
+
+  .saved__manage {
+    flex-basis: 100%;
+  }
+
+  .saved__confirm-actions {
+    width: 100%;
+  }
+
+  .saved__confirm-actions .btn {
+    flex: 1 1 0;
+  }
+
+  .card__foot {
+    padding: 0;
+  }
+
+  /* 手机上两列，和目录页同一个口径：三列会让海报只剩 103px，
+     标题全被截断，下面的 Move 按钮也挤到放不下集合名。 */
+  #saved-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* 抽屉底部的「看全部」：抽屉只做快速查看，整理在整页上做 */
+.drawer__all {
+  margin-block-start: 4px;
+  padding: 10px 4px 2px;
+  border-block-start: 1px solid var(--line);
+  color: var(--accent);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  text-align: center;
+}
+
+.drawer__all:hover {
+  color: var(--text);
 }

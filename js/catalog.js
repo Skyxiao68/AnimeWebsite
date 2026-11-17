@@ -4,10 +4,12 @@ import { card, renderCards, renderState } from './ui.js';
 import { getQuery, getState, initFilters, onChange, resetAll } from './filters.js';
 import { isBookmarked, mountBookmarks, syncWithin } from './bookmarks.js';
 
-const PER_PAGE = 24;
+// 48 = 每 6 列一行的整数倍（桌面 8 行），AniList 单页上限是 50。
+const PER_PAGE = 48;
 
 const grid = document.getElementById('catalog-grid');
 const count = document.getElementById('result-count');
+const tagLine = document.getElementById('tag-summary');
 const more = document.getElementById('load-more');
 
 let page = 1;
@@ -29,17 +31,45 @@ function say(text) {
   if (count) count.textContent = text;
 }
 
+// Left half of the result line: which tags are on. Sort is always set, so it
+// is not a "tag"; the search box counts separately and reads as a quote.
+const TAGS = ['country', 'format', 'status', 'genre', 'year'];
+
+function sayTags(source) {
+  if (!tagLine) return;
+
+  const state = getState();
+  const picked = TAGS.filter((key) => state[key]).length;
+  const parts = [];
+
+  if (picked) parts.push(`${picked} tag${picked === 1 ? '' : 's'} selected`);
+  else parts.push('No tags selected');
+
+  const query = getQuery();
+  if (query) parts.push(`"${query}"`);
+
+  // Jikan cannot honour every filter; say so here instead of burying it.
+  if (source === 'jikan') parts.push('Jikan fallback, filters limited');
+
+  tagLine.textContent = parts.join(' · ');
+}
+
+// Right half: how many titles are on the page right now. The number grows when
+// Load More is used, which is why it is read from the running total.
+function sayFound() {
+  if (!count) return;
+
+  const lead = document.createElement('strong');
+  lead.className = 'result-count__lead';
+  lead.textContent = `A Total of ${shown}`;
+
+  count.replaceChildren(lead, ' Titles have been found');
+}
+
 function setBusy(busy) {
   if (busy) grid.setAttribute('aria-busy', 'true');
   else grid.setAttribute('aria-busy', 'false');
   if (more) more.hidden = busy || !hasMore;
-}
-
-function summary(source) {
-  if (!shown) return 'Nothing to show';
-  const tail = hasMore ? '' : ' · end of list';
-  const via = source === 'jikan' ? ' · fallback source, filters limited' : '';
-  return `${shown} title${shown === 1 ? '' : 's'}${tail}${via}`;
 }
 
 function emptyState() {
@@ -50,7 +80,7 @@ function emptyState() {
     actionLabel: 'Clear filters',
     onAction: resetAll,
   });
-  say('0 titles');
+  sayFound();
 }
 
 function errorState(err) {
@@ -99,6 +129,7 @@ async function load({ reset = true } = {}) {
     grid.dataset.state = 'loading';
     renderState(grid, 'loading', { count: PER_PAGE });
     say('Loading…');
+    sayTags();
   }
 
   setBusy(true);
@@ -132,7 +163,8 @@ async function load({ reset = true } = {}) {
 
     shown += items.length;
     syncWithin(grid);
-    say(summary(result.source));
+    sayTags(result.source);
+    sayFound();
   } catch (err) {
     if (mine !== ticket) return;
     errorState(err);

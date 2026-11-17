@@ -97,13 +97,20 @@ function paintRating(id) {
   els.rate.setAttribute('aria-pressed', String(Boolean(score)));
 }
 
+// 列表能滚的时候，底部淡出一点提示"下面还有"，滚到底就收掉。
+function syncRelatedFade() {
+  const list = els.relatedList;
+  list.dataset.more = String(list.scrollHeight - list.clientHeight - list.scrollTop > 8);
+}
+
 function paintRelated(item) {
   const edges = (item.relations?.edges || []).filter((e) => e.node?.type === 'ANIME');
   if (!edges.length) {
     els.related.hidden = true;
     return;
   }
-  const rows = edges.slice(0, 3).map((edge) => {
+  // 列表在面板里滚（见 .related__list 的 max-height），所以关系全渲染，不再截三条。
+  const rows = edges.map((edge) => {
     const node = edge.node;
     const li = document.createElement('li');
     const a = document.createElement('a');
@@ -122,12 +129,50 @@ function paintRelated(item) {
     return li;
   });
   els.relatedList.replaceChildren(...rows);
+  els.relatedList.scrollTop = 0;
   els.relatedCount.textContent = `Total of ${edges.length} ${edges.length === 1 ? 'Title' : 'Titles'}`;
   els.related.hidden = false;
+  syncRelatedFade();
 }
 
-function paintLinks(item) {
-  const links = (item.externalLinks || []).filter((l) => l?.url).slice(0, 5);
+// 外链按类型给一个线稿图标：播放 / 社交 / 信息 / 其他。
+// 各家品牌 logo 是十几套不同的画法，统一成一种线风格反而更像一个界面。
+const LINK_GLYPH = {
+  STREAMING: '<path d="M9 6.6v10.8l9-5.4z" fill="currentColor" stroke="none"/>',
+  SOCIAL: '<path d="M4.6 5.6h14.8v9.6H9.4l-4.8 4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>',
+  INFO: '<circle cx="12" cy="12" r="7.9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 11.1v5.1M12 7.7v.7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>',
+  OTHER: '<path d="M13.4 4.6h5.8v5.8M19.2 4.6l-8 8M11 5.2H5.4v13.4h13.4V13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>',
+};
+
+// 胶囊右侧那两个字：每种链接都标一下是哪一类，不只是 Info 才有。
+const LINK_KIND = { STREAMING: 'Streaming', SOCIAL: 'Social', INFO: 'Info', OTHER: 'Other' };
+
+// AniList 自带每家的官方小图标，有图就用图；没有图或者图挂了，退回上面的类型线稿。
+function externalIcon(link) {
+  if (link.icon) {
+    const img = document.createElement('img');
+    img.className = 'ext-link__icon ext-link__icon--brand';
+    img.src = link.icon;
+    img.alt = '';
+    img.width = 16;
+    img.height = 16;
+    img.loading = 'lazy';
+    img.addEventListener('error', () => img.replaceWith(linkIcon(link.type)), { once: true });
+    return img;
+  }
+  return linkIcon(link.type);
+}
+
+function linkIcon(type) {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('class', 'ext-link__icon');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.innerHTML = LINK_GLYPH[type] || LINK_GLYPH.OTHER;
+  return svg;
+}
+
+function paintLinks(item) {  const links = (item.externalLinks || []).filter((l) => l?.url).slice(0, 5);
   if (!links.length) {
     els.extBlock.hidden = true;
     return;
@@ -140,12 +185,14 @@ function paintLinks(item) {
       a.rel = 'noopener';
       a.target = '_blank';
       const name = document.createElement('span');
+      name.className = 'ext-link__name';
       name.textContent = link.site || 'Link';
-      a.append(name);
-      if (link.type && link.type !== 'STREAMING') {
+      a.append(externalIcon(link), name);
+      const kindLabel = LINK_KIND[link.type];
+      if (kindLabel) {
         const kind = document.createElement('span');
         kind.className = 'ext-link__kind';
-        kind.textContent = 'Info';
+        kind.textContent = kindLabel;
         a.append(kind);
       }
       return a;
@@ -166,7 +213,7 @@ function paintActions(item) {
   const sync = () => {
     const on = isBookmarked(id);
     els.save.setAttribute('aria-pressed', String(on));
-    els.saveLabel.textContent = on ? 'Favorited' : 'Favorite';
+    els.saveLabel.textContent = on ? 'Bookmarked' : 'Bookmark';
   };
   sync();
 
@@ -275,11 +322,16 @@ function wire() {
     }
   });
 
+  // 到页脚就收起：它是 fixed，抬多少都会跟着页面一起滚，只有收起来才真不压版权行。
+  const footer = document.querySelector('.site-footer');
   const onScroll = () => {
-    els.toTop.hidden = scrollY < 600;
+    const footerTop = footer ? footer.getBoundingClientRect().top : Infinity;
+    els.toTop.hidden = scrollY < 600 || footerTop < innerHeight;
   };
   addEventListener('scroll', onScroll, { passive: true });
   onScroll();
+
+  els.relatedList.addEventListener('scroll', syncRelatedFade, { passive: true });
 
   els.toTop.addEventListener('click', () => {
     const soft = !matchMedia('(prefers-reduced-motion: reduce)').matches;

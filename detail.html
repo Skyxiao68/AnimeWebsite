@@ -90,10 +90,10 @@
 
           <div class="detail__actions" id="detail-actions" hidden>
             <button class="pill-btn" type="button" id="detail-save" aria-pressed="false">
-              <span id="detail-save-label">Favorite</span>
+              <span id="detail-save-label">Bookmark</span>
               <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linejoin="round">
-                <path d="M12 20s-7-4.4-7-9a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 4.6-7 9-7 9z" />
+                stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
+                <path d="M6.5 4h11v16l-5.5-3.8L6.5 20z" />
               </svg>
             </button>
 
@@ -124,7 +124,8 @@
       <div class="detail__state" id="detail-state" aria-live="polite"></div>
 
       <section class="detail__block">
-        <h2 class="detail__h2">Introduction</h2>
+        <!-- PRD 反馈 #14：这一节的标题用 Overview，比 Introduction 更像「整部片的概览」。 -->
+        <h2 class="detail__h2">Overview</h2>
         <div class="detail__copy" id="detail-synopsis" data-clamped="true"></div>
         <button class="text-btn" type="button" id="detail-more" aria-expanded="false" hidden>
           Read more
@@ -156,7 +157,7 @@
           <a href="index.html">Home</a>
           <a href="catalog.html">Categories</a>
           <a href="rankings.html">Ranks</a>
-          <a href="history.html">History</a>
+          <a href="saved.html">Bookmarks</a>
         </nav>
       </div>
       <p class="site-footer__note">
@@ -183,6 +184,7 @@
           Nothing saved yet. Tap Bookmark on any card.
         </li>
       </ul>
+      <a class="drawer__all" href="saved.html">View all saved →</a>
     </aside>
     <button
       class="drawer-backdrop"
@@ -205,10 +207,10 @@
         <span class="tabbar__icon" aria-hidden="true">▮</span>
         Rankings
       </a>
-      <button class="tabbar__item" type="button" id="open-bookmarks-tab">
+      <a class="tabbar__item" href="saved.html">
         <span class="tabbar__icon" aria-hidden="true">★</span>
         Saved
-      </button>
+      </a>
     </nav>
 
     <script src="vendor/gsap.min.js"></script>
