@@ -1,15 +1,14 @@
 // Home: one poster pick and four shelves. Each shelf loads on its own so a
 // single failing request cannot blank the page.
 
-import { section, hero, airingDay, chart, userMessage } from './api.js';
+import { homeFeed, hero, airingDay, chart, userMessage } from './api.js';
 import { card, titleText, synopsisHtml } from './ui.js';
 import { isBookmarked, mountBookmarks, syncWithin } from './bookmarks.js';
 
 const WEEK = 4;
 // TV / Movies 固定三排（客户 2026-11-16 定的）。列数由 CSS 断点决定（6 / 4 / 3），
-// 所以先按最大 18 张取回来，再按「三排 × 当前列数」切 —— 手机上就是三排三格。
+// homeFeed() 按上限 18 张取回来，这里再按「三排 × 当前列数」切 —— 手机上就是三排三格。
 const WIDE_ROWS = 3;
-const WIDE_MAX = 18;
 
 const el = {
   hero: document.getElementById('hero'),
@@ -247,9 +246,9 @@ function startAuto() {
   }, AUTO_MS);
 }
 
-async function loadHero() {
+async function loadHero(seed = null) {
   try {
-    picks = await hero({ count: 3 });
+    picks = await hero({ count: 3, from: seed });
     if (!picks.length) throw new Error('empty');
     showPick(0, { animate: false });
     startAuto();
@@ -324,13 +323,19 @@ function fillShelf(grid, name) {
   paint(grid, items.slice(0, WIDE_ROWS * wideColumns()));
 }
 
-function loadShelf(grid, name) {
-  return section(name, { perPage: WIDE_MAX })
-    .then(({ items }) => {
-      shelfItems.set(name, items);
-      fillShelf(grid, name);
-    })
-    .catch((err) => paintMessage(grid, 'error', 'Could not load this shelf', userMessage(err)));
+// TV / Movies 的两份数据由 homeFeed() 一起带回来，这里只负责落进 shelfItems 和上屏；
+// 曾经各自 section() 一条，等于首页开局就多发两条请求。
+function showShelves(feed) {
+  shelfItems.set('tv', feed.tv);
+  shelfItems.set('movies', feed.movies);
+  fillShelf(el.tv, 'tv');
+  fillShelf(el.movies, 'movies');
+}
+
+function failShelves(err) {
+  const message = userMessage(err);
+  paintMessage(el.tv, 'error', 'Could not load this shelf', message);
+  paintMessage(el.movies, 'error', 'Could not load this shelf', message);
 }
 
 // Mon=0 … Sun=6, matching the chip order in the markup.
@@ -399,12 +404,24 @@ el.rankChips.addEventListener('click', (e) => {
 });
 
 // ----------------------------------------------------------------- boot
+// 先发一条合并请求把放送窗口和两条 shelf 拿回来，再让 hero / 今日 / Ranks 吃缓存。
+// 顺序是有意的：hero 和 Ranks 都依赖那份放送窗口，先拿它就不用各自再发一条。
+async function boot() {
+  let feed = null;
+  try {
+    feed = await homeFeed();
+    showShelves(feed);
+  } catch (err) {
+    failShelves(err);
+  }
+
+  loadHero(feed ? feed.day : null);
+  loadDay(todayIndex());
+  loadChart('week');
+}
+
 mountBookmarks();
-loadHero();
-loadDay(todayIndex());
-loadChart('week');
-loadShelf(el.tv, 'tv');
-loadShelf(el.movies, 'movies');
+boot();
 
 let refillTimer = 0;
 window.addEventListener('resize', () => {

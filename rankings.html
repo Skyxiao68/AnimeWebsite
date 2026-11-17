@@ -156,9 +156,46 @@
           </div>
         </div>
 
+        <!-- Genre：#17 + #15 要用题材区分榜单。17 个 chip 一次铺开会把三行筛选压成
+             一屏高，默认只露 8 个，其余收在 More 后面（折叠是纯 CSS 的，
+             data-expanded="false" 时隐藏第 10 个 chip 起）。 -->
+        <div class="rank-row" data-group="genre" data-collapsible="8" data-expanded="false">
+          <span class="rank-row__label" id="rank-label-genre">Genre</span>
+          <div
+            class="rank-row__opts"
+            role="group"
+            aria-labelledby="rank-label-genre"
+          >
+            <button class="rank-opt" type="button" data-all="genre" aria-pressed="true">
+              All
+            </button>
+            <button class="rank-opt" type="button" data-value="Action" aria-pressed="false">Action</button>
+            <button class="rank-opt" type="button" data-value="Adventure" aria-pressed="false">Adventure</button>
+            <button class="rank-opt" type="button" data-value="Comedy" aria-pressed="false">Comedy</button>
+            <button class="rank-opt" type="button" data-value="Drama" aria-pressed="false">Drama</button>
+            <button class="rank-opt" type="button" data-value="Fantasy" aria-pressed="false">Fantasy</button>
+            <button class="rank-opt" type="button" data-value="Mystery" aria-pressed="false">Mystery</button>
+            <button class="rank-opt" type="button" data-value="Romance" aria-pressed="false">Romance</button>
+            <button class="rank-opt" type="button" data-value="Sci-Fi" aria-pressed="false">Sci-Fi</button>
+            <button class="rank-opt" type="button" data-value="Slice of Life" aria-pressed="false">Slice of Life</button>
+            <button class="rank-opt" type="button" data-value="Sports" aria-pressed="false">Sports</button>
+            <button class="rank-opt" type="button" data-value="Supernatural" aria-pressed="false">Supernatural</button>
+            <button class="rank-opt" type="button" data-value="Mahou Shoujo" aria-pressed="false">Mahou Shoujo</button>
+            <button class="rank-opt" type="button" data-value="Mecha" aria-pressed="false">Mecha</button>
+            <button class="rank-opt" type="button" data-value="Music" aria-pressed="false">Music</button>
+            <button class="rank-opt" type="button" data-value="Horror" aria-pressed="false">Horror</button>
+            <button class="rank-opt" type="button" data-value="Psychological" aria-pressed="false">Psychological</button>
+            <button class="rank-opt" type="button" data-value="Thriller" aria-pressed="false">Thriller</button>
+            <button class="rank-more" type="button" data-expand="genre" aria-expanded="false">
+              More <span aria-hidden="true">⌄</span>
+            </button>
+          </div>
+        </div>
+
         <!-- Time：All / Year / Season / Week 走真实字段（seasonYear、season、
-             TRENDING_DESC）；Month 和 Day 是两个 AniList 不提供的粒度，
-             保留位置但禁用——宁可明说，也不假装能筛。 -->
+             TRENDING_DESC）；Month 和 Day 是两个 AniList 不提供的粒度，保留位置但禁用。
+             Month 在首页是可用的（连载中按 trending），但这一页的 Week 本身就是 trending，
+             打开 Month 会和 Week 一模一样，所以这里不重复摆一个假选项。 -->
         <div class="rank-row" data-group="time">
           <span class="rank-row__label" id="rank-label-time">Time</span>
           <div
@@ -181,7 +218,7 @@
               data-value="month"
               aria-pressed="false"
               disabled
-              title="AniList does not expose a monthly chart"
+              title="Week below is already the trending list; the monthly view is on the home page"
             >
               Month
             </button>
@@ -226,7 +263,7 @@
           <a href="index.html">Home</a>
           <a href="catalog.html">Categories</a>
           <a href="rankings.html">Ranks</a>
-          <a href="history.html">History</a>
+          <a href="saved.html">Bookmarks</a>
         </nav>
       </div>
       <p class="site-footer__note">
@@ -253,6 +290,7 @@
           Nothing saved yet. Tap Bookmark on any card.
         </li>
       </ul>
+      <a class="drawer__all" href="saved.html">View all saved →</a>
     </aside>
     <button
       class="drawer-backdrop"
@@ -275,10 +313,10 @@
         <span class="tabbar__icon" aria-hidden="true">▮</span>
         Rankings
       </a>
-      <button class="tabbar__item" type="button" id="open-bookmarks-tab">
+      <a class="tabbar__item" href="saved.html">
         <span class="tabbar__icon" aria-hidden="true">★</span>
         Saved
-      </button>
+      </a>
     </nav>
 
     <script src="vendor/gsap.min.js"></script>

@@ -16,7 +16,8 @@
     <a class="skip-link" href="#main">Skip to content</a>
 
     <!-- ============================================================ 顶栏（与首页同一套） -->
-    <header class="site-header">
+    <!-- site-header--joined：这条顶栏和下面的搜索条是同一层玻璃，两段之间不画分界线。 -->
+    <header class="site-header site-header--joined">
       <div class="site-header__inner">
         <a class="brand" href="index.html">MikuFansAnime</a>
 
@@ -27,21 +28,6 @@
         </nav>
 
         <div class="header-tools">
-          <form class="nav-search" role="search" action="catalog.html" method="get">
-            <label class="visually-hidden" for="q">Search anime</label>
-            <input
-              class="nav-search__input"
-              id="q"
-              name="q"
-              type="search"
-              placeholder="Search for..."
-              autocomplete="off"
-            />
-            <button class="nav-search__go" type="submit">
-              <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.6"/><path d="m19.6 19.6-3.4-3.4"/></svg>
-              <span class="visually-hidden">Search</span>
-            </button>
-          </form>
 
           <button
             class="icon-btn"
@@ -119,6 +105,7 @@
       <section class="filters" id="filters" aria-labelledby="filters-title">
         <div class="filters__head">
           <div class="filters__intro">
+            <p class="filters__kicker">Browse in Categories</p>
             <h1 class="filters__title" id="filters-title">
               Filter Out Your Anime
             </h1>
@@ -135,183 +122,188 @@
           </button>
         </div>
 
-        <div class="filters__row" data-group="country">
-          <span class="filters__label" id="label-country">Region</span>
-          <button
-            class="filters__all"
-            type="button"
-            data-all="country"
-            aria-pressed="true"
-          >
-            All
-          </button>
-          <div
-            class="filters__options"
-            role="group"
-            aria-labelledby="label-country"
-          >
-            <button class="opt" type="button" data-value="JP" aria-pressed="false">Japan</button>
-            <button class="opt" type="button" data-value="KR" aria-pressed="false">Korea</button>
-            <button class="opt" type="button" data-value="CN" aria-pressed="false">China</button>
-            <button class="opt" type="button" data-value="TW" aria-pressed="false">Taiwan</button>
-          </div>
-        </div>
-
-        <div class="filters__row" data-group="format">
-          <span class="filters__label" id="label-format">Format</span>
-          <button
-            class="filters__all"
-            type="button"
-            data-all="format"
-            aria-pressed="true"
-          >
-            All
-          </button>
-          <div
-            class="filters__options"
-            role="group"
-            aria-labelledby="label-format"
-          >
-            <button class="opt" type="button" data-value="TV" aria-pressed="false">TV Show</button>
-            <button class="opt" type="button" data-value="MOVIE" aria-pressed="false">Movie</button>
-            <button class="opt" type="button" data-value="OVA" aria-pressed="false">OVA</button>
-            <button class="opt" type="button" data-value="ONA" aria-pressed="false">ONA</button>
-            <button class="opt" type="button" data-value="SPECIAL" aria-pressed="false">Special</button>
-          </div>
-        </div>
-
-        <div
-          class="filters__row"
-          data-group="status"
-          data-collapsible="3"
-          data-expanded="false"
-        >
-          <span class="filters__label" id="label-status">Status</span>
-          <button
-            class="filters__all"
-            type="button"
-            data-all="status"
-            aria-pressed="true"
-          >
-            All
-          </button>
-          <div
-            class="filters__options"
-            role="group"
-            aria-labelledby="label-status"
-          >
-            <button class="opt" type="button" data-value="RELEASING" aria-pressed="false">Airing</button>
-            <button class="opt" type="button" data-value="FINISHED" aria-pressed="false">Finished</button>
-            <button class="opt" type="button" data-value="NOT_YET_RELEASED" aria-pressed="false">Upcoming</button>
-            <button class="opt" type="button" data-value="CANCELLED" aria-pressed="false">Cancelled</button>
-          </div>
-          <button
-            class="filters__expand"
-            type="button"
-            data-expand="status"
-            aria-expanded="false"
-            aria-controls="label-status"
-          >
-            Expand <span class="filters__caret" aria-hidden="true">⌄</span>
-          </button>
-        </div>
-
-        <!-- Genre 是长行：前 8 个直接显示，其余折叠。折叠是纯 CSS 的
-             （data-expanded="false" 时 :nth-child(n+9) 隐藏），JS 只切属性。 -->
-        <div
-          class="filters__row"
-          data-group="genre"
-          data-collapsible="5"
-          data-expanded="false"
-        >
-          <span class="filters__label" id="label-genre">Genre</span>
-          <button
-            class="filters__all"
-            type="button"
-            data-all="genre"
-            aria-pressed="true"
-          >
-            All
-          </button>
-          <div
-            class="filters__options"
-            role="group"
-            aria-labelledby="label-genre"
-          >
-            <button class="opt" type="button" data-value="Action" aria-pressed="false">Action</button>
-            <button class="opt" type="button" data-value="Adventure" aria-pressed="false">Adventure</button>
-            <button class="opt" type="button" data-value="Comedy" aria-pressed="false">Comedy</button>
-            <button class="opt" type="button" data-value="Drama" aria-pressed="false">Drama</button>
-            <button class="opt" type="button" data-value="Fantasy" aria-pressed="false">Fantasy</button>
-            <button class="opt" type="button" data-value="Mystery" aria-pressed="false">Mystery</button>
-            <button class="opt" type="button" data-value="Romance" aria-pressed="false">Romance</button>
-            <button class="opt" type="button" data-value="Sci-Fi" aria-pressed="false">Sci-Fi</button>
-            <button class="opt" type="button" data-value="Slice of Life" aria-pressed="false">Slice of Life</button>
-            <button class="opt" type="button" data-value="Sports" aria-pressed="false">Sports</button>
-            <button class="opt" type="button" data-value="Supernatural" aria-pressed="false">Supernatural</button>
-            <button class="opt" type="button" data-value="Mecha" aria-pressed="false">Mecha</button>
-            <button class="opt" type="button" data-value="Music" aria-pressed="false">Music</button>
-            <button class="opt" type="button" data-value="Horror" aria-pressed="false">Horror</button>
-            <button class="opt" type="button" data-value="Psychological" aria-pressed="false">Psychological</button>
-            <button class="opt" type="button" data-value="Thriller" aria-pressed="false">Thriller</button>
-          </div>
-          <button
-            class="filters__expand"
-            type="button"
-            data-expand="genre"
-            aria-expanded="false"
-            aria-controls="label-genre"
-          >
-            Expand <span class="filters__caret" aria-hidden="true">⌄</span>
-          </button>
-        </div>
-
-        <!-- 年份故意偏离设计稿：稿里是 2026→2005 一长串 + Expand，
-             PRD 评审第 19 条要求「year selection → type-in box instead of list」。
-             这是 20 条评论之一，不改就是「未回应 PRD 反馈」上限 69%。 -->
-        <div class="filters__row" data-group="year">
-          <span class="filters__label" id="label-year">Year</span>
-          <button
-            class="filters__all"
-            type="button"
-            data-all="year"
-            aria-pressed="true"
-          >
-            All
-          </button>
-          <div class="filters__options" role="group" aria-labelledby="label-year">
-            <label class="visually-hidden" for="year"
-              >Release year, four digits</label
+        <div class="filters__panel">
+          <div class="filters__row" data-group="country">
+            <span class="filters__label" id="label-country">Region</span>
+            <button
+              class="filters__all"
+              type="button"
+              data-all="country"
+              aria-pressed="true"
             >
-            <input
-              class="filters__number"
-              id="year"
-              type="number"
-              inputmode="numeric"
-              min="1960"
-              max="2026"
-              step="1"
-              placeholder="e.g. 2019"
-            />
-            <span class="filters__hint">Type a year, or leave empty for any.</span>
+              All
+            </button>
+            <div
+              class="filters__options"
+              role="group"
+              aria-labelledby="label-country"
+            >
+              <button class="opt" type="button" data-value="JP" aria-pressed="false">Japan</button>
+              <button class="opt" type="button" data-value="KR" aria-pressed="false">Korea</button>
+              <button class="opt" type="button" data-value="CN" aria-pressed="false">China</button>
+              <button class="opt" type="button" data-value="TW" aria-pressed="false">Taiwan</button>
+            </div>
           </div>
-        </div>
-
-        <!-- Sort 没有可用的 All：它总有一个值（默认 Popularity） -->
-        <div class="filters__row" data-group="sort">
-          <span class="filters__label" id="label-sort">Sort</span>
-          <span class="filters__all is-static" aria-hidden="true">All</span>
-          <div class="filters__options" role="group" aria-labelledby="label-sort">
-            <button class="opt" type="button" data-value="popular" aria-pressed="true">Popularity</button>
-            <button class="opt" type="button" data-value="score" aria-pressed="false">Average Score</button>
-            <button class="opt" type="button" data-value="trending" aria-pressed="false">Trending</button>
-            <button class="opt" type="button" data-value="favourites" aria-pressed="false">Favorites</button>
+  
+          <div class="filters__row" data-group="format">
+            <span class="filters__label" id="label-format">Format</span>
+            <button
+              class="filters__all"
+              type="button"
+              data-all="format"
+              aria-pressed="true"
+            >
+              All
+            </button>
+            <div
+              class="filters__options"
+              role="group"
+              aria-labelledby="label-format"
+            >
+              <button class="opt" type="button" data-value="TV" aria-pressed="false">TV Show</button>
+              <button class="opt" type="button" data-value="MOVIE" aria-pressed="false">Movie</button>
+              <button class="opt" type="button" data-value="OVA" aria-pressed="false">OVA</button>
+              <button class="opt" type="button" data-value="ONA" aria-pressed="false">ONA</button>
+              <button class="opt" type="button" data-value="SPECIAL" aria-pressed="false">Special</button>
+            </div>
+          </div>
+  
+          <div
+            class="filters__row"
+            data-group="status"
+            data-collapsible="3"
+            data-expanded="false"
+          >
+            <span class="filters__label" id="label-status">Status</span>
+            <button
+              class="filters__all"
+              type="button"
+              data-all="status"
+              aria-pressed="true"
+            >
+              All
+            </button>
+            <div
+              class="filters__options"
+              role="group"
+              aria-labelledby="label-status"
+            >
+              <button class="opt" type="button" data-value="RELEASING" aria-pressed="false">Airing</button>
+              <button class="opt" type="button" data-value="FINISHED" aria-pressed="false">Finished</button>
+              <button class="opt" type="button" data-value="NOT_YET_RELEASED" aria-pressed="false">Upcoming</button>
+              <button class="opt" type="button" data-value="CANCELLED" aria-pressed="false">Cancelled</button>
+            </div>
+            <button
+              class="filters__expand"
+              type="button"
+              data-expand="status"
+              aria-expanded="false"
+              aria-controls="label-status"
+            >
+              Expand <span class="filters__caret" aria-hidden="true">⌄</span>
+            </button>
+          </div>
+  
+          <!-- Genre 是长行：前 5 个直接显示，其余折叠。折叠是纯 CSS 的
+               （data-expanded="false" 时 :nth-child(n+6) 隐藏），JS 只切属性。 -->
+          <div
+            class="filters__row"
+            data-group="genre"
+            data-collapsible="5"
+            data-expanded="false"
+          >
+            <span class="filters__label" id="label-genre">Genre</span>
+            <button
+              class="filters__all"
+              type="button"
+              data-all="genre"
+              aria-pressed="true"
+            >
+              All
+            </button>
+            <div
+              class="filters__options"
+              role="group"
+              aria-labelledby="label-genre"
+            >
+              <button class="opt" type="button" data-value="Action" aria-pressed="false">Action</button>
+              <button class="opt" type="button" data-value="Adventure" aria-pressed="false">Adventure</button>
+              <button class="opt" type="button" data-value="Comedy" aria-pressed="false">Comedy</button>
+              <button class="opt" type="button" data-value="Drama" aria-pressed="false">Drama</button>
+              <button class="opt" type="button" data-value="Fantasy" aria-pressed="false">Fantasy</button>
+              <button class="opt" type="button" data-value="Mystery" aria-pressed="false">Mystery</button>
+              <button class="opt" type="button" data-value="Romance" aria-pressed="false">Romance</button>
+              <button class="opt" type="button" data-value="Sci-Fi" aria-pressed="false">Sci-Fi</button>
+              <button class="opt" type="button" data-value="Slice of Life" aria-pressed="false">Slice of Life</button>
+              <button class="opt" type="button" data-value="Sports" aria-pressed="false">Sports</button>
+              <button class="opt" type="button" data-value="Supernatural" aria-pressed="false">Supernatural</button>
+              <button class="opt" type="button" data-value="Mahou Shoujo" aria-pressed="false">Mahou Shoujo</button>
+              <button class="opt" type="button" data-value="Mecha" aria-pressed="false">Mecha</button>
+              <button class="opt" type="button" data-value="Music" aria-pressed="false">Music</button>
+              <button class="opt" type="button" data-value="Horror" aria-pressed="false">Horror</button>
+              <button class="opt" type="button" data-value="Psychological" aria-pressed="false">Psychological</button>
+              <button class="opt" type="button" data-value="Thriller" aria-pressed="false">Thriller</button>
+            </div>
+            <button
+              class="filters__expand"
+              type="button"
+              data-expand="genre"
+              aria-expanded="false"
+              aria-controls="label-genre"
+            >
+              Expand <span class="filters__caret" aria-hidden="true">⌄</span>
+            </button>
+          </div>
+  
+          <!-- 年份故意偏离设计稿：稿里是 2026→2005 一长串 + Expand，
+               PRD 评审第 19 条要求「year selection → type-in box instead of list」。
+               这是 20 条评论之一，不改就是「未回应 PRD 反馈」上限 69%。 -->
+          <div class="filters__row" data-group="year">
+            <span class="filters__label" id="label-year">Year</span>
+            <button
+              class="filters__all"
+              type="button"
+              data-all="year"
+              aria-pressed="true"
+            >
+              All
+            </button>
+            <div class="filters__options" role="group" aria-labelledby="label-year">
+              <label class="visually-hidden" for="year"
+                >Release year, four digits</label
+              >
+              <input
+                class="filters__number"
+                id="year"
+                type="number"
+                inputmode="numeric"
+                min="1960"
+                max="2026"
+                step="1"
+                placeholder="e.g. 2019"
+              />
+              <span class="filters__hint">Type a year, or leave empty for any.</span>
+            </div>
+          </div>
+  
+          <!-- Sort 没有可用的 All：它总有一个值（默认 Popularity） -->
+          <div class="filters__row" data-group="sort">
+            <span class="filters__label" id="label-sort">Sort</span>
+            <span class="filters__all is-static" aria-hidden="true">All</span>
+            <div class="filters__options" role="group" aria-labelledby="label-sort">
+              <button class="opt" type="button" data-value="popular" aria-pressed="true">Popularity</button>
+              <button class="opt" type="button" data-value="newest" aria-pressed="false">Newest</button>
+              <button class="opt" type="button" data-value="score" aria-pressed="false">Average Score</button>
+              <button class="opt" type="button" data-value="trending" aria-pressed="false">Trending</button>
+              <button class="opt" type="button" data-value="favourites" aria-pressed="false">Favorites</button>
+            </div>
           </div>
         </div>
       </section>
 
-      <!-- 结果头：条数（role=status，筛选后读屏也能听到变化） -->
+      <!-- 结果头：左边说选了哪些标签，右边说找到多少（role=status，读屏也能听到变化） -->
       <div class="catalog-head">
+        <p class="catalog-head__tags" id="tag-summary">No tags selected</p>
         <p
           class="result-count"
           id="result-count"
@@ -332,7 +324,7 @@
 
       <div class="load-more-wrap">
         <button class="btn load-more" type="button" id="load-more" hidden>
-          Load more
+          Load More
         </button>
       </div>
     </main>
@@ -356,7 +348,7 @@
           <a href="index.html">Home</a>
           <a href="catalog.html">Categories</a>
           <a href="rankings.html">Ranks</a>
-          <a href="history.html">History</a>
+          <a href="saved.html">Bookmarks</a>
         </nav>
       </div>
       <p class="site-footer__note">
@@ -384,6 +376,7 @@
           Nothing saved yet. Tap Bookmark on any card.
         </li>
       </ul>
+      <a class="drawer__all" href="saved.html">View all saved →</a>
     </aside>
     <button
       class="drawer-backdrop"
@@ -406,10 +399,10 @@
         <span class="tabbar__icon" aria-hidden="true">▮</span>
         Rankings
       </a>
-      <button class="tabbar__item" type="button" id="open-bookmarks-tab">
+      <a class="tabbar__item" href="saved.html">
         <span class="tabbar__icon" aria-hidden="true">★</span>
         Saved
-      </button>
+      </a>
     </nav>
 
     <!-- catalog.js pulls in filters.js and bookmarks.js, so this is the only

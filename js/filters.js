@@ -180,6 +180,12 @@ export function initFilters() {
 
   let typing = 0;
 
+  // A ?q= link (the nav search on the other pages posts here, and a shared URL
+  // carries it too) must land in the box, otherwise the page looks unfiltered.
+  const box = document.getElementById('q');
+  const fromUrl = new URLSearchParams(location.search).get('q');
+  if (box && fromUrl && !box.value) box.value = fromUrl;
+
   root.addEventListener('click', (event) => {
     const btn = event.target.closest('button');
     if (!btn || !root.contains(btn)) return;

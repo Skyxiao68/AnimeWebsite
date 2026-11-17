@@ -32,25 +32,90 @@ export class ApiError extends Error {
   }
 }
 
-// ---------------------------------------------------------------- 缓存（5 分钟）
+// ---------------------------------------------------------------- 缓存（5 分钟，跨页面与刷新）
+// 一级是内存 Map，二级落到 localStorage：index → detail → 返回，或者干脆刷新一次，
+// 都不该再打一遍接口。AniList 只给 30 次/分钟，首页冷启动现在也要发 2 条（feed + hero）。
 const cache = new Map(); // key -> { at, items }
+const LS_KEY = 'mf.anilist.v1';
+const LS_MAX_ENTRIES = 24;
+const LS_MAX_CHARS = 700000;
+
+function lsAll() {
+  try {
+    const stored = localStorage.getItem(LS_KEY);
+    return stored ? JSON.parse(stored) : {};
+  } catch {
+    return {};
+  }
+}
+
+// 写之前先按时间裁一刀，再按字符数裁一刀：详情页一条数据带 relations + recommendations，
+// 二十几条就能顶到 1MB，localStorage 塞不下时宁可丢缓存，也不能让页面因为缓存写失败挂掉。
+function lsPut(all) {
+  let entries = Object.entries(all).filter(([, v]) => v && Date.now() - v.at <= TTL_MS);
+  entries.sort((a, b) => b[1].at - a[1].at);
+  entries = entries.slice(0, LS_MAX_ENTRIES);
+  let text = JSON.stringify(Object.fromEntries(entries));
+  while (text.length > LS_MAX_CHARS && entries.length > 1) {
+    entries.pop();
+    text = JSON.stringify(Object.fromEntries(entries));
+  }
+  try {
+    localStorage.setItem(LS_KEY, text);
+  } catch {
+    // 配额满 / 隐私模式禁写：内存那份还在，不影响本次会话
+  }
+}
 
 function cacheGet(key) {
   const hit = cache.get(key);
-  if (!hit) return null;
-  if (Date.now() - hit.at > TTL_MS) {
-    cache.delete(key);
-    return null;
-  }
-  return hit.items;
+  if (hit && Date.now() - hit.at <= TTL_MS) return hit.items;
+  if (hit) cache.delete(key);
+
+  const stored = lsAll()[key];
+  if (!stored || Date.now() - stored.at > TTL_MS) return null;
+  cache.set(key, { at: stored.at, items: stored.items });
+  return stored.items;
 }
 
 function cacheSet(key, items) {
-  cache.set(key, { at: Date.now(), items });
+  const at = Date.now();
+  cache.set(key, { at, items });
+  const all = lsAll();
+  all[key] = { at, items };
+  lsPut(all);
 }
 
 export function clearCache() {
   cache.clear();
+  try {
+    localStorage.removeItem(LS_KEY);
+  } catch {
+    // ignore
+  }
+}
+
+// 传输层排队：一页里 hero / 两份 shelf / 放送表是同时发出去的，并行最容易撞限流。
+// 相邻两条至少隔 600ms；单条请求本身还是 8s 超时，不受排队影响。
+const MIN_GAP_MS = 600;
+let lastSentAt = 0;
+let chain = Promise.resolve();
+
+function throttle(task) {
+  const run = chain.then(async () => {
+    const wait = MIN_GAP_MS - (Date.now() - lastSentAt);
+    if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+    lastSentAt = Date.now();
+    return task();
+  });
+  chain = run.catch(() => {});
+  return run;
+}
+
+function hash(text) {
+  let h = 5381;
+  for (let i = 0; i < text.length; i += 1) h = ((h << 5) + h + text.charCodeAt(i)) | 0;
+  return (h >>> 0).toString(36);
 }
 
 // ---------------------------------------------------------------- 查询与参数
@@ -72,6 +137,7 @@ const MEDIA_FIELDS = `
         averageScore
         format
         type
+        startDate { year }
 `;
 
 const PAGE_QUERY = `query ($page: Int, $perPage: Int, $type: MediaType, $sort: [MediaSort]) {
@@ -106,7 +172,16 @@ function fuzzyDaysAgo(days) {
 const SECTION_SPECS = {
   weekly: { label: 'Weekly', type: 'ANIME', sort: 'TRENDING_DESC' },
   topRated: { label: 'Top Rated', type: 'ANIME', sort: 'SCORE_DESC' },
-  tv: { label: 'TV', type: 'ANIME', format: 'TV', sort: 'START_DATE_DESC', statusIn: ['RELEASING'] },
+  // TV：连载中 + 最近 90 天开播的已完结。只留 RELEASING 会让上周刚播完的番
+  // 直接从首页消失；90 天窗口既能留住刚完结的，也不会把老番翻出来。
+  tv: {
+    label: 'TV',
+    type: 'ANIME',
+    format: 'TV',
+    sort: 'START_DATE_DESC',
+    statusIn: ['RELEASING', 'FINISHED'],
+    startedWithinDays: 90,
+  },
   movies: {
     label: 'Movies',
     type: 'ANIME',
@@ -141,7 +216,32 @@ export function variablesFor(section, page = 1, perPage = 12) {
 }
 
 // ---------------------------------------------------------------- 传输层
-async function raw(query, variables) {
+// raw() 负责缓存、排队和一次 429 重试；send() 只做「发出去、判状态、解析」这一件事。
+async function raw(query, variables, { noStore = false } = {}) {
+  const vars = variables || {};
+  const key = `raw:${hash(query + JSON.stringify(vars))}`;
+  if (!noStore) {
+    const hit = cacheGet(key);
+    if (hit) return hit;
+  }
+
+  let data;
+  try {
+    data = await throttle(() => send(query, vars));
+  } catch (err) {
+    // 429 只自动重试一次：Retry-After 封顶 15s，再久就让页面卡着了，
+    // 还不如把 RATE 抛上去让面板说「X 秒后再试」。
+    if (!(err instanceof ApiError) || err.kind !== KIND.RATE) throw err;
+    const waitMs = Math.min(Math.max(err.retryAfter || 5, 1), 15) * 1000;
+    await new Promise((r) => setTimeout(r, waitMs));
+    data = await throttle(() => send(query, vars));
+  }
+
+  if (!noStore && data !== undefined && data !== null) cacheSet(key, data);
+  return data;
+}
+
+async function send(query, variables) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
 
@@ -354,8 +454,9 @@ const HERO_BY_IDS = `query ($ids: [Int]) {
 // 主视觉要「今天热度最高的三张」（客户 2026-11-16 定的）。
 // AniList 没有现成的「今日热度」字段，所以先拿当天的放送表，再按 popularity 自己排；
 // 主题、banner、简介这些只有这里要的字段，按 id 回查一次 —— 放送表那层不带它们。
-export async function hero({ count = 3 } = {}) {
-  const today = await airingWindow({ days: 1 });
+export async function hero({ count = 3, from = null } = {}) {
+  // from 是首页那次「一口气取齐」已经算好的当天列表；没传就自己取一遍（详情页/其它入口）。
+  const today = from || (await airingWindow({ days: 1 }));
   const ids = today.slice(0, count).map((m) => m.id);
 
   // 周中某天排片可能不足三张（放送表按分钟切，冷门日会稀疏），用一周窗口补齐，
@@ -394,6 +495,12 @@ export async function airingDay(dayOffset = 0) {
   const now = new Date();
   const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() + dayOffset);
   const from = Math.floor(start.getTime() / 1000);
+
+  // 今天这一格在 homeFeed() 里已经顺手切好了（它本来就拉了 7 天的放送记录），
+  // 别再单独打一条回去。其它日期还是要自己的请求。
+  const ready = cacheGet(`schedule:${from}`);
+  if (ready) return ready;
+
   const data = await raw(SCHEDULE_QUERY, { from, to: from + 86400 });
   const rows = (data && data.Page && data.Page.airingSchedules) || [];
   const seen = new Set();
@@ -423,6 +530,22 @@ const WINDOW_QUERY = `query ($from: Int, $to: Int, $page: Int) {
         title { romaji english }
         coverImage { large }
       }
+    }
+  }
+}`;
+
+// Month 没有真月榜可用：AniList 只给放送表和按季/年过滤，Jikan、TMDB 同样没有月度窗口。
+// 拿「正在连载的作品按 trending 排」当替身——trending 是近期活跃度，不是本月增量，
+// 但这样排出来的确和 Week（放送表按累计人气）不是同一批，不会两个标签一个内容。
+const MONTH_QUERY = `query {
+  Page(page: 1, perPage: 30) {
+    media(type: ANIME, status: RELEASING, sort: TRENDING_DESC, isAdult: false) {
+      id
+      type
+      format
+      averageScore
+      title { romaji english }
+      coverImage { large }
     }
   }
 }`;
@@ -459,12 +582,22 @@ const airingCache = new Map();
 
 async function airingWindow({ days = 1 } = {}) {
   const now = new Date();
-  const from = Math.floor(startOfDay(now).getTime() / 1000);
-  const to = days <= 1 ? from + 86400 : Math.floor(now.getTime() / 1000);
+  const span = Math.max(1, days);
+  // 一周窗口要从「今天往前数第 7 天」起算。原来这里少乘了 (days - 1)，
+  // 一周窗口和一天一样都从今天 0 点开始，于是过了午夜就只剩几分钟的放送记录，
+  // Week 面板整块空着。
+  const fromDay = new Date(startOfDay(now).getTime() - (span - 1) * 86400000);
+  const from = Math.floor(fromDay.getTime() / 1000);
+  const to = span <= 1 ? from + 86400 : Math.floor(now.getTime() / 1000);
 
   const key = `${days}:${from}`;
   const cached = airingCache.get(key);
   if (cached) return cached;
+  const stored = cacheGet(`airing:${key}`);
+  if (stored) {
+    airingCache.set(key, stored);
+    return stored;
+  }
 
   const seen = new Map();
   for (let page = 1; page <= 3; page += 1) {
@@ -481,7 +614,99 @@ async function airingWindow({ days = 1 } = {}) {
 
   const list = [...seen.values()].sort(byPopularity);
   airingCache.set(key, list);
+  cacheSet(`airing:${key}`, list);
   return list;
+}
+
+// ---------------------------------------------------------------- 首页一次性取齐
+const WINDOW_FIELDS = `
+        id
+        type
+        format
+        averageScore
+        popularity
+        title { romaji english }
+        coverImage { large }`;
+
+// 首页原来要发 5 条（放送表还会翻到 3 页，最多 9 条）：hero、Weekly、Ranks、TV、Movies。
+// 现在用 alias 挤进一条查询，再把 7 天窗口在本地切成「今天 / 这一周」——请求数 5→1。
+// 参数只能写字面量：GraphQL 的 variables 是整条查询共享的，几段筛选条件不一样，没法共用。
+function homeQuery(weekFrom, to, tvAfter, moviesAfter) {
+  const windowPage = (page) => `w${page}: Page(page: ${page}, perPage: 50) {
+    pageInfo { hasNextPage }
+    airingSchedules(airingAt_greater: ${weekFrom}, airingAt_lesser: ${to}, sort: TIME) {
+      airingAt
+      media {${WINDOW_FIELDS}}
+    }
+  }`;
+
+  return `query {
+  ${windowPage(1)}
+  ${windowPage(2)}
+  ${windowPage(3)}
+  tv: Page(page: 1, perPage: 18) {
+    media(type: ANIME, isAdult: false, format: TV, sort: START_DATE_DESC,
+      status_in: [RELEASING, FINISHED], startDate_greater: ${tvAfter}) {${MEDIA_FIELDS}}
+  }
+  movies: Page(page: 1, perPage: 18) {
+    media(type: ANIME, isAdult: false, format: MOVIE, sort: START_DATE_DESC,
+      status_in: [FINISHED], startDate_greater: ${moviesAfter}) {${MEDIA_FIELDS}}
+  }
+}`;
+}
+
+/**
+ * 首页唯一的数据入口。返回 { day, week, tv, movies }，并把放送表按缓存键塞好，
+ * 让 hero() / airingDay(0) / chart('day'|'week') 直接命中，不再各发一条。
+ */
+export async function homeFeed() {
+  const now = new Date();
+  const todayStart = startOfDay(now);
+  const todayFrom = Math.floor(todayStart.getTime() / 1000);
+  const weekFrom = todayFrom - 6 * 86400;
+  // 窗口右端取「今天结束」，不是「此刻」——两个原因：
+  // 一是 Weekly Keep Ups 要整天的排片，凌晨打开时只取到 0 点到现在就只有两三条；
+  // 二是右端如果是 now，查询文本每秒都在变，缓存键也跟着变，刷新一次就等于没缓存。
+  const to = todayFrom + 86400;
+
+  const data = await raw(homeQuery(weekFrom, to, fuzzyDaysAgo(90), fuzzyDaysAgo(365)));
+
+  const byId = new Map();
+  const timed = [];
+  for (const alias of ['w1', 'w2', 'w3']) {
+    for (const row of (data && data[alias] && data[alias].airingSchedules) || []) {
+      const m = row.media;
+      if (!m || m.type !== 'ANIME') continue;
+      timed.push({ at: row.airingAt, media: m });
+      if (!byId.has(m.id)) byId.set(m.id, m);
+    }
+  }
+
+  const week = [...byId.values()].sort(byPopularity);
+
+  // 当天这份要保留放送顺序（Weekly Keep Ups 是按时间播的），和按人气排的 week 不是一回事。
+  const todayEnd = todayFrom + 86400;
+  const isToday = (row) => row.at >= todayFrom && row.at < todayEnd;
+  const dayIds = new Set(timed.filter(isToday).map((r) => r.media.id));
+  const dayPopular = week.filter((m) => dayIds.has(m.id));
+  const dayTimed = [];
+  const seenDay = new Set();
+  for (const row of timed.slice().sort((a, b) => a.at - b.at)) {
+    if (!isToday(row) || seenDay.has(row.media.id)) continue;
+    seenDay.add(row.media.id);
+    dayTimed.push(row.media);
+  }
+
+  cacheSet(`airing:7:${weekFrom}`, week);
+  cacheSet(`airing:1:${todayFrom}`, dayPopular);
+  cacheSet(`schedule:${todayFrom}`, dayTimed);
+
+  return {
+    day: dayPopular,
+    week,
+    tv: (data && data.tv && data.tv.media) || [],
+    movies: (data && data.movies && data.movies.media) || [],
+  };
 }
 
 function currentSeason(date = new Date()) {
@@ -506,6 +731,9 @@ export async function chart(windowName, { perPage = 4, fresh = false } = {}) {
   let items;
   if (windowName === 'day' || windowName === 'week') {
     items = await airingWindow({ days: windowName === 'day' ? 1 : 7 });
+  } else if (windowName === 'month') {
+    const data = await raw(MONTH_QUERY);
+    items = (data && data.Page && data.Page.media) || [];
   } else if (windowName === 'season' || windowName === 'year') {
     const now = new Date();
     const vars = { seasonYear: now.getFullYear(), sort: ['POPULARITY_DESC'] };
@@ -521,10 +749,12 @@ export async function chart(windowName, { perPage = 4, fresh = false } = {}) {
   return cut;
 }
 
-// URL 上只放这四个短名，别把 AniList 的枚举直接写进地址栏。
-// 四个 key 就是 URL 与 catalog.html 里 data-value 用的短名，顺序照设计稿的 Sort 行
+// URL 上只放这些短名，别把 AniList 的枚举直接写进地址栏。
+// key 就是 URL 与 catalog.html 里 data-value 用的短名；前四个照设计稿的 Sort 行，
+// newest 是 2026-11-17 客户点的「最新的番」。
 export const SEARCH_SORTS = {
   popular: 'POPULARITY_DESC',
+  newest: 'START_DATE_DESC',
   score: 'SCORE_DESC',
   trending: 'TRENDING_DESC',
   favourites: 'FAVOURITES_DESC',
@@ -546,7 +776,12 @@ export async function search(q, f = {}, { page = 1, perPage = 24, fresh = false 
   if (text) vars.search = text;
   if (f.genre) vars.genre = [f.genre];
   if (f.format) vars.format = [f.format];
+  // Newest 是 START_DATE_DESC：只按日期倒序的话，AniList 会把「宣布了但没定档」
+  // 的条目排在最前，它们的 coverImage 是空的，第一屏就是一排灰框。
+  // 所以没显式选状态时，这档只拿已开播和连载中的。
+  const newest = sort === SEARCH_SORTS.newest;
   if (f.status) vars.status = [f.status];
+  else if (newest) vars.status = ['RELEASING', 'FINISHED'];
   if (f.country) vars.country = f.country; // 单值，不是数组
   if (f.year) vars.year = Number(f.year);
   if (f.season) vars.season = f.season; // WINTER / SPRING / SUMMER / FALL
@@ -560,8 +795,12 @@ export async function search(q, f = {}, { page = 1, perPage = 24, fresh = false 
   let result;
   try {
     const data = await raw(SEARCH_QUERY, vars);
+    let items = data?.Page?.media ?? [];
+    // START_DATE_DESC 把「日期未知」的条目当空值排在最前（都是几十年前的老片，
+    // 有封面但没有开播日），所以日期和封面都得判一下。
+    if (newest) items = items.filter((m) => m.coverImage?.large && m.startDate?.year);
     result = {
-      items: data?.Page?.media ?? [],
+      items,
       hasNextPage: Boolean(data?.Page?.pageInfo?.hasNextPage),
       source: 'anilist',
     };
@@ -581,7 +820,8 @@ async function fallbackSearch(err, text, vars) {
   if (!(err instanceof ApiError) || !FALLBACK_KINDS.has(err.kind)) throw err;
 
   const qs = new URLSearchParams({
-    limit: String(vars.perPage),
+    // Jikan 单页最多 25 条，放开到 48 会被它自己截断或报错。
+    limit: String(Math.min(vars.perPage, 25)),
     page: String(vars.page),
   });
   if (text) qs.set('q', text);
@@ -626,7 +866,7 @@ const MEDIA_QUERY = `query ($id: Int) {
     title { native }
     coverImage { extraLarge }
     studios { nodes { name isAnimationStudio } }
-    externalLinks { id site url type }
+    externalLinks { id site url type icon }
     genres
     relations {
       edges {
