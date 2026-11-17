@@ -68,12 +68,30 @@
             <span class="visually-hidden">Bookmarks</span>
           </button>
 
-          <span class="avatar" aria-hidden="true"><svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8.4" r="3.6"/><path d="M5 20c.8-3.6 3.7-5.6 7-5.6s6.2 2 7 5.6"/></svg></span>
 
           <div class="recent-pop" id="recent-pop" hidden></div>
         </div>
       </div>
     </header>
+
+    <!-- 手机（<480）顶栏塞不下搜索：390 宽时品牌 146 + 工具 122 就只剩 75。
+         这一档把搜索放成顶栏下面一条，和目录页同款；480 以上回到顶栏那个。 -->
+    <div class="search-bar search-bar--phone">
+      <div class="container">
+        <form class="search" action="catalog.html" method="get" role="search">
+          <label class="search__label" for="home-q">Search anime</label>
+          <input
+            class="search__input"
+            id="home-q"
+            name="q"
+            type="search"
+            placeholder="Search anime, e.g. Frieren"
+            autocomplete="off"
+          />
+          <button class="search__submit" type="submit">Search</button>
+        </form>
+      </div>
+    </div>
 
     <main id="main">
       <!-- 整幅海报 hero：趋势第一名。标题、标签、简介、箭头、三张缩略图都由 home.js 填 -->

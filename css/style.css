@@ -284,17 +284,6 @@ h3 {
   color: var(--accent);
 }
 
-.avatar {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: rgb(255 255 255 / 0.16);
-  color: #fff;
-}
-
 /* 「时钟」= 最近看过的详情页。图标在渲染图里就在，点开是一个小面板。 */
 .recent-pop {
   position: absolute;
@@ -1168,6 +1157,15 @@ h3 {
   }
 }
 
+/* 手机首页那条搜索只在 520 以下出现（520 以上顶栏放得下），见 index.html。 */
+@media (min-width: 520px) {
+  .search-bar--phone {
+    display: none;
+  }
+}
+
+
+
 /* ---------------------------------------------------------------- 四段 */
 main {
   display: flex;
@@ -1669,8 +1667,31 @@ body.page-saved main {
   }
 }
 
-/* ≥600：平板双列，tab bar 收起，桌面导航出现 */
+/* ≥600：平板双列。导航仍然交给底部 tab bar，到 900 才交接给顶栏。 */
 @media (min-width: 600px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .hero {
+    padding-block: 0 var(--sp-6);
+  }
+}
+
+/* 600–899 这一档原来两边都没有导航：tab bar 在 600 被收掉、顶栏要 900 才出来，
+   中间 300px 宽的窗口里一个导航入口都没有。tab bar 现在留到 899，
+   只是限宽居中——满屏横着一条会像桌面底栏，收窄才像手机和平板的手势条。 */
+@media (min-width: 600px) and (max-width: 899px) {
+  .tabbar {
+    inset-inline: auto;
+    left: 50%;
+    width: min(620px, calc(100% - 24px));
+    translate: -50% 0;
+  }
+}
+
+/* ≥900：桌面导航出现，底部 tab bar 让位 */
+@media (min-width: 900px) {
   body {
     padding-block-end: 0;
   }
@@ -1681,14 +1702,6 @@ body.page-saved main {
 
   .site-nav {
     display: flex;
-  }
-
-  .grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .hero {
-    padding-block: 0 var(--sp-6);
   }
 }
 
@@ -2491,12 +2504,22 @@ body.page-saved main {
 }
 
 @media (max-width: 899px) {
+  .rank-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* TOP 5 在窄窗里折行：一间只剩三张就变成两张大图加一只孤儿，
+   所以按 5 / 3 / 2 分档，897 这种宽度仍然是一整排五张。 */
+@media (max-width: 767px) {
   .rank-top__row {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+}
 
-  .rank-list {
-    grid-template-columns: minmax(0, 1fr);
+@media (max-width: 519px) {
+  .rank-top__row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -2524,10 +2547,6 @@ body.page-saved main {
     inset-block-start: 0;
     inset-inline-end: 0;
     margin-inline-start: 0;
-  }
-
-  .rank-top__row {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .rank-item__link {
@@ -2871,17 +2890,34 @@ body.page-saved main {
 
 /* ---------------------------------------------------------------- 窄屏 */
 
-/* 900px 以下不再放顶部导航和导航搜索：底部 tab bar 承担导航，
-   搜索留在目录页和首页表单里，头部只留品牌 + 书签 + 头像。 */
+/* 900px 以下顶部导航让给底部 tab bar，头部只留品牌 + 工具。
+   搜索还留着：600–899 这一档（平板与窄窗）品牌 + 搜索 + 三个图标摆得下，
+   收掉以后这个宽度就只能绕到目录页才能搜。手机再收。 */
 @media (max-width: 899px) {
-  .site-nav,
-  .nav-search {
+  .site-nav {
     display: none;
   }
 
   .header-tools {
     margin-inline-start: auto;
   }
+
+  .nav-search {
+    /* 600 起放宽一点，480–599 这一档品牌 + 工具已经占掉 268，只能给到 150–190 */
+    width: clamp(150px, 27vw, 264px);
+  }
+}
+
+@media (max-width: 519px) {
+  .nav-search {
+    display: none;
+  }
+}
+
+/* 目录页自己就有一条大搜索框黏在顶上，顶栏再放一个会并排两个搜索框。
+   这一页只留下面那条。 */
+body.page-catalog .nav-search {
+  display: none;
 }
 
 @media (max-width: 599px) {
@@ -2901,10 +2937,30 @@ body.page-saved main {
   }
 }
 
-/* 375 下目录页两列，一列 24 张会拖到一万六千像素 */
+/* 目录页的列数跟着首页 TV Shows / Movies 走：3 / 4 / 6。
+   原来用的是通用阶梯 2 / 3 / 6，842 这种窗口里只有两列，
+   两张大卡把整屏撑满，和首页同一批卡摆出来完全不像一套。 */
 @media (max-width: 599px) {
   #catalog-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 600px) {
+  #catalog-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 640px) {
+  #catalog-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  #catalog-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 }
 
@@ -2936,6 +2992,13 @@ body.page-saved main {
   margin-block-start: calc(-1 * var(--header-h));
   /* 图底下不再留内边距：多出 32px 就把整块顶过一屏，海报掉到折线以下。 */
   padding-block: 0;
+}
+
+/* 520 以下首页多了一条搜索带，hero 不能再往顶栏里抽 64，否则压掉带子。 */
+@media (max-width: 519px) {
+  .page-hero .hero {
+    margin-block-start: 0;
+  }
 }
 
 /* ---------------------------------------------------------------- 响应式列数

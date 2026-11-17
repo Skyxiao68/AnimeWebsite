@@ -620,6 +620,78 @@ Showing four also broke something the old count hid: `More ⌄` no longer fits b
 
 Evidence: docs/evidence/_new/mobile-rank-genre4-390.png.
 
+## 49. Between 600 and 899 there was no navigation at all
+
+The client opened the deployed site in an 854px window and found neither a top navigation nor a bottom one. Both halves were true and neither was a bug on its own: the mobile tab bar was switched off from `min-width: 600px` (css/style.css, old line 1678), while the top navigation and the header search were switched off up to `max-width: 899px`. Every width in between got an empty header and no bar — a 300px-wide dead zone, most visibly a browser window that is not phone-sized but not wide either.
+
+The two handovers are now one handover, at 900px. `@media (min-width: 600px)` keeps only the tablet grid and hero padding; a new `min-width: 900px` block resets the body's bottom padding, hides `.tabbar`, and shows `.site-nav`; and the tab bar stays on screen through 899. Because a 780px-wide phone bar looks like a desktop footer, the bar is capped at `min(620px, 100% - 24px)` and centred via `left: 50%` + `translate: -50% 0` in a `600px–899px` band, so it reads as a floating strip rather than a full-width bar.
+
+**Measured at 900px tall** on index.html: 599 → tab bar only (560 wide, left 12); 600 → tab bar 561 wide, body bottom padding 82; 768 → bar 620 wide, left 67; 854 → 620, left 110; 899 → 620, left 132; 900 and 1440 → top navigation, no bar, body padding 0. Exactly one navigation entry point at every width, no horizontal overflow at any of them. Catalog at 854 keeps its sticky search bar above the panel and gains the same centred tab bar.
+
+Evidence: docs/evidence/_new/nav-854-index.png, nav-854-index-bottom.png, nav-854-catalog.png.
+
+**Not verified**: 600–899 in portrait tablet orientation on a real device (the same rules, but the bar sits closer to the thumb).
+
+## 50. The catalog grid got the home page's column ladder
+
+In an 842px window the catalog put the same posters Home shows at four or six across into **two** very large columns, so the two pages looked like different sites. The cause was two different ladders: Home's wide shelves step 3 → 4 (640) → 6 (1024), while the shared `.grid` (which catalog used) steps 1 → 2 (600) → 3 (992) → 6 (1280).
+
+`#catalog-grid` now uses the shelf ladder directly: 2 columns below 600 (unchanged, 24 cards in one column would be a 16000px page), 3 from 600, 4 from 640, 6 from 1024. The id selector keeps winning over the shared `.grid` rules at every breakpoint, so the generic ladder is untouched for detail's recommendation strip.
+
+**Measured catalog at 900px tall**: 390 → 2 columns, card 167; 599 → 2, 271; 600 → 3, 168; 640 → 4, 132; 842 → 4, 183; 900 → 4, 197; 1024 → 6, 144; 1280 → 6, 183; 1440 → 6, 200 (unchanged). At 842 Home's TV Shows grid measures the same 4 × 182.75px tracks with a 16px gap, so the two pages now agree to the pixel; cards stay flat (transparent background, no border) on both.
+
+Evidence: docs/evidence/_new/catalog-842-cards.png.
+
+**Not verified**: 1024–1279 with a full 48-card load on a real tablet; the 144px cards there are the narrowest this page ever gets.
+
+## 51. The header search came back for tablets, and stopped doubling up on the catalog
+
+After the 600–899 dead zone was fixed, an 813px window still had no way to search from the home page: the header search was hidden up to 899px, and the home search band had been removed when the search moved into the header. The header at that width only holds brand, the search field and three icons, so the field fits — it is now hidden only below 600px.
+
+Two numbers keep it from crowding the bar: `.nav-search` gets `width: clamp(180px, 25vw, 264px)` in the 600–899 band, so it never squeezes the brand at 600 and never runs into the icons at 899.
+
+The catalog page then had two search fields on screen (header field plus its own sticky one). The page already starts with a full-size search field pinned above the results, so `body.page-catalog .nav-search` is hidden at every width; catalog.html now carries a `page-catalog` body class for that rule.
+
+**Measured at 900px tall**: header field visible at 600 (180px), 640 (180), 768 (192), 813 (203), 899 (225), 900 (200 — desktop width rule), 1440 (264); hidden at 599 and 390. `.site-header__inner` scroll width equals client width at every one of those widths, so nothing is clipped; horizontal overflow stays at the scrollbar's 15px. Catalog: header field hidden and page field visible at both 813 and 1440; index: header field visible at 813, none at 390.
+
+Evidence: docs/evidence/_new/nav-search-813-index.png, nav-search-813-catalog.png.
+
+**Open**: below 600px the home page still has no search entry; the catalog's own field is the only one on a phone. Left alone pending the client's call.
+
+## 52. Search on a phone: the bar could not fit, so the band came back
+
+The header search cannot live below ~520px: at 390px the brand is 146px and the three tool buttons 122px, leaving 75px inside the header — not enough for a field. The home page therefore had no search at all on a phone, which is exactly the width the client photographed at 578px and at 390px.
+
+Two mechanisms, one per range. From 520px up the header field is used again: `width: clamp(150px, 27vw, 264px)` keeps the header from clipping (measured overflow of `.site-header__inner` is 0 from 520px on; at 480px it was 27px, which is why 520 is the boundary and not 480). Below 520px the home page gets a `.search-bar--phone` strip under the header — the same `.search` component the catalog page already uses, 73px tall with a 46px input.
+
+Because that band is the first block on the phone screen, the hero can no longer pull itself up under the header on this range: `@media (max-width: 519px) { .page-hero .hero { margin-block-start: 0 } }` sits after the base pull-up rule. Measured at 900px tall: 360 / 390 / 430 / 479 / 519 → band `block`, 73px tall, hero starts exactly at its bottom edge (137px), header search hidden; 520 / 578 / 640 / 813 / 1440 → header field `flex`, band hidden, hero back under the header (top 0), header overflow 0 everywhere.
+
+The catalog page still uses its own full-width field plus the header one hidden by `body.page-catalog`, so only one search field is ever visible per page.
+
+Evidence: docs/evidence/_new/home-search-phone-390.png.
+
+**Not verified**: real iOS Safari safe-area behaviour of the band against the top edge.
+
+## 53. TOP 5 folds 5 / 3 / 2 instead of 3 / 2
+
+The rankings podium was three columns from 899px down, so an 897px window showed three oversized covers with two orphans underneath. It now keeps five across until 768, drops to three between 520 and 767, and two below 520 — the same "fill the row" logic the rest of the site uses.
+
+**Measured on rankings.html at 900px tall**: 390 → 2 columns, cover 166; 519 → 2, 230; 520 → 3, 150; 640 → 3, 184; 767 → 3, 227; 768 → 5, 131; 897 → 5, 157; 900 → 5, 158; 1440 → 5, 254. Five items render at every width, no horizontal overflow.
+
+The single-column ranking list below 900px is unchanged — only the podium row moved.
+
+Evidence: docs/evidence/_new/rankings-top5-897.png.
+
+## 54. The avatar button is gone
+
+The translucent person icon in the header sat between the bookmark button and the recently-viewed panel and did nothing: the site has no accounts, no sign-in and no profile page (PRD has none, and the README says as much). The client asked for it to be removed ("这个移除掉吧", 2026-11-18).
+
+Removed from all five pages (index, catalog, detail, rankings, saved) together with the `.avatar` rule; `.header-tools` is now the search field plus the clock and bookmark buttons. Nothing in `js/` referenced it, so no script changed.
+
+**Measured**: `.header-tools` children are `nav-search, icon-btn, icon-btn, recent-pop` on all five pages, `.avatar` count 0, horizontal overflow unchanged. The earlier header measurements in §17 of this file still describe the old three-icon row; this section supersedes them for the avatar.
+
+Evidence: docs/evidence/_new/header-no-avatar-1440.png.
+
 ## What was *not* changed
 
 - Four states (loading / success / error / empty), skeleton geometry and `aria-busy`.
