@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-root="pages/">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -23,19 +23,19 @@
 
     <!-- Header: logo, three nav links, search, clock, bookmarks.
          The clock opens a recently-viewed popover; organising bookmarks lives on
-         saved.html, which the footer and the phone tab bar both point at. -->
+         pages/saved.html, which the footer and the phone tab bar both point at. -->
     <header class="site-header">
       <div class="site-header__inner">
         <a class="brand" href="index.html">MikuFansAnime</a>
 
         <nav class="site-nav" aria-label="Main">
           <a class="site-nav__link" href="index.html" aria-current="page">Home</a>
-          <a class="site-nav__link" href="catalog.html">Categories</a>
-          <a class="site-nav__link" href="rankings.html">Ranks</a>
+          <a class="site-nav__link" href="pages/catalog.html">Categories</a>
+          <a class="site-nav__link" href="pages/rankings.html">Ranks</a>
         </nav>
 
         <div class="header-tools">
-          <form class="nav-search" role="search" action="catalog.html" method="get">
+          <form class="nav-search" role="search" action="pages/catalog.html" method="get">
             <label class="visually-hidden" for="nav-q">Search anime</label>
             <input
               class="nav-search__input"
@@ -98,7 +98,7 @@
          shape as the catalog page; from 480 up it returns to the header. -->
     <div class="search-bar search-bar--phone">
       <div class="container">
-        <form class="search" action="catalog.html" method="get" role="search">
+        <form class="search" action="pages/catalog.html" method="get" role="search">
           <label class="search__label" for="home-q">Search anime</label>
           <input
             class="search__input"
@@ -123,7 +123,7 @@
         <div class="container hero__body">
           <p class="hero__tags" id="hero-tags"></p>
           <h1 class="hero__title" id="hero-title">
-            <a class="hero__title-link" id="hero-title-link" href="catalog.html">Tonight&rsquo;s pick</a>
+            <a class="hero__title-link" id="hero-title-link" href="pages/catalog.html">Tonight&rsquo;s pick</a>
           </h1>
           <p class="hero__lede" id="hero-lede">
             Loading the most talked-about title this week.
@@ -157,7 +157,7 @@
                 <button class="chip-chip" type="button" data-day="5" aria-pressed="false">Sat</button>
                 <button class="chip-chip" type="button" data-day="6" aria-pressed="false">Sun</button>
               </div>
-              <a class="shelf__more" href="catalog.html?sort=newest&format=TV">More →</a>
+              <a class="shelf__more" href="pages/catalog.html?sort=newest&format=TV">More →</a>
             </div>
             <div
               class="grid shelf__grid"
@@ -188,7 +188,7 @@
                 <button class="chip-chip" type="button" data-window="season" aria-pressed="false">Season</button>
                 <button class="chip-chip" type="button" data-window="year" aria-pressed="false">Year</button>
               </div>
-              <a class="shelf__more" href="rankings.html">More →</a>
+              <a class="shelf__more" href="pages/rankings.html">More →</a>
             </div>
             <div
               class="grid shelf__grid"
@@ -202,7 +202,7 @@
         <section class="shelf shelf--wide" aria-labelledby="tv-title">
           <div class="shelf__head">
             <h2 class="shelf__title" id="tv-title">TV Shows</h2>
-            <a class="shelf__more" href="catalog.html?format=TV">More →</a>
+            <a class="shelf__more" href="pages/catalog.html?format=TV">More →</a>
           </div>
           <div class="grid" id="tv-grid" data-state="loading" aria-busy="true"></div>
         </section>
@@ -210,7 +210,7 @@
         <section class="shelf shelf--wide" aria-labelledby="movies-title">
           <div class="shelf__head">
             <h2 class="shelf__title" id="movies-title">Movies</h2>
-            <a class="shelf__more" href="catalog.html?format=MOVIE">More →</a>
+            <a class="shelf__more" href="pages/catalog.html?format=MOVIE">More →</a>
           </div>
           <div class="grid" id="movies-grid" data-state="loading" aria-busy="true"></div>
         </section>
@@ -225,9 +225,9 @@
         <p class="site-footer__copy">MikuFansAnime @ 2026. All rights reserved.</p>
         <nav class="site-footer__links" aria-label="Footer">
           <a href="index.html">Home</a>
-          <a href="catalog.html">Categories</a>
-          <a href="rankings.html">Ranks</a>
-          <a href="saved.html">Bookmarks</a>
+          <a href="pages/catalog.html">Categories</a>
+          <a href="pages/rankings.html">Ranks</a>
+          <a href="pages/saved.html">Bookmarks</a>
         </nav>
       </div>
       <p class="site-footer__note">
@@ -254,7 +254,7 @@
           Nothing saved yet. Tap Bookmark on any card.
         </li>
       </ul>
-      <a class="drawer__all" href="saved.html">View all saved →</a>
+      <a class="drawer__all" href="pages/saved.html">View all saved →</a>
     </aside>
     <button
       class="drawer-backdrop"
@@ -271,15 +271,15 @@
         <span class="tabbar__icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M4.4 10.2 12 4.4l7.6 5.8V19.6H4.4z"/><path d="M9.8 19.6v-4.8h4.4v4.8"/></svg></span>
         Home
       </a>
-      <a class="tabbar__item" href="catalog.html">
+      <a class="tabbar__item" href="pages/catalog.html">
         <span class="tabbar__icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M4.4 5.6h15.2l-5.8 6.8v5.4l-3.6 2v-7.4z"/></svg></span>
         Catalog
       </a>
-      <a class="tabbar__item" href="rankings.html">
+      <a class="tabbar__item" href="pages/rankings.html">
         <span class="tabbar__icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5.2 19.4v-5.6"/><path d="M12 19.4V9"/><path d="M18.8 19.4V4.6"/></svg></span>
         Rankings
       </a>
-      <a class="tabbar__item" href="saved.html">
+      <a class="tabbar__item" href="pages/saved.html">
         <span class="tabbar__icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6.5 4h11v16l-5.5-3.8L6.5 20z"/></svg></span>
         Saved
       </a>

@@ -5,6 +5,8 @@
 // Bookmark state is expressed with data attributes so bookmarks.js can flip it,
 // and card markup matches the static cards that used to be hand-written in the HTML.
 
+import { pageHref } from './paths.js';
+
 const COVER_W = 400; // 2:3 goes into the attributes so nothing shifts before the image loads
 const COVER_H = 600;
 
@@ -29,7 +31,7 @@ export function card(media, { bookmarked = false, href } = {}) {
 
   const link = document.createElement('a');
   link.className = 'card__link';
-  link.href = href || `detail.html?id=${encodeURIComponent(id)}`;
+  link.href = href || pageHref(`detail.html?id=${encodeURIComponent(id)}`);
 
   const img = document.createElement('img');
   img.className = 'card__cover';

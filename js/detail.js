@@ -2,6 +2,7 @@
 // everything goes in via textContent or createElement — no innerHTML anywhere.
 import { media } from './api.js';
 import { card, mountToTop, renderCards, renderState } from './ui.js';
+import { pageHref } from './paths.js';
 import {
   isBookmarked,
   pulseSave,
@@ -122,7 +123,7 @@ function paintRelated(item) {
     const li = document.createElement('li');
     const a = document.createElement('a');
     a.className = 'related__link';
-    a.href = `detail.html?id=${node.id}`;
+    a.href = pageHref(`detail.html?id=${node.id}`);
     const img = document.createElement('img');
     img.src = node.coverImage?.large || '';
     img.alt = '';
@@ -346,7 +347,7 @@ async function boot() {
       title: 'No title selected',
       message: 'Open a title from the catalogue or the rankings.',
       actionLabel: 'Go to catalogue',
-      onAction: () => { location.href = 'catalog.html'; },
+      onAction: () => { location.href = pageHref('catalog.html'); },
     });
     els.title.textContent = 'Nothing to show';
     els.reco.dataset.state = 'empty';

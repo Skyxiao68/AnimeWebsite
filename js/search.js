@@ -9,6 +9,7 @@
 
 import { search } from './api.js';
 import { titleText } from './ui.js';
+import { pageHref } from './paths.js';
 
 const DEBOUNCE = 220;
 const MIN_CHARS = 2;
@@ -29,7 +30,7 @@ function metaLine(media) {
 function hit(media) {
   const link = document.createElement('a');
   link.className = 'search-pop__hit';
-  link.href = `detail.html?id=${encodeURIComponent(media?.id ?? '')}`;
+  link.href = pageHref(`detail.html?id=${encodeURIComponent(media?.id ?? '')}`);
   link.setAttribute('role', 'option');
   link.setAttribute('aria-selected', 'false');
 
@@ -114,7 +115,7 @@ function mount(form) {
     if (query) {
       const all = document.createElement('a');
       all.className = 'search-pop__more';
-      all.href = `catalog.html?q=${encodeURIComponent(query)}`;
+      all.href = pageHref(`catalog.html?q=${encodeURIComponent(query)}`);
       all.textContent = `See all results for “${query}”`;
       line.append(all);
     }

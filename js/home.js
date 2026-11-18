@@ -4,6 +4,7 @@
 import { homeFeed, hero, airingDay, chart, userMessage } from './api.js';
 import { card, titleText, synopsisHtml, mountToTop } from './ui.js';
 import { isBookmarked, mountBookmarks, syncWithin } from './bookmarks.js';
+import { pageHref } from './paths.js';
 
 const WEEK = 4;
 // TV / Movies stay at three rows; columns come from CSS (6 / 4 / 3), and
@@ -126,9 +127,9 @@ function paintMeta(m) {
     .join('');
 
   el.titleLink.textContent = titleText(m);
-  el.titleLink.href = `detail.html?id=${encodeURIComponent(m.id)}`;
+  el.titleLink.href = pageHref(`detail.html?id=${encodeURIComponent(m.id)}`);
   el.lede.innerHTML = synopsisHtml(m.description) || 'No synopsis published yet.';
-  if (el.cta) el.cta.href = `detail.html?id=${encodeURIComponent(m.id)}`;
+  if (el.cta) el.cta.href = pageHref(`detail.html?id=${encodeURIComponent(m.id)}`);
 
   el.thumbs.innerHTML = picks
     .map(
@@ -308,10 +309,10 @@ async function loadHero(seed = null) {
     el.hero.dataset.state = 'error';
     el.tags.innerHTML = '';
     el.titleLink.textContent = 'The pick of the week did not load';
-    el.titleLink.href = 'catalog.html';
+    el.titleLink.href = pageHref('catalog.html');
     el.lede.textContent = userMessage(err);
     if (el.cta) {
-      el.cta.href = 'catalog.html';
+      el.cta.href = pageHref('catalog.html');
       el.cta.textContent = 'Browse the catalogue';
     }
   }
@@ -336,7 +337,7 @@ el.thumbs.addEventListener('click', (e) => {
   const pick = Number(btn.dataset.pick);
   // Tapping the selected thumbnail means "open the detail page", not "replay the swap".
   if (pick === index && picks[index]) {
-    window.location.href = `detail.html?id=${encodeURIComponent(picks[index].id)}`;
+    window.location.href = pageHref(`detail.html?id=${encodeURIComponent(picks[index].id)}`);
     return;
   }
   showPick(pick);

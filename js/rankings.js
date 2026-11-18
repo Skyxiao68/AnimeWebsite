@@ -5,6 +5,7 @@
 import { search, airingWindow, userMessage } from './api.js';
 import { renderState, titleText, mountToTop } from './ui.js';
 import { mountBookmarks } from './bookmarks.js';
+import { pageHref } from './paths.js';
 
 const TOP_WIDE = 5;
 const TOP_PHONE = 3;
@@ -73,7 +74,7 @@ const esc = (s) =>
     (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])
   );
 const coverOf = (m) => (m.coverImage && m.coverImage.large) || '';
-const hrefOf = (m) => `detail.html?id=${encodeURIComponent(m.id)}`;
+const hrefOf = (m) => pageHref(`detail.html?id=${encodeURIComponent(m.id)}`);
 
 function topCard(m, rank) {
   return `<li class="rank-top__item">

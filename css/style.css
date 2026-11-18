@@ -2851,7 +2851,7 @@ body.page-saved main {
 }
 
 .detail__copy {
-  max-width: none;
+  max-width: 68ch;
   color: var(--text-muted);
   font-size: 0.8125rem;
   line-height: 1.6;

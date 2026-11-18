@@ -1,6 +1,8 @@
 // Saved titles live in localStorage — the PRD has no account, so there is no
 // server-side collection. Each entry keeps what a drawer row needs, which means
 // opening the drawer never calls the API again.
+import { pageHref } from './paths.js';
+
 const KEY = 'mf.bookmarks.v1';
 const LIMIT = 200;
 
@@ -357,7 +359,7 @@ function renderDrawer() {
 
       const link = document.createElement('a');
       link.className = 'drawer__link';
-      link.href = 'detail.html?id=' + encodeURIComponent(row.id);
+      link.href = pageHref('detail.html?id=' + encodeURIComponent(row.id));
 
       if (row.cover) {
         const cover = document.createElement('img');
@@ -518,7 +520,7 @@ function paintRecent() {
       const item = document.createElement('li');
       const link = document.createElement('a');
       link.className = 'recent-pop__link';
-      link.href = `detail.html?id=${encodeURIComponent(row.id)}`;
+      link.href = pageHref(`detail.html?id=${encodeURIComponent(row.id)}`);
 
       const cover = document.createElement('img');
       cover.src = row.cover;

@@ -1,12 +1,12 @@
 # Design deviations from the handoff spec
 
-**Why this file exists.** The handoff spec (Figma "Homepage — Desktop HiFi" + IA flow sheets) is the approved production direction, and Assessment Policy §16 allows *minor design and implementation improvements* without written approval — but leaves no trail of why they happened. This file is that trail. Every entry says what the spec asked for, what shipped, and what measurement forced the change.
+The handoff spec (Figma "Homepage — Desktop HiFi" + IA flow sheets) is the approved production direction. Assessment Policy §16 allows *minor design and implementation improvements* without written approval, but it leaves no record of why they happened. This file is that record. Every entry says what the spec asked for, what shipped, and what measurement forced the change.
 
-Nothing here changes the PRD's intent: four states, 2:3 covers, the four GSAP moments, three ranking lists (year as a type-in input), the theme toggle, and the PRD colour tokens (`#141018` / `#1A1424` / `#BD91C8`) are untouched. The deviations are layout maths only.
+The PRD's intent is unchanged: four states, 2:3 covers, the four GSAP moments, three ranking lists (year as a type-in input), the theme toggle, and the PRD colour tokens (`#141018` / `#1A1424` / `#BD91C8`) are untouched. The deviations are layout maths only.
 
-**Source hierarchy (client ruling, 2026-11-16).** The HiFi renders under `refs/*--render-*` are the source of truth; the Handoff spec sheets (`*--spec-*`) *may be wrong* and are treated as hints, not requirements. Only the renders are measured at 1:1, and every number in this file comes from them.
+Source hierarchy (client ruling, 2026-11-16): the HiFi renders under `refs/*--render-*` are the source of truth. The Handoff spec sheets (`*--spec-*`) *may be wrong* and are treated as hints, not requirements. Only the renders are measured at 1:1, and every number in this file comes from them.
 
-The sheets have already been caught out more than once, which is why they lost the tie-break:
+The sheets have been wrong more than once, so they lost the tie-break:
 
 | Sheet said | Render actually measures |
 |---|---|
@@ -16,7 +16,7 @@ The sheets have already been caught out more than once, which is why they lost t
 | Card title 14/22 | ~14/20, soft grey rather than white |
 | Card hover: lift + shadow | posters are flat; the sheet's shadow is not in the render |
 
-Renders win, and where the render itself disagrees with `https://www.cycani.org/` (used mid-way as a density reference), the render still wins.
+The render wins. Where it disagrees with `https://www.cycani.org/` (used mid-way as a density reference), the render still wins.
 
 ---
 
@@ -74,7 +74,7 @@ Also taken from cycani:
 - **Type steps at 640 and 1200**: h1 20 / 26 / 32px, `max-width` 280px on phones and 768-816px above.
 - **Below 640px the hero art goes 3:4** and the thumbnail row is hidden, matching the reference's portrait hero.
 
-Two small deliberate differences: thumbnails stay visible from 640px (cycani hides them until ~768px) because they are the only entry point to another title on a narrow window; and the copy is aligned to the content container (see entry 1) rather than at cycani's 16px inner padding.
+Two small differences remain: thumbnails stay visible from 640px (cycani hides them until ~768px) because they are the only entry point to another title on a narrow window; and the copy is aligned to the content container (see entry 1) rather than at cycani's 16px inner padding.
 
 ### Hero artwork: blurred banner + the pick's cover as the subject
 
@@ -88,7 +88,7 @@ Shipped at ≥1200px (css/style.css:369-410):
 
 Below 1200px there is no room for both columns, so the hero falls back to the banner at its native aspect, unblurred and with no cover overlay.
 
-Known duplication: the featured pick's cover appears twice — once as the large hero subject, once as the first (ringed) thumbnail. That is deliberate; the thumbnail row is the picker for the other two titles, and hiding the current one would leave a two-item row.
+Known duplication: the featured pick's cover appears twice, once as the large hero subject and once as the first (ringed) thumbnail. That is intentional: the thumbnail row is the picker for the other two titles, and hiding the current one would leave a two-item row.
 
 ## 4. Weekly / Ranks are tinted panels
 
@@ -125,11 +125,11 @@ At ≤1199 they used to reflow to 2×2 to keep 190–250px posters. The 2×2 gri
 | Shipped | One variable Inter file, self-hosted (`fonts/inter-var.woff2`, 48 KB, latin subset, `font-weight: 100 900`, `font-display: swap`, preloaded on all four pages). `--font-sans` and `--font-display` both lead with Inter; headings `font-weight: 700`; card titles `14px / 22px / 500` |
 | Measured | `document.fonts.size` 1 face, status loaded; `.hero__title` Inter 32/700/38.4; `.card__title` Inter 14/500/22 at 1460, 1706, 962 and 375 px wide |
 
-**Why.** The CSS asked for Inter and Space Grotesk but the project shipped no webfont file, no `@font-face` and no Google Fonts `<link>` — so every page silently rendered in Segoe UI, and the headings requested a display face (Space Grotesk) that no browser here has. The type looked generic because it was the system fallback, not the spec's face.
+The CSS asked for Inter and Space Grotesk, but the project shipped no webfont file, no `@font-face` and no Google Fonts `<link>`. Every page silently rendered in Segoe UI, and the headings requested a display face (Space Grotesk) that no browser here has. The type looked generic because it was the system fallback, not the spec's face.
 
-Two judgement calls inside this entry:
+The entry involved two judgement calls:
 
-- **Card titles use the sheet's weight exactly (400, "Regular"), 14/22.** They were 500 for one round because Inter 400 reads thin on `#141018` at 1x; the client asked for the design as drawn, so the spec value won.
+- **Card titles use the sheet's weight (400, "Regular"), 14/22.** They were 500 for one round because Inter 400 reads thin on `#141018` at 1x; the client asked for the design as drawn, so the spec value won.
 - **Noto Sans SC is not bundled.** The CJK face only matters for the Chinese strings inside the copy and error states; shipping it would add megabytes. It stays as the third entry in both stacks, so the OS supplies it when present and Microsoft YaHei / Segoe UI covers it otherwise.
 
 ## 9. Type, spacing and card metrics read off the render, not the sheet
@@ -151,7 +151,7 @@ The sheet gives four type sizes and a 24 px grid gap; the render disagrees almos
 | Card corner radius | — | ~6-8 px | 10 px (was 16) |
 | Hero thumb radius / gap | — | ~8 / ~13 | 8 / 12 |
 
-The two-line clamp on hero thumb names is deliberate: the render lets a long title run to a second line instead of ellipsing it. Day chips spell out "Tues" and "Thurs" as the render does.
+The two-line clamp on hero thumb names is intentional: the render lets a long title run to a second line instead of ellipsing it. Day chips spell out "Tues" and "Thurs" as the render does.
 
 ## 10. Hero copy: lifted off the poster row, softened to the label grey
 
@@ -184,7 +184,7 @@ At 1200-1470 px the container edge is close to the window edge, so an arrow cent
 
 Verified at 1440: poster 296x410 at y=96, Introduction heading y=530 (24px under the poster), copy 1320 wide at 13px, links row 5x258, recommendation cards 207. At 954 the poster drops to 200x277 through the existing 1024 breakpoint, at 375 to 132x183; no horizontal overflow on any width.
 
-Still different from the render, deliberately: the link pills carry no site icons (we would have to fetch favicons), and paragraph gaps inside the synopsis are larger because the text keeps its blank-line formatting.
+Some differences from the render remain: the link pills carry no site icons (we would have to fetch favicons), and paragraph gaps inside the synopsis are larger because the text keeps its blank-line formatting.
 
 ## 13. Ranks windows: Day/Week computed locally, Month is a trending proxy
 
@@ -202,16 +202,16 @@ While checking Month the Week tab turned out to be broken: `airingWindow()` igno
 
 So the Day/Week tabs mean *"among the titles that air in that window, the most popular"* — a real, live-filtered ranking, just not the site-wide daily chart that a traffic-based site like cycani can compute. Twelve titles come back for a typical day and thirty for a week, so a 4-card panel always fills.
 
-**Month, opened on 2026-11-17.** No public anime API sells a monthly chart: AniList has only schedule windows plus season/year filters, Jikan exposes `top` and `seasons`, TMDB's trending windows are day/week. A real 30-day window built from `airingSchedules` is not an option either — that window holds 5000 records (100 pages of 50), so a page load can only sample ~6% of it. So `Month` now means *"currently airing titles, ordered by `TRENDING_DESC`"* (`MONTH_QUERY` in js/api.js). Trending is computed from recent activity, which is the closest thing AniList has to a monthly signal, and it is a genuinely different list from Week (ONE PIECE sits third, behind a season-show nobody would call the most popular title of all time). This is a proxy and is labelled as one: the chip tooltip reads "Airing titles ranked by what people are watching this month".
+Month was opened on 2026-11-17. No public anime API sells a monthly chart: AniList has only schedule windows plus season/year filters, Jikan exposes `top` and `seasons`, TMDB's trending windows are day/week. A real 30-day window built from `airingSchedules` is not an option either: that window holds 5000 records (100 pages of 50), so a page load can only sample ~6% of it. So `Month` now means *"currently airing titles, ordered by `TRENDING_DESC`"* (`MONTH_QUERY` in js/api.js). Trending is computed from recent activity, which is the closest thing AniList has to a monthly signal, and it is a genuinely different list from Week (ONE PIECE sits third, behind a season-show nobody would call the most popular title of all time). This is a proxy and is labelled as one: the chip tooltip reads "Airing titles ranked by what people are watching this month".
 
-On `rankings.html` the same name stayed disabled on purpose at the time: that page's **Week** filter was `TRENDING_DESC`, so a monthly chip there would have repeated Week exactly. **Superseded by §62** — on the client's request the rankings page now gives all three windows their own meaning.
+On `pages/rankings.html` the same name stayed disabled on purpose at the time: that page's **Week** filter was `TRENDING_DESC`, so a monthly chip there would have repeated Week exactly. Superseded by §62: on the client's request the rankings page now gives all three windows their own meaning.
 
 Re-checked in the browser: all five chip states paint `data-state="success"` with 4 cards, e.g. Day → `Hello, I am a Witch…` (74), `PSYREN` (70), `So What's Wrong with Getting Reborn as a Goblin?` (65), `MAGICAL GIRL RAISING PROJECT restart` (61). Screenshots `docs/evidence/ranks-day-1460.png`, `ranks-week-1460.png`, `ranks-season-1460.png`.
 
 Panel card titles were also 6px too tall (`min-height: 44px` against a 19px line-height), which leaked a sliver of a third line under two-line titles; now `38px`, matching the clamp.
 ## 14. Header: script wordmark, bare icons, and a working clock
 
-The render's nav is deliberately quieter than the spec sheet's:
+The render's nav is quieter than the spec sheet's:
 
 | Item | Spec sheet | Render (and now shipped) |
 |---|---|---|
@@ -222,7 +222,7 @@ The render's nav is deliberately quieter than the spec sheet's:
 
 Entry `css/style.css:119-362` carries all of it; `--header-h` is 64 (was 60), and the page-hero pages pull their hero up by `calc(-1 * var(--header-h))` so the image still starts at the window's top edge.
 
-Two of those need explaining rather than just listing:
+Two entries need context:
 
 - **The wordmark is a stand-in.** The client's logo exists only inside the render as pixels, with no vector and no font name. `Caveat 700` (self-hosted, `fonts/caveat-700.woff2`, declared in `css/tokens.css:21`) is the closest brush face tested against three alternatives (`kalam-700`, `sriracha-400`, `nothing-400`, kept in `fonts/` unused) — comparison at `docs/evidence/font-test.png`. If the real logo arrives as SVG, only `.brand` and the `.brand__mark` rule at `css/style.css:152` need touching.
 - **The clock opens a compact Recently viewed panel, not a full page.** It lists the last six titles the visitor opened (`localStorage` key `mf.recent.v1`, written by `recordView()`, painted by `paintRecent()`); the store keeps 24 rows so a page opened days ago still has its title, cover and score when the drawer needs to repair a row (section 38). Empty state says so plainly instead of showing a blank panel. The full History page that used to read the same store was retired on 2026-11-17 (section 17).
@@ -231,20 +231,20 @@ Measured at 1440: header 64, wordmark 53-195, Home at 219, capsule 769-1239 (470
 
 ## 15. Home TV / Movies: newest first, always three rows
 
-Two client rulings arrived together on 2026-11-16, both about the home page's two wide shelves:
+Two client rulings arrived on 2026-11-16, both about the home page's two wide shelves:
 
 | | |
 |---|---|
 | Data | "TV 和 Movies 要按最新来" — sorted by start date, not all-time popularity |
 | Shape | three rows at every width, six per row on desktop and three per row on a phone, the same way cycani's home page does it |
 
-**Data.** `START_DATE_DESC` alone is not usable: AniList returns rows for titles that are announced but undated, with no cover image. So the TV shelf asks for `status_in: [RELEASING, FINISHED]` plus `startDate_greater` 90 days back, and the Movies shelf for `status_in: [FINISHED]` plus one year back (a fuzzy date `YYYYMMDD`, not a unix timestamp; passing seconds silently returns nothing). Query at `js/api.js:89-170`.
+The data has one gap: `START_DATE_DESC` alone is not usable: AniList returns rows for titles that are announced but undated, with no cover image. So the TV shelf asks for `status_in: [RELEASING, FINISHED]` plus `startDate_greater` 90 days back, and the Movies shelf for `status_in: [FINISHED]` plus one year back (a fuzzy date `YYYYMMDD`, not a unix timestamp; passing seconds silently returns nothing). Query at `js/api.js:89-170`.
 
-**Why the TV window is wider than "airing now".** A show that finished last week is neither announced nor absent; hiding it the day it ends makes the shelf drop titles the user was watching. The 90-day window keeps them eligible. Measured on 2026-11-17, though, the first two pages of 18 are still all `RELEASING` — currently airing titles have newer start dates than anything already finished inside the window — so the shelf looks unchanged today and a finished title only enters the visible 18 when the airing roster thins out. If a finished title has to be visible regardless, the fix is a second query (`FINISHED`, sorted by end date) merged into the same 18, at the cost of one request per load; that is not wired up.
+Why the TV window is wider than "airing now". A show that finished last week is neither announced nor absent; hiding it the day it ends makes the shelf drop titles the user was watching. The 90-day window keeps them eligible. Measured on 2026-11-17, though, the first two pages of 18 are still all `RELEASING` — currently airing titles have newer start dates than anything already finished inside the window — so the shelf looks unchanged today and a finished title only enters the visible 18 when the airing roster thins out. If a finished title has to be visible regardless, the fix is a second query (`FINISHED`, sorted by end date) merged into the same 18, at the cost of one request per load; that is not wired up.
 
-**Shape.** The column count is already a CSS decision (6 / 4 / 3 at the `shelf--wide` breakpoints), so the count of cards follows it: `rows × columns` = 18 / 12 / 9. `js/home.js:9-12` fetches the largest batch once, then `fillShelf()` slices to the current width; resizing re-slices the same batch instead of firing another request. Measured: 1440 → 18 cards, 6 columns, 3 rows; 954 → 12 / 4 / 3; 375 → 9 / 3 / 3; live resize 1440 → 375 → 1440 gives 18 → 9 → 18 with no reload.
+The column count is already a CSS decision (6 / 4 / 3 at the `shelf--wide` breakpoints); the number of cards follows it: `rows × columns` = 18 / 12 / 9. `js/home.js:9-12` fetches the largest batch once, then `fillShelf()` slices to the current width; resizing re-slices the same batch instead of firing another request. Measured: 1440 → 18 cards, 6 columns, 3 rows; 954 → 12 / 4 / 3; 375 → 9 / 3 / 3; live resize 1440 → 375 → 1440 gives 18 → 9 → 18 with no reload.
 
-**Hero follows the day.** The same ruling made the hero thumbs "today's hottest three", so `hero()` now reads the airing schedule for today and sorts it by `popularity` before asking for the banner/genre/synopsis fields by id. That makes the hero and the Ranks *Day* window the same list, which is deliberate — two panels on one page disagreeing about what is hot today would be a bug the user can see.
+The same ruling made the hero thumbs "today's hottest three", so `hero()` now reads the airing schedule for today and sorts it by `popularity` before asking for the banner/genre/synopsis fields by id. That makes the hero and the Ranks *Day* window the same list. Two panels on one page disagreeing about what is hot today would be a bug the user can see.
 
 While wiring that up, the schedule day turned out to be truncated at 50 records, i.e. roughly the first half of the day, because that is the first page of `airingSchedules`. Evening shows were missing from both the hero and the Day chart. `airingWindow()` now pages until `hasNextPage` is false (three pages at most, 150 records) and caches the result per day so the hero and the Day tab share one request.
 
@@ -252,15 +252,15 @@ While wiring that up, the schedule day turned out to be truncated at 50 records,
 
 The footer had drifted into a dark strip: page background, a hairline on top, every line in muted grey. The render shows it the other way round — a solid band of PRD main (#2A1F3A) running edge to edge, white copy, the wordmark at header size. Colours and wordmark now follow that (css/style.css:1416, token --main in css/tokens.css:35); the copyright sits dead centre because the design centres it, and the three-column grid keeps it there regardless of how wide the two side items get.
 
-Two smaller corrections came with it: the year is 2026 (was a 202X placeholder from the render) and the footer wordmark is 25px like the header, not the 15px it had shrunk to.
+The change also fixed the year (2026, not the render's 202X placeholder) and set the footer wordmark to 25px, matching the header instead of the 15px it had shrunk to.
 
-The footer now carries the design's four links — Home, Categories, Ranks, Bookmarks. Home was missing from the earlier three; the fourth slot was History at first, because the render had a History link and no page behind it (section 17). The client moved that slot to Bookmarks on 2026-11-17, so the footer, the mobile tab bar and the drawer's `View all saved →` all open `saved.html` (section 39).
+The footer now carries the design's four links — Home, Categories, Ranks, Bookmarks. Home was missing from the earlier three; the fourth slot was History at first, because the render had a History link and no page behind it (section 17). The client moved that slot to Bookmarks on 2026-11-17, so the footer, the mobile tab bar and the drawer's `View all saved →` all open `pages/saved.html` (section 39).
 
 ## 17. History was a page, then stopped being one
 
 The render puts a History link in the footer, and the header's clock already answers "what did I look at" — so the page was built as a wide version of that panel rather than a new feature: the same `mf.recent.v1` rows, 24 kept instead of 6, rendered with the card component at the same column ladder (`js/history.js`, `#history-grid`). It is not AniList watch history — the API has no per-user data without OAuth — so the page said "stored on this device" and its empty state offered the catalog.
 
-That page no longer exists (client, 2026-11-17: "history 不该有一个页面, 给bookmark 一个页面. 然后让用户可以organize 他们的bookmark"). `history.html` and `js/history.js` were deleted, the footer's fourth slot now reads Bookmarks, and the mobile tab bar's fourth item opens `saved.html`. The header clock keeps its Recently viewed panel: viewing history is a glance, not a destination, and the 24 rows in `mf.recent.v1` still earn their keep as the repair source for drawer rows (section 38).
+That page no longer exists (client, 2026-11-17: "history 不该有一个页面, 给bookmark 一个页面. 然后让用户可以organize 他们的bookmark"). `history.html` and `js/history.js` were deleted, the footer's fourth slot now reads Bookmarks, and the mobile tab bar's fourth item opens `pages/saved.html`. The header clock keeps its Recently viewed panel: viewing history is a glance, not a destination, and the 24 rows in `mf.recent.v1` still earn their keep as the repair source for drawer rows (section 38).
 
 ## 18. Card gaps widened to cycani's rhythm
 
@@ -270,7 +270,7 @@ The client asked for cycani's spacing, so the gap now follows the column ladder 
 
 The hero's three thumbnails follow the same proportion rather than a flat value: their gap is `clamp(12px, 1.5vw, 24px)` (css/style.css:631), which is 21.6px beside a 199px thumbnail at 1440 — 10.9%, the same ratio as the grid. A fixed 24px would have been too airy once the thumbnails shrink to 96px at tablet width.
 
-Two details kept deliberately: the half-width Weekly/Ranks panels stay at 10px because their cards are only ~146px wide and 24px would break the four-up row, and mobile keeps 10px because 3 columns in 343px already land at cycani's ratio.
+Two details stay at 10px: the half-width Weekly/Ranks panels stay at 10px because their cards are only ~146px wide and 24px would break the four-up row, and mobile keeps 10px because 3 columns in 343px already land at cycani's ratio.
 
 ## 19. Hero PV art carries no extra zoom; card titles warm on hover
 
@@ -296,13 +296,13 @@ Now `homeFeed()` (js/api.js:661) sends one aliased query — `w1`/`w2`/`w3` for 
 
 Measured on a 1440 headless load: **two POSTs** (homeFeed, hero) plus the browser's CORS preflight, then every panel rendered — hero 3 thumbs, Weekly 4, Ranks 4, TV 18, Movies 18. A second load with the cache warm made **zero** requests and painted the same page.
 
-Three supporting changes came with it:
+Supporting changes:
 
 - **The cache survives a reload.** Memory alone dies on refresh, which is exactly when the budget is spent again. `cacheSet` now mirrors into `localStorage` (`mf.anilist.v1`, 24 entries, 700k characters, five-minute TTL, oldest dropped first; a quota or private-mode failure is swallowed, memory still serves the session).
 - **Requests queue 600ms apart.** A cold page still fires hero and feed almost together; spacing them keeps bursts from tripping the limit. The queue is a promise chain, so ordering is stable and each request keeps its own 8s timeout.
 - **429 retries once.** `Retry-After` is clamped to 1–15s, one retry is allowed, then the normal error state appears. Verified by injecting a synthetic 429 on the first request: the page recovered, no error panel, and only the retry and hero went out.
 
-Two bugs surfaced while measuring and are fixed here. The window's right edge was `now`, so at 02:00 the "today" slice held two hours of schedule and Weekly Keep Ups came up nearly empty — it is now the end of today, with the day slice bounded `[00:00, next 00:00)`. That same `now` was interpolated into the query text, so the cache key changed every second and a reload missed the cache entirely; the query is now stable for a whole day.
+Two bugs surfaced while measuring; both are fixed here. The window's right edge was `now`, so at 02:00 the "today" slice held two hours of schedule and Weekly Keep Ups came up nearly empty — it is now the end of today, with the day slice bounded `[00:00, next 00:00)`. That same `now` was interpolated into the query text, so the cache key changed every second and a reload missed the cache entirely; the query is now stable for a whole day.
 
 Ten rapid page switches in a row cost 7 requests and produced no 429 and no console error.
 
@@ -341,12 +341,12 @@ Other pages keep the base header (`color-mix(… 82%)` with `blur(12px)`, css/st
 
 ## 25. Catalog gained a Newest sort, and the Weekly panel's More link uses it
 
-The spec's Sort row has four values (Popularity / Average Score / Trending / Favorites). On 2026-11-17 the client clicked "More →" on Weekly Keep Ups and landed on a catalog front-page of all-time popular titles — `index.html:123` pointed at a bare `catalog.html`, so the page fell back to `POPULARITY_DESC` and opened on Attack on Titan. He asked for the newest titles instead.
+The spec's Sort row has four values (Popularity / Average Score / Trending / Favorites). On 2026-11-17 the client clicked "More →" on Weekly Keep Ups and landed on a catalog front-page of all-time popular titles — `index.html:123` pointed at a bare `pages/catalog.html`, so the page fell back to `POPULARITY_DESC` and opened on Attack on Titan. He asked for the newest titles instead.
 
-Three small changes:
+Small fixes:
 
-- **`newest` sort** (`SEARCH_SORTS.newest = 'START_DATE_DESC'`, js/api.js:753-760) and a fifth chip in `catalog.html:305-310`, placed right after Popularity so the default highlight does not move.
-- **The link** now carries intent: `catalog.html?sort=newest&format=TV` (index.html:123). `?status=RELEASING` was the first attempt; it answers "what is airing" but opens on ONE PIECE, which is not what "newest" means. `format=TV` keeps the landing page to series, matching the weekly schedule panel — without it the first screen fills with OVAs and pilot films that are technically the newest releases.
+- **`newest` sort** (`SEARCH_SORTS.newest = 'START_DATE_DESC'`, js/api.js:753-760) and a fifth chip in `pages/catalog.html:305-310`, placed right after Popularity so the default highlight does not move.
+- **The link** now carries intent: `pages/catalog.html?sort=newest&format=TV` (index.html:123). `?status=RELEASING` was the first attempt; it answers "what is airing" but opens on ONE PIECE, which is not what "newest" means. `format=TV` keeps the landing page to series, matching the weekly schedule panel — without it the first screen fills with OVAs and pilot films that are technically the newest releases.
 - **Null dates have to be filtered.** `START_DATE_DESC` sorts entries with no start date *first* — a 1960s short with a cover image and no date outranks a 2026 premiere. So when the user has not picked a Status, the `newest` query implicitly asks for `status_in: [RELEASING, FINISHED]` (js/api.js:776-783), and rows still missing `startDate.year` or a cover are dropped client-side (js/api.js:799-802). `MEDIA_FIELDS` gained `startDate { year }` (js/api.js:133-141) so that filter can run at all; it is three fields on a payload that already carries a cover URL.
 
 Measured at 1440 with the query `?sort=newest&format=TV`: 24 titles, the Newest chip and the TV Show chip pressed, and the first eight descending by start date — Cardfight!! Vanguard Divinez, DARK MACHINE THE ANIMATION, Chitose-kun 2nd Cour, Ace of the Diamond act II, Yozakura Family S2 P2, Dragon Ball Super: Beerus, Full Clearing Another World, HORROR COLLECTOR. No console errors. At 375 the filter rows collapse into the "Filters 2" sheet as before, horizontal overflow 0, and the extra chip wraps inside the panel (row height 125px, chip 74px wide) rather than pushing the layout.
@@ -355,20 +355,20 @@ Measured at 1440 with the query `?sort=newest&format=TV`: 24 titles, the Newest 
 
 The render puts a line above the grid: No Tags was selected on the left, A Total of 5000 Titles have been found on the right, with the number in bold accent. Ours had a single grey "24 titles".
 
-It is now two halves (catalog.html:315-327): #tag-summary counts the chips that are off their default (country / format / status / genre / year — Sort is always set, so it never counts) and appends the search term when the header box has one; #result-count carries the count. Sampled from the render: muted text is rgb(138, 129, 152), the bold phrase is accent, both about 13px. In CSS that is --text-muted at --fs-xs for the halves and --accent / 600 for .result-count__lead (css/style.css:1889-1917).
+It is now two halves (pages/catalog.html:315-327): #tag-summary counts the chips that are off their default (country / format / status / genre / year — Sort is always set, so it never counts) and appends the search term when the header box has one; #result-count carries the count. Sampled from the render: muted text is rgb(138, 129, 152), the bold phrase is accent, both about 13px. In CSS that is --text-muted at --fs-xs for the halves and --accent / 600 for .result-count__lead (css/style.css:1889-1917).
 
-The right half always uses the render's sentence: "A Total of N Titles have been found". An earlier pass switched to "Showing N Titles so far" while Load More was still open, on the grounds that AniList returns pages rather than a grand total; the client asked for the plain result line instead (2026-11-17), so the number is the count currently on the page and grows when Load More is used — measured 48 before the click, 96 after (§31). End-of-list case checked with ?year=2026&format=TV&genre=Sports&country=JP: "4 tags selected" / "A Total of 9 Titles have been found", Load More hidden. Accent rgb(189,145,200) at weight 600, both halves 13px, horizontal overflow 0 at 1440 and 375.
+**Superseded by §63.** The right half used the render's sentence, "A Total of N Titles have been found", until the PRD feedback called the wording awkward (2026-11-18). An earlier pass switched to "Showing N Titles so far" while Load More was still open, on the grounds that AniList returns pages rather than a grand total; the client asked for the plain result line instead (2026-11-17), so the number is the count currently on the page and grows when Load More is used: measured 48 before the click, 96 after (§31). End-of-list case checked with ?year=2026&format=TV&genre=Sports&country=JP: "4 tags selected" / "A Total of 9 Titles have been found", Load More hidden. Accent rgb(189,145,200) at weight 600, both halves 13px, horizontal overflow 0 at 1440 and 375.
 
-The first pass shipped with a known defect: catalog.html carried two elements with id="q", so the page's big search box was bound to nothing and ?q= was never read. §27 covers the fix and the header change that came with it.
+The first pass shipped with a known defect: pages/catalog.html carried two elements with id="q", so the page's big search box was bound to nothing and ?q= was never read. §27 covers the fix and the header change that came with it.
 
 ## 27. Catalog owns its search box; the nav one is gone there
 
-Two problems, one cause. catalog.html had **two** elements with id="q" — the header search (line 30) and the page's own full-width box (line 81). getElementById('q') returned the header one, so typing in the big box did nothing, and the big form's submit navigated to ?q=… which no code read; ?q=zzzzz happily returned the 24 most popular titles.
+Both problems had one cause. pages/catalog.html had **two** elements with id="q" — the header search (line 30) and the page's own full-width box (line 81). getElementById('q') returned the header one, so typing in the big box did nothing, and the big form's submit navigated to ?q=… which no code read; ?q=zzzzz happily returned the 24 most popular titles.
 
-- **Header search removed on this page** (client, 2026-11-17: the page already has one big box). The form is deleted from catalog.html's header rather than hidden, so the duplicate id goes with it and the big box is the only #q. .header-tools keeps its margin-inline-start: auto, so the three icons stay pinned right: measured header 64px, tools right edge 1380 at 1440 and 359 at 375, horizontal overflow 0 on both.
+- **Header search removed on this page** (client, 2026-11-17: the page already has one big box). The form is deleted from pages/catalog.html's header rather than hidden, so the duplicate id goes with it and the big box is the only #q. .header-tools keeps its margin-inline-start: auto, so the three icons stay pinned right: measured header 64px, tools right edge 1380 at 1440 and 359 at 375, horizontal overflow 0 on both.
 - **?q= is now read** (js/filters.js initFilters): the value is written into the box before the first request, so a link from another page's nav search — or a shared URL — lands filtered instead of looking broken. The box also keeps the address bar in sync through the existing emit()/writeUrl.
 
-Measured: catalog.html?q=naruto opens with the box filled, "No tags selected · \"naruto\"" on the left, and the grid starting Naruto / Naruto: Shippuden / Boruto / The Last: Naruto the Movie. Typing "frieren" into the box (input event, 300ms debounce) filters to 6 titles, URL becomes ?q=frieren, count line reads "A Total of 6 Titles have been found". index.html still reports its nav search (one .nav-search), so the removal is scoped to catalog.
+Measured: pages/catalog.html?q=naruto opens with the box filled, "No tags selected · \"naruto\"" on the left, and the grid starting Naruto / Naruto: Shippuden / Boruto / The Last: Naruto the Movie. Typing "frieren" into the box (input event, 300ms debounce) filters to 6 titles, URL becomes ?q=frieren, count line reads "A Total of 6 Titles have been found". index.html still reports its nav search (one .nav-search), so the removal is scoped to catalog.
 
 At 375 the two halves of the result line wrap onto separate lines rather than shrinking; both stay 13px and left-aligned, which is where the mobile render puts them too.
 
@@ -382,7 +382,7 @@ The grids outside the home page still drew the base `.card` — surface backgrou
 
 - **Rule** (css/style.css, next to the `.shelf--wide` block): `.grid > .card` clears `background` and makes the border transparent; `:hover` / `:focus-within` keep the transparent border and drop `box-shadow` — a box shadow around a frameless card draws the box back in; `.card__body` drops its side padding so the title lines up with the poster edge. `.grid > .card` (specificity 0,2,0) beats `.card` (0,1,0), and `.grid > .card:hover` (0,3,0) beats `.card:hover` (0,2,0), so no `!important`.
 - **Hover still lifts 4px** — Home's frameless cards already do that, the poster scales 1.04 inside the frame; only the shadow and border are suppressed.
-- **Scope**: every `.grid` that holds `.card` — catalog, detail recommendations, bookmarks (`saved.html`). Rankings is untouched: its page is rows plus a top-five strip, not a card grid.
+- **Scope**: every `.grid` that holds `.card` — catalog, detail recommendations, bookmarks (`pages/saved.html`). Rankings is untouched: its page is rows plus a top-five strip, not a card grid.
 
 Measured after the change: catalog card at 1440 is `bg rgba(0,0,0,0)`, `border 1px rgba(0,0,0,0)`, `body padding 12px 0 0`, width 200 — byte-for-byte the same numbers as `#tv-grid .card` on the home page. At 375 the catalog card is 167 wide with the same transparent treatment. Detail recommendations: 12 cards, same computed styles, title wraps to two lines under the poster as before.
 
@@ -396,7 +396,7 @@ Added one rule set for `.btn` next to the Load-more block:
 - hover fills the button with accent and flips the label to `#1a0f1e` — the same pressed treatment `.filters__all` and `.chip-chip[aria-pressed="true"]` already use
 - `:active` nudges 1px down, `:disabled` drops to 45% opacity and loses the pointer
 
-Label capitalisation matches the reference image too: `Load More`, not `Load more` (catalog.html line 323).
+Label capitalisation matches the reference image too: `Load More`, not `Load more` (pages/catalog.html line 323).
 
 Measured on catalog at 1440: 131×42px, `background rgba(0,0,0,0)`, `color rgb(189,145,200)`, `border 1px rgb(189,145,200)`, `border-radius 10px`, `font-size 15px`, `font-weight 600`. Evidence: docs/evidence/_new/load-more-area-1440.png.
 
@@ -404,7 +404,7 @@ Measured on catalog at 1440: 131×42px, `background rgba(0,0,0,0)`, `color rgb(1
 
 ## 30. The six filter rows sit on a panel, and the mobile sheet is one too
 
-The render puts Region / Format / Status / Genre / Year / Sort inside a rounded, slightly lighter block, while ours were six hairlines straight on the page background (client call, 2026-11-17: "这里的做成我设计的那样底下颜色跟页面不一样"). The rows are now wrapped in `.filters__panel` (catalog.html:124-299) and styled once (css/style.css, after the `.filters__row` rules) rather than restyling each row:
+The render puts Region / Format / Status / Genre / Year / Sort inside a rounded, slightly lighter block, while ours were six hairlines straight on the page background (client call, 2026-11-17: "这里的做成我设计的那样底下颜色跟页面不一样"). The rows are now wrapped in `.filters__panel` (pages/catalog.html:124-299) and styled once (css/style.css, after the `.filters__row` rules) rather than restyling each row:
 
 - `margin-block-start: var(--sp-4)`, `padding: 4px var(--sp-5)`, `background: var(--surface)` (#1A1424), `border: 1px solid var(--line)`, `border-radius: var(--r-lg)` (16px)
 - `.filters__panel > .filters__row:first-child` loses its `border-top` and `:last-child` its `border-bottom`, so the two edge rules don't double up with the panel's own border; the four interior dividers stay
@@ -413,7 +413,7 @@ Measured at 1440: panel `background rgb(26, 20, 36)`, `border rgba(255,255,255,0
 
 The mobile drawer had a worse version of the same problem: it had **no background at all** — a probe at 375 with the sheet open returned `backgroundColor rgba(0,0,0,0)`, `padding 0 0 24px`, and the first row spanning the full 375 with x=0, so the rows sat loose on top of the dimmed page. The sheet now takes `background: var(--surface)`, `padding-inline: var(--sp-4)`, its sticky `.filters__head` takes the same colour (otherwise the head band and the sheet body show a seam while scrolling), and `.filters__panel` flattens to `margin/padding/border/background: 0` inside the sheet — the drawer itself is the panel, one layer not two. Measured after: `sheetBg rgb(26, 20, 36)`, `padding 0 16px 24px`, panel `background rgba(0,0,0,0)` / `border 0` / `padding 0px`, first row x16 w343, header background matches the sheet, horizontal overflow 0. Evidence: docs/evidence/_new/filters-sheet-375.png.
 
-**Stacking fix that came with it.** The sheet was on `z-index: 60` while the catalog's sticky search bar sits on `99` (`calc(var(--z-header) - 1)`, css/style.css:1067-1070) — so with the drawer open the search field's bottom arc painted **over** the drawer, and `elementFromPoint(300, 150)` answered `.search-bar` instead of the sheet. The sheet now uses `var(--z-drawer)` (200) and the backdrop `calc(var(--z-drawer) - 1)` (199), the same ladder the bookmarks drawer already used; the three probes at (300,150) / (330,158) / (200,155) now resolve to the drawer's own controls (`.filters__close`, `.filters__reset-icon`). The header and tab bar dim behind the backdrop, which is what a modal sheet should do.
+A stacking fix came with it. The sheet was on `z-index: 60` while the catalog's sticky search bar sits on `99` (`calc(var(--z-header) - 1)`, css/style.css:1067-1070). With the drawer open the search field's bottom arc painted **over** the drawer, and `elementFromPoint(300, 150)` answered `.search-bar` instead of the sheet. The sheet now uses `var(--z-drawer)` (200) and the backdrop `calc(var(--z-drawer) - 1)` (199), the same ladder the bookmarks drawer already used; the three probes at (300,150) / (330,158) / (200,155) now resolve to the drawer's own controls (`.filters__close`, `.filters__reset-icon`). The header and tab bar dim behind the backdrop, which is what a modal sheet should do.
 
 **Not verified**: the drawer was opened by clicking #open-filters in a headless run, not by a real touch drag; the sheet's scroll-inside behaviour at 84vh was not exercised.
 
@@ -431,17 +431,17 @@ At 375 the same request paints 48 cards at 167px wide, horizontal overflow 0, al
 
 ## 32. Genre row: collapsed again, plus Mahou Shoujo
 
-The Genre row keeps the sheet's collapsed pattern — five chips plus Expand — and that stayed after a short experiment (2026-11-17) that showed every genre at once (sixteen at the time). The experiment was reverted on the client's word ("改回去"): the remark behind it was that the **genre list itself** is short, not that too few of it were displayed. So the row is back to `data-collapsible="5"` + `.filters__expand` (catalog.html genre row, css/style.css collapsible rule) and the evidence files from the experiment are superseded.
+The Genre row keeps the sheet's collapsed pattern — five chips plus Expand — and that stayed after a short experiment (2026-11-17) that showed every genre at once (sixteen at the time). The experiment was reverted on the client's word ("改回去"): the remark behind it was that the **genre list itself** is short, not that too few of it were displayed. So the row is back to `data-collapsible="5"` + `.filters__expand` (pages/catalog.html genre row, css/style.css collapsible rule) and the evidence files from the experiment are superseded.
 
 What the experiment did establish, and is kept as a measurement: at 1440 the `.filters__options` column is 1029px with a 6px gap, those sixteen chips totalled 1253px + 15 gaps, so **only 12 fit on one line** — any visible count between 13 and 16 wraps, and a count of 13 leaves Music alone on a second line. Row height 53px collapsed, 87px with all sixteen. Reverted state measured at 1440: collapsed shows Action…Fantasy (5 of 16), `aria-expanded="false"`, Expand opens to all sixteen, horizontal overflow 0. Evidence: docs/evidence/_new/genre-reverted-1440.png.
 
-The list itself: AniList's `GenreCollection` returns 19 names — the sixteen we rendered, plus **Ecchi**, **Mahou Shoujo** and **Hentai**. Hentai is out on principle. **Mahou Shoujo** was added (catalog.html, between Supernatural and Mecha) at the client's word ("可以补"), which makes the row seventeen chips; Ecchi is still omitted — borderline tag, no course value.
+The list itself: AniList's `GenreCollection` returns 19 names — the sixteen we rendered, plus **Ecchi**, **Mahou Shoujo** and **Hentai**. Hentai is out on principle. **Mahou Shoujo** was added (pages/catalog.html, between Supernatural and Mecha) at the client's word ("可以补"), which makes the row seventeen chips; Ecchi is still omitted — borderline tag, no course value.
 
 Seventeen chips collapse to five and open to two lines at 1440 (row 53px → 87px). Measured: `collapsed total 17 / shown 5 / rowH 53`; after Expand `shown 17 / lines 2 / rowH 87`; picking Mahou Shoujo sends `?genre=Mahou+Shoujo`, grid `data-state="success"`, 48 cards, the row stays open (one click event on the chip, no re-render of the panel), horizontal overflow 0. Evidence: docs/evidence/_new/genre-17-selected-1440.png, genre-17-open-1440.png, genre-mahou-1440.png.
 
 ## 33. Catalog intro is a size bigger, and stacks on mobile
 
-"Browse in Categories / Filter Out Your Anime / Select different combinations…" sat at 22px (title) and 15px (kicker, lede) — a section heading scaled to card-body type, which read as undersized next to the 34–41px page title on `rankings.html` (client call, 2026-11-17: "这个字体改大一点").
+"Browse in Categories / Filter Out Your Anime / Select different combinations…" sat at 22px (title) and 15px (kicker, lede) — a section heading scaled to card-body type, which read as undersized next to the 34–41px page title on `pages/rankings.html` (client call, 2026-11-17: "这个字体改大一点").
 
 Now: kicker `--fs-md` (17px), title `clamp(1.6rem, 2.4vw, 2.25rem)` — 34.56px at 1440, same family as the rankings heading, capped at 36px — and lede `--fs-md` with `line-height: 1.55` and a 64ch measure. Measured at 1440: kicker 17/27.2, title 34.56/39.7, lede 17/26.35, intro block 103px tall, horizontal overflow 0. Evidence: docs/evidence/_new/catalog-intro-1440.png.
 
@@ -451,7 +451,7 @@ The bigger type exposed a mobile problem: the intro shares one flex row with Res
 
 `.detail-page` was reset to `padding-block: var(--sp-6) 0` when the old flex + 96px gap layout was pulled out, so the recommendation grid's last row landed on the footer's top edge — the card labels were readable, but the block had no end (client, 2026-11-17: "详细页的底下这边贴住了").
 
-The bottom half is back to `var(--sp-7)` (48px), the same value `main` uses everywhere else. Measured on detail.html?id=16498 scrolled to the end: `main` computed padding-bottom 48px, last card bottom to footer top 48px, at both 1890 and 375. Evidence: docs/evidence/_new/detail-footer-gap-1890.png and detail-footer-gap-375.png.
+The bottom half is back to `var(--sp-7)` (48px), the same value `main` uses everywhere else. Measured on pages/detail.html?id=16498 scrolled to the end: `main` computed padding-bottom 48px, last card bottom to footer top 48px, at both 1890 and 375. Evidence: docs/evidence/_new/detail-footer-gap-1890.png and detail-footer-gap-375.png.
 
 ## 35. The Related panel scrolls instead of stopping at three titles
 
@@ -459,13 +459,13 @@ The panel printed "Total of 10 Titles" above exactly three rows: `paintRelated` 
 
 Now every anime relation is rendered and `.related__list` caps at 288px — three full rows (82px each plus 8px gaps) and a sliver of the fourth, which is what tells you the panel scrolls. `overflow-y: auto` with `overscroll-behavior: contain` so wheeling the list doesn't start scrolling the page, a 6px thumb in `--line-strong`, and 4px of padding pulled back with a -4px margin so the `focus-visible` outline on a row is not clipped.
 
-The cut fourth row looked like a rendering accident rather than an affordance, so `syncRelatedFade()` in js/detail.js sets `data-more` on the list whenever `scrollHeight - clientHeight - scrollTop > 8`, and `.related__list[data-more="true"]` applies a 26px bottom mask. Scroll to the end and the attribute flips to false, so the last row is never left dimmed. Measured on detail.html?id=16498: 10 rows, clientHeight 288, scrollHeight 900; scrollTop 200 sticks, end state scrollTop 612 with `data-more="false"`. Evidence: docs/evidence/_new/detail-related-fade-1890.png.
+The cut fourth row looked like a rendering accident rather than an affordance, so `syncRelatedFade()` in js/detail.js sets `data-more` on the list whenever `scrollHeight - clientHeight - scrollTop > 8`, and `.related__list[data-more="true"]` applies a 26px bottom mask. Scroll to the end and the attribute flips to false, so the last row is never left dimmed. Measured on pages/detail.html?id=16498: 10 rows, clientHeight 288, scrollHeight 900; scrollTop 200 sticks, end state scrollTop 612 with `data-more="false"`. Evidence: docs/evidence/_new/detail-related-fade-1890.png.
 
 ## 36. "Favorite" is a Bookmark, and it fills when it is on
 
 The detail page's save control read `Favorite` with a heart while every other save affordance in the site — the card overlay, the drawer, the header badge — is a bookmark. Same store, different word (client, 2026-11-17: "这里改成bookmark").
 
-Now: `detail.html` label and icon are the bookmark (`M6.5 4h11v16l-5.5-3.8L6.5 20z`), `js/detail.js` swaps the label to `Bookmarked` on press, and the icon fills with `currentColor`. It was still too quiet — the id rule `#detail-save` out-specifies `.pill-btn[aria-pressed="true"]`, so the pressed state showed no accent at all — so `#detail-save[aria-pressed="true"]` now paints the pill in `var(--accent)` with `#1a0f1e` ink, the same read as the rating pills. Measured at 1440 after a click: `background rgb(189, 145, 200)`, `border-color` the same, `color rgb(26, 15, 30)`, label `Bookmarked`, `aria-pressed="true"`, and `mf.bookmarks.v1` appears in `localStorage` — the card overlay and the drawer show the same title saved, because `toggleSave` is the one writer. Evidence: docs/evidence/_new/detail-bookmark-on-1440.png (before the accent fill), detail-bookmark-accent-1440.png (after).
+Now: `pages/detail.html` label and icon are the bookmark (`M6.5 4h11v16l-5.5-3.8L6.5 20z`), `js/detail.js` swaps the label to `Bookmarked` on press, and the icon fills with `currentColor`. It was still too quiet — the id rule `#detail-save` out-specifies `.pill-btn[aria-pressed="true"]`, so the pressed state showed no accent at all — so `#detail-save[aria-pressed="true"]` now paints the pill in `var(--accent)` with `#1a0f1e` ink, the same read as the rating pills. Measured at 1440 after a click: `background rgb(189, 145, 200)`, `border-color` the same, `color rgb(26, 15, 30)`, label `Bookmarked`, `aria-pressed="true"`, and `mf.bookmarks.v1` appears in `localStorage` — the card overlay and the drawer show the same title saved, because `toggleSave` is the one writer. Evidence: docs/evidence/_new/detail-bookmark-on-1440.png (before the accent fill), detail-bookmark-accent-1440.png (after).
 
 A fixed button cannot be lifted clear of a footer it scrolls past, so `#to-top` now retires as soon as `.site-footer` enters the viewport (`footerTop < innerHeight`) — the page is already at its end there, and the button was sitting on the copyright line at 375. Measured: 375 / scrollY 900 → visible; 375 / scrollY 3048 (end) → `hidden` true; at 1440 the page tops out at scrollY 839 with the footer in view, so it is hidden from the point the footer appears. Evidence: docs/evidence/_new/detail-footer-clean-375.png.
 ## 37. External links carry a type icon
@@ -478,28 +478,28 @@ The `type` glyph stays as the fallback (`LINK_GLYPH` / `linkIcon()` in js/detail
 
 Every pill also carries its type word on the right — `Streaming`, `Social`, `Info`, `Other` (`LINK_KIND` in js/detail.js) — not just the info links (client's call, 2026-11-17: "保留,并且给其他的要文字"). This fixed a real mislabel while it was at it: the old code printed `Info` for every non-streaming type, so the Twitter pill claimed to be an info page.
 
-Measured at 1440 and 375 on detail.html?id=16498 and id=101922: five pills each with one 16px icon; the streaming sites and Twitter resolve to `s4.anilist.co/…/link/icon/…png` (naturalSize 64, drawn at 16), `Official Site` has no `icon` in AniList and renders the info glyph. Pills measure 258px at 1440 and 328px at 375 with no clipping (`scrollWidth` never exceeds the box); `.ext-link__name` holds the site name on one line with an ellipsis so a long site name cannot push the kind word out. Horizontal overflow 0 at both widths. Evidence: docs/evidence/_new/detail-ext-kind-1440.png, detail-ext-kind-social-1440.png, detail-ext-kind-375.png.
+Measured at 1440 and 375 on pages/detail.html?id=16498 and id=101922: five pills each with one 16px icon; the streaming sites and Twitter resolve to `s4.anilist.co/…/link/icon/…png` (naturalSize 64, drawn at 16), `Official Site` has no `icon` in AniList and renders the info glyph. Pills measure 258px at 1440 and 328px at 375 with no clipping (`scrollWidth` never exceeds the box); `.ext-link__name` holds the site name on one line with an ellipsis so a long site name cannot push the kind word out. Horizontal overflow 0 at both widths. Evidence: docs/evidence/_new/detail-ext-kind-1440.png, detail-ext-kind-social-1440.png, detail-ext-kind-375.png.
 ## 38. The bookmarks drawer is a list of posters, not ids
 
 The drawer was the only surface still drawn as raw markup: `renderDrawer()` wrote the title into a link and put a bordered `Remove` word next to it. A stylesheet rule for a cover image had been sitting in css/style.css since the drawer was built, but nothing ever created the `<img>` — and a row saved from the detail page could not have filled it anyway (client, 2026-11-17: "这个弄好看").
 
-**The row that said `#207329`.** Two writers hand rows to the one store, in two different shapes: the card overlay passes the AniList media object (`title.romaji`, `coverImage.large`, `averageScore`), and js/detail.js passes a flat row (`title` string, `cover` string, `score` number). The store only understood the first, so a detail-page save kept the fallback `#<id>` title, no cover, and a null score — which is exactly what the drawer drew.
+Rows saved from the detail page said `#207329`. Two writers hand rows to the one store, in two different shapes: the card overlay passes the AniList media object (`title.romaji`, `coverImage.large`, `averageScore`), and js/detail.js passes a flat row (`title` string, `cover` string, `score` number). The store only understood the first, so a detail-page save kept the fallback `#<id>` title, no cover, and a null score — which is exactly what the drawer drew.
 
 `snapshot()` in js/bookmarks.js now normalises both shapes before writing, and `fillGaps()` repairs rows that were already stored: the same title is sitting in `mf.recent.v1` because detail.js records every view, so the drawer fills the missing title, cover and score from there and writes the repaired list back once. No extra request, and no stale ids left in the client's own browser.
 
-**What a row is now.** 44×62 cover (8px radius, inset hairline so pale posters keep an edge), two-line title, and the score in the same `8.5/10` form the detail page prints — the card badge shows the raw 0-100 number, but a drawer row has room for the readable one. The text `Remove` button became a 32×32 trash glyph that keeps its `aria-label` ("Remove {title} from bookmarks") and turns red on hover. Rows are 78px tall with a 4px gap and fill `var(--surface)` under the pointer or keyboard focus. The panel title carries the same count the header badge shows, and the empty state is the bookmark glyph plus "Nothing saved yet" and a sentence on how to save.
+A row is now a 44×62 cover (8px radius, inset hairline so pale posters keep an edge), two-line title, and the score in the same `8.5/10` form the detail page prints — the card badge shows the raw 0-100 number, but a drawer row has room for the readable one. The text `Remove` button became a 32×32 trash glyph that keeps its `aria-label` ("Remove {title} from bookmarks") and turns red on hover. Rows are 78px tall with a 4px gap and fill `var(--surface)` under the pointer or keyboard focus. The panel title carries the same count the header badge shows, and the empty state is the bookmark glyph plus "Nothing saved yet" and a sentence on how to save.
 
-Measured at 1440 and 375 on index.html with a saved row and a deliberately stale `{ id: 207329, title: "#207329", cover: "", score: null }` row: 2 rows, titles resolved to the real names, metas `8.5/10` / `7.4/10`, covers naturalWidth 230 drawn at 44px, row height 78, list gap 4px, hover background `rgb(26, 20, 36)` (`:hover` verified through a synthetic `Input.dispatchMouseEvent`), trash box 32×32, drawer width 380 at 1440 and 375 at 375, horizontal overflow 0 at both. A cover URL that fails loads is swapped for the same empty frame (`blankCover()` on the image's `error` event), so a dead CDN leaves a clean placeholder instead of a broken-image glyph. A fresh save from detail.html?id=16498 now stores `{ title: "Attack on Titan", cover: "…/bx16498-buvcRTBx4NSm.jpg", score: 85 }` instead of a null score. Evidence: docs/evidence/_new/drawer-rows-1440.png, drawer-rows-crop-1440.png, drawer-rows-375.png, drawer-empty-1440.png.
+Measured at 1440 and 375 on index.html with a saved row and a deliberately stale `{ id: 207329, title: "#207329", cover: "", score: null }` row: 2 rows, titles resolved to the real names, metas `8.5/10` / `7.4/10`, covers naturalWidth 230 drawn at 44px, row height 78, list gap 4px, hover background `rgb(26, 20, 36)` (`:hover` verified through a synthetic `Input.dispatchMouseEvent`), trash box 32×32, drawer width 380 at 1440 and 375 at 375, horizontal overflow 0 at both. A cover URL that fails loads is swapped for the same empty frame (`blankCover()` on the image's `error` event), so a dead CDN leaves a clean placeholder instead of a broken-image glyph. A fresh save from pages/detail.html?id=16498 now stores `{ title: "Attack on Titan", cover: "…/bx16498-buvcRTBx4NSm.jpg", score: 85 }` instead of a null score. Evidence: docs/evidence/_new/drawer-rows-1440.png, drawer-rows-crop-1440.png, drawer-rows-375.png, drawer-empty-1440.png.
 
 ## 39. Bookmarks moved out of the drawer and became a page you can sort out
 
-The drawer could only look and remove. The client asked for the organising half of the feature in the same message that retired the History page (2026-11-17: "history 不该有一个页面, 给bookmark 一个页面. 然后让用户可以organize 他们的bookmark"), so `saved.html` + `js/saved.js` now read the same store as the drawer, and the drawer keeps its glance role with a `View all saved →` row at the bottom (`.drawer__all`, on all four pages).
+The drawer could only look and remove. The client asked for the organising half of the feature in the same message that retired the History page (2026-11-17: "history 不该有一个页面, 给bookmark 一个页面. 然后让用户可以organize 他们的bookmark"), so `pages/saved.html` + `js/saved.js` now read the same store as the drawer, and the drawer keeps its glance role with a `View all saved →` row at the bottom (`.drawer__all`, on all four pages).
 
-**Storage grew by one field, not a new store.** Rows in `mf.bookmarks.v1` gained `collection` (a collection id, `null` for Unsorted) and a second key `mf.collections.v1` holds `[{ id, name }]`. Rows written before the page existed have no `collection`, so they read as Unsorted and nothing needs migrating. `all()`, `collections()`, `addCollection()`, `renameCollection()`, `removeCollection()` and `moveTo()` in js/bookmarks.js are the whole API, and both surfaces go through them, so the header badge keeps up whichever one changes the list.
+Storage grew by one field, not a new store. Rows in `mf.bookmarks.v1` gained `collection` (a collection id, `null` for Unsorted) and a second key `mf.collections.v1` holds `[{ id, name }]`. Rows written before the page existed have no `collection`, so they read as Unsorted and nothing needs migrating. `all()`, `collections()`, `addCollection()`, `renameCollection()`, `removeCollection()` and `moveTo()` in js/bookmarks.js are the whole API, and both surfaces go through them, so the header badge keeps up whichever one changes the list.
 
-**What the page does.** A search box filters on title; a select sorts by Recently saved / Title A–Z / Highest score; the chip row is All, Unsorted, then one chip per collection with a live count. `+ New collection` opens an inline name field instead of a browser prompt, and the same form does rename duty when a real collection is selected — Rename and Delete only appear there, because All and Unsorted are views rather than buckets. Delete asks first, in one sentence, and says where the rows go: "Delete “Rewatch”? Its bookmarks move back to Unsorted." Each card also carries a `Move` menu (Unsorted / every collection / New collection…) so a title can be filed without leaving the shelf, and a status line reports every change in text for anyone not watching the grid.
+The page has a search box that filters on title; a select sorts by Recently saved / Title A–Z / Highest score; the chip row is All, Unsorted, then one chip per collection with a live count. `+ New collection` opens an inline name field instead of a browser prompt, and the same form does rename duty when a real collection is selected — Rename and Delete only appear there, because All and Unsorted are views rather than buckets. Delete asks first, in one sentence, and says where the rows go: "Delete “Rewatch”? Its bookmarks move back to Unsorted." Each card also carries a `Move` menu (Unsorted / every collection / New collection…) so a title can be filed without leaving the shelf, and a status line reports every change in text for anyone not watching the grid.
 
-**One page out, one page in.** The footer's fourth slot was History (§17) and now reads Bookmarks; the mobile tab bar's fourth item keeps its `Saved` label but opens `saved.html`; the header clock keeps the compact Recently viewed panel rather than a destination page. `history.html`, `js/history.js`, `#history-grid` and `body.page-history` are gone.
+History left the footer and Bookmarks took its slot. The footer's fourth slot was History (§17) and now reads Bookmarks; the mobile tab bar's fourth item keeps its `Saved` label but opens `pages/saved.html`; the header clock keeps the compact Recently viewed panel rather than a destination page. `history.html`, `js/history.js`, `#history-grid` and `body.page-history` are gone.
 
 **Measured.** Seeded with three rows (scores 85 / 82 / 87), at 1440 the grid is six 200px columns of the frameless card from §28, the chip row fits on one line, the count reads "3 saved", and horizontal overflow is 0; 1256 and 375 also report 0. Search "titan" narrows to one card, sorting by score puts 87 / 85 / 82 in order, and the collection view prints "1 of 3 shown". The phone grid is two columns (159px cards) rather than the three the ladder would give: three leaves 103px posters with truncated titles and no room for the Move button, the same reason `#catalog-grid` is two columns below 600px. The empty state says "Nothing saved yet" and offers the catalog instead of a blank grid.
 Evidence: docs/evidence/_new/saved-page-1440.png, saved-move-menu-1440.png, saved-collection-1440.png, saved-rename-1440.png, saved-delete-confirm-1440.png, saved-search-1440.png, saved-empty-1440.png, saved-page-375.png, saved-empty-375.png.
@@ -508,21 +508,21 @@ Evidence: docs/evidence/_new/saved-page-1440.png, saved-move-menu-1440.png, save
 
 A line-by-line re-read of `figma_comments.json` against the running pages (2026-11-15) showed the old "复核" section of `PRD-FEEDBACK-MAP.md` was describing a build that no longer existed: the home search bar had been removed by `fed119c` ("rebuild home, detail and rankings to the Figma reference"), the rankings genre control had never been built, its thumbnails were 46×69 rather than "whole-card covers", and the detail heading was back to `Introduction`. The client approved the repair list ("可以", 2026-11-17); the two items that stay as written answers are #05 (icon-only save button) and #09 (per-row Expand).
 
-**Home search is back, and it is one bar for the whole site.** The header form `.nav-search--long` is gone; a `.search-bar#home-search` band sits between `</header>` and `<main>` on `index.html`, holding the same `.search` component the catalog uses (720px cap, 56px field, 22px placeholder). It is `position: sticky; top: var(--header-h)`, so it joins the header while scrolling the hero, and it submits to `catalog.html?q=` — the catalog already reads `?q=` back into its own field (see §28-era fix), so a search from the home page arrives filtered rather than empty. At `max-width: 599px` the band tightens to a 46px field on `--fs-sm` with 12px inline padding: at 56px the placeholder "Search anime, e.g. Frieren" was cut mid-word at 235px wide. Measured at 1440: band 91px tall at y64, field 56px / 22px, submit 48px, zero horizontal overflow; submitting `frieren` lands on `catalog.html?q=frieren` with the field prefilled and "A Total of 6 Titles have been found". At 375: band 73px, field 235×46, visible in the first screen. The mobile hero starts 64px under the band because `.page-hero .hero` carries `margin-block-start: calc(-1 * var(--header-h))` (css/style.css:2908) — the art bleeds under the glass instead of leaving a strip of page background between bar and image.
+Home search returned as one bar for the whole site. The header form `.nav-search--long` is gone; a `.search-bar#home-search` band sits between `</header>` and `<main>` on `index.html`, holding the same `.search` component the catalog uses (720px cap, 56px field, 22px placeholder). It is `position: sticky; top: var(--header-h)`, so it joins the header while scrolling the hero, and it submits to `pages/catalog.html?q=`. The catalog already reads `?q=` back into its own field (see §28-era fix), so a search from the home page arrives filtered rather than empty. At `max-width: 599px` the band tightens to a 46px field on `--fs-sm` with 12px inline padding: at 56px the placeholder "Search anime, e.g. Frieren" was cut mid-word at 235px wide. Measured at 1440: band 91px tall at y64, field 56px / 22px, submit 48px, zero horizontal overflow; submitting `frieren` lands on `pages/catalog.html?q=frieren` with the field prefilled and "A Total of 6 Titles have been found". At 375: band 73px, field 235×46, visible in the first screen. The mobile hero starts 64px under the band because `.page-hero .hero` carries `margin-block-start: calc(-1 * var(--header-h))` (css/style.css:2908) — the art bleeds under the glass instead of leaving a strip of page background between bar and image.
 
-**Rankings gained the genre row it never had.** `.rank-row[data-group="genre"]` sits between Format and Time, seeded with the same seventeen genres the catalog offers, collapsed to eight plus a `More ⌄` button (`data-collapsible="8"`, the ninth `.rank-opt` onward hidden by CSS). `setGenreOpen()` in js/rankings.js owns the state so the label ("More ⌄" / "Less ⌃"), `aria-expanded` and `data-expanded` cannot drift apart; picking a genre re-opens the row, because a collapsed row would otherwise hide the chip it just pressed. The filter rides the existing query builder (`f.genre`), and the count line names what is applied — "25 titles ranked · Fantasy" — instead of a bare "· Genre". Measured at 1440: rows country / format / genre / time in that order, 9 visible chips collapsed, 18 opened (panel 302px), picking Fantasy leaves the chip visible with the row open; at 375 the collapsed row shows 9 chips and the More button sits at x262.
+Rankings gained a genre row. `.rank-row[data-group="genre"]` sits between Format and Time, seeded with the same seventeen genres the catalog offers, collapsed to eight plus a `More ⌄` button (`data-collapsible="8"`, the ninth `.rank-opt` onward hidden by CSS). `setGenreOpen()` in js/rankings.js owns the state so the label ("More ⌄" / "Less ⌃"), `aria-expanded` and `data-expanded` cannot drift apart; picking a genre re-opens the row, because a collapsed row would otherwise hide the chip it just pressed. The filter rides the existing query builder (`f.genre`), and the count line names what is applied ("25 titles ranked · Fantasy") instead of a bare "· Genre". Measured at 1440: rows country / format / genre / time in that order, 9 visible chips collapsed, 18 opened (panel 302px), picking Fantasy leaves the chip visible with the row open; at 375 the collapsed row shows 9 chips and the More button sits at x262.
 
-**Ranking thumbnails are 82×123, not 46×69.** The complaint was that covers could not be recognised (#04) and that the ranking page looked foreign next to the card grids (#08). The grid track went from 46px to 82px (375: 96px), the thumb to 82×123 (375: 96×144) at a 10px radius, and the skeleton row from 85px to 139px (375: 160px) so the list does not jump when data lands. Rows are 139px tall at 1440 — the page got taller, which is the opposite of what #07 asked for; #07 (compress the gaps) stays refused for the reason in `PRD-FEEDBACK-MAP.md`, and the bigger covers are the answer to the underlying note about wasted space.
+Ranking thumbnails grew to 82×123 from 46×69. The complaint was that covers could not be recognised (#04) and that the ranking page looked foreign next to the card grids (#08). The grid track went from 46px to 82px (375: 96px), the thumb to 82×123 (375: 96×144) at a 10px radius, and the skeleton row from 85px to 139px (375: 160px) so the list does not jump when data lands. Rows are 139px tall at 1440. The page got taller, which is the opposite of what #07 asked for; #07 (compress the gaps) stays refused for the reason in `PRD-FEEDBACK-MAP.md`, and the bigger covers are the answer to the underlying note about wasted space.
 
-**"Introduction" is "Overview".** `detail.html:127` now reads `Overview`, matching the word in the comment (#14). Verified run of `detail.html?id=16498`: the `.detail__h2` sequence is Overview / External & Streaming Links / Recommendations Chosen based on topic tags.
+The detail heading `Introduction` became `Overview`. `pages/detail.html:127` now reads `Overview`, matching the word in the comment (#14). Verified run of `pages/detail.html?id=16498`: the `.detail__h2` sequence is Overview / External & Streaming Links / Recommendations Chosen based on topic tags.
 
-**#05 stays an icon.** The save button on a card is a poster overlay; adding the word `Bookmark` under every poster in a six-column grid pushes two-line titles into three and shrinks the art. It keeps `aria-label="Bookmark: <title>"` + `aria-pressed`, and the page-level entry points (tab bar Saved, footer Bookmarks, drawer "View all saved") carry the word for anyone who reads instead of recognises. That trade is written out as the answer to #05 rather than left as an omission.
+The save button stays an icon (#05). It sits on the poster as an overlay; adding the word `Bookmark` under every poster in a six-column grid pushes two-line titles into three and shrinks the art. It keeps `aria-label="Bookmark: <title>"` + `aria-pressed`, and the page-level entry points (tab bar Saved, footer Bookmarks, drawer "View all saved") carry the word for anyone who reads instead of recognises. That trade is written out as the answer to #05 rather than left as an omission.
 
 Evidence: docs/evidence/_new/home-search-1440.png, home-search-375.png, rankings-genre-1440.png, rankings-genre-open-1440.png, rankings-genre-filtered-1440.png, rankings-genre-375.png, detail-overview-1440.png, catalog-search-compact-375.png.
 
 **Not verified**: keyboard submission from the home field (Tab to Search, Enter) — the submit path was exercised by clicking; and the sticky band's behaviour over the hero on iOS Safari's collapsing toolbar.
 
-**Addendum, later the same day.** The one-bar-per-site rule was read as "put the search where every other page keeps it", so the band came off `index.html` and `.nav-search` went back into `.header-tools` on both `index.html` and `catalog.html` (ids `nav-q` and `q` so the catalog keeps two distinct fields). At 1440 the home header now carries a 264px search field, the hero starts at y0 under the glass again, and typing Frieren in it lands on `catalog.html?q=frieren` with 6 results. The gap this opens: `.nav-search` is hidden at `max-width: 899px` (css/style.css:2849), so the mobile home page currently has no search field at all — the desktop-only fix was not finished for phones, and the decision (restore the band below 900px vs. record the omission against PRD #13/#20) is still open with the client.
+Later the same day, the one-bar-per-site rule was read as "put the search where every other page keeps it", so the band came off `index.html` and `.nav-search` went back into `.header-tools` on both `index.html` and `pages/catalog.html` (ids `nav-q` and `q` so the catalog keeps two distinct fields). At 1440 the home header now carries a 264px search field, the hero starts at y0 under the glass again, and typing Frieren in it lands on `pages/catalog.html?q=frieren` with 6 results. The gap this opens: `.nav-search` is hidden at `max-width: 899px` (css/style.css:2849), so the mobile home page currently has no search field at all. The desktop-only fix was not finished for phones, and the decision (restore the band below 900px vs. record the omission against PRD #13/#20) is still open with the client.
 
 ## 41. On phones the bookmark sits on the poster, not under the title
 
@@ -530,7 +530,7 @@ The first mobile pass put the save button in the document flow under the title (
 
 Now the overlay stays with the poster at every width and only the button's position changes. At `max-width: 599px` `.grid .card__save` is pinned 8px from the poster's bottom-right (the score badge already owns the top-right), 30×30, radius 9, `rgb(10 8 14 / 0.62)` behind the icon so it reads over any art, `opacity: 1` because a touch screen has no hover, and `pointer-events: auto` so taps reach it through the `pointer-events: none` overlay. Saved cards fill it with `--accent` and `#1a0f1e` ink, the same pressed look the detail page uses.
 
-Measured at 390×844 (device emulation, `mobile: true`): button 30×30, 8px from the poster's right and bottom edges, fully inside the cover, `position: absolute`, `opacity: 1`; card height 321px on the catalog and 318px on the bookmarks page; saved grid still two columns with a 172px Move button; horizontal overflow 0 on the catalog, home and saved pages and on the detail page's recommendation grid. Clicking the button toggles `aria-pressed` and the store (3 → 2 → 3 rows) without navigating away from `catalog.html`. At 1440 nothing changed: the button is still the 30px hover-only overlay 9px from the card's top-left, card height 318px.
+Measured at 390×844 (device emulation, `mobile: true`): button 30×30, 8px from the poster's right and bottom edges, fully inside the cover, `position: absolute`, `opacity: 1`; card height 321px on the catalog and 318px on the bookmarks page; saved grid still two columns with a 172px Move button; horizontal overflow 0 on the catalog, home and saved pages and on the detail page's recommendation grid. Clicking the button toggles `aria-pressed` and the store (3 → 2 → 3 rows) without navigating away from `pages/catalog.html`. At 1440 nothing changed: the button is still the 30px hover-only overlay 9px from the card's top-left, card height 318px.
 
 Evidence: docs/evidence/_new/mobile-card-bookmark-390.png, mobile-card-bookmark-saved-390.png, mobile-card-bookmark-home-390.png.
 
@@ -542,7 +542,7 @@ The hero was built for a 16:9 desktop frame: the wide art is the anime's own pro
 
 The art picker already had the branch — `artFor(m, portrait)` in js/home.js:95 returns `coverImage.extraLarge || coverImage.large` when the viewport is at most 639px and the PV frame or banner otherwise — so no CSS was needed for the switch, and the existing `@media (max-width: 639px)` block still owns the 3:4 frame and the mobile gradient.
 
-**The real bug was the fallback.** js/home.js:39 watches `load` on the hero images because YouTube returns a 120px grey frame when `maxresdefault.jpg` is missing, and swaps to the banner when `naturalWidth < 1000`. That threshold is fine for a 1280-wide PV frame and wrong for a poster: `cover/large` is 460×647, so every mobile paint was immediately replaced by the banner the branch had just avoided. Measured before the fix: at 390 and 596 `matchMedia('(max-width: 639px)')` was true, `coverImage.extraLarge` existed in the API response, `localStorage` was cleared and `Network.setCacheDisabled: true` was set — and `#hero-img` still resolved to `.../banner/159042-X0mqyaUFBkms.jpg`. The fallback now runs only on `img.hero__img--pv`, which is the case it was written for.
+The fallback threshold was the real bug. js/home.js:39 watches `load` on the hero images because YouTube returns a 120px grey frame when `maxresdefault.jpg` is missing, and swaps to the banner when `naturalWidth < 1000`. That threshold is fine for a 1280-wide PV frame and wrong for a poster: `cover/large` is 460×647, so every mobile paint was immediately replaced by the banner the branch had just avoided. Measured before the fix: at 390 and 596 `matchMedia('(max-width: 639px)')` was true, `coverImage.extraLarge` existed in the API response, `localStorage` was cleared and `Network.setCacheDisabled: true` was set, and `#hero-img` still resolved to `.../banner/159042-X0mqyaUFBkms.jpg`. The fallback now runs only on `img.hero__img--pv`, which is the case it was written for.
 
 **Measured after the revert to full bleed.** 390×844: media 390×520 (3:4, left edge 0, radius 0), hero top 0 so the art still bleeds under the glass header, source `.../cover/large/bx159042-GGFwlDskc5vR.png`, horizontal overflow 0. 375 keeps the same shape at 375×500. Pressing `#hero-next` brings the next cover (`.../cover/large/bx152677-gtJbgjE94lCN.png`, "The Detective Is Already Dead Season 2") and stays on a cover image. 1440 unchanged: the PV frame `maxresdefault.jpg` at 1425×864 with radius 0.
 
@@ -570,7 +570,7 @@ The four tabs used text glyphs — `◆ ▤ ▮ ★` — which render as whateve
 
 The glyphs are replaced with inline SVGs on all five pages that carry the bar (index, catalog, detail, rankings, saved): house with a door for Home, funnel for Catalog, three rising bars for Rankings, and the same bookmark outline the header uses for Saved. All are 20×20, `viewBox="0 0 24 24"`, `fill="none"`, `stroke="currentColor"`, `stroke-width="1.8"`, so the icon inherits the item colour instead of being a fixed-shape glyph. `.tabbar__icon` became a flex box sized to the svg.
 
-**The current tab is now a block, not just tinted text.** `.tabbar__item` gained `margin: 5px 4px`, `padding-block: 3px`, a 14px radius and a colour/background transition; `[aria-current="page"]` paints `color-mix(in srgb, var(--accent) 18%, transparent)` behind the icon and label, the way the reference does. Because the items now carry their own margin, the bar sits at 62px tall instead of 56 — measured at 390×844: bar x12, width 366, height 62, active item 50px tall, 20px icons, horizontal overflow 0 on every page, footer still 11px clear of the bar when scrolled to the bottom.
+The current tab is now a block rather than tinted text. `.tabbar__item` gained `margin: 5px 4px`, `padding-block: 3px`, a 14px radius and a colour/background transition; `[aria-current="page"]` paints `color-mix(in srgb, var(--accent) 18%, transparent)` behind the icon and label, the way the reference does. Because the items now carry their own margin, the bar sits at 62px tall instead of 56. Measured at 390×844: bar x12, width 366, height 62, active item 50px tall, 20px icons, horizontal overflow 0 on every page, footer still 11px clear of the bar when scrolled to the bottom.
 
 Evidence: docs/evidence/_new/mobile-tabbar-icons-390.png.
 
@@ -580,7 +580,7 @@ Evidence: docs/evidence/_new/mobile-tabbar-icons-390.png.
 
 The button was built for the detail page (its scroll handler lived in js/detail.js) and the other four pages had no way back to the top except dragging — which got worse once the floating tab bar started covering the first row of cards. The client noticed the gap ("其他页面没有back to top 按钮", 2026-11-18).
 
-The behaviour moved into js/ui.js as `mountToTop(button)`, because it is a piece of page furniture rather than detail-page logic: it finds `#to-top`, listens to `scroll` passively, sets `hidden` when `scrollY < 600` or when the footer's top reaches the viewport (the button is `position: fixed`, so moving it up only moves it over the copyright line), and scrolls to `{ top: 0 }` with `behavior: smooth` unless the user asked for reduced motion. `index.html`, `catalog.html`, `rankings.html` and `saved.html` gained the same `<button class="to-top" id="to-top" hidden>Back to top</button>` the detail page already had, and their entry scripts (js/home.js, js/catalog.js, js/rankings.js, js/saved.js) call `mountToTop()` once at boot; js/detail.js went from twenty lines of its own handler to `mountToTop(els.toTop)`, so the five pages cannot drift apart.
+The behaviour moved into js/ui.js as `mountToTop(button)`, because it is a piece of page furniture rather than detail-page logic: it finds `#to-top`, listens to `scroll` passively, sets `hidden` when `scrollY < 600` or when the footer's top reaches the viewport (the button is `position: fixed`, so moving it up only moves it over the copyright line), and scrolls to `{ top: 0 }` with `behavior: smooth` unless the user asked for reduced motion. `index.html`, `pages/catalog.html`, `pages/rankings.html` and `pages/saved.html` gained the same `<button class="to-top" id="to-top" hidden>Back to top</button>` the detail page already had, and their entry scripts (js/home.js, js/catalog.js, js/rankings.js, js/saved.js) call `mountToTop()` once at boot; js/detail.js went from twenty lines of its own handler to `mountToTop(els.toTop)`, so the five pages cannot drift apart.
 
 **Measured at 390×844** on all five pages: hidden at the top of the page; after scrolling to 900 the button is visible at `right: 16px`, bottom edge 762, i.e. 10px above the floating tab bar; clicking it returns `scrollY` to 0; scrolled to the very bottom it hides again so the footer's last line is readable. On the bookmarks page, which is short, the button never appears because the footer is already on screen at `scrollY` 900 — the same rule doing its job rather than a special case.
 
@@ -592,9 +592,9 @@ Evidence: docs/evidence/_new/mobile-to-top-catalog-390.png.
 
 On a phone, reloading the catalogue showed the six filter rows for a moment and then they vanished. That was the bottom sheet arriving late rather than a rendering glitch: the sheet only becomes a sheet when `body[data-filters-ready="true"]` is set (css/style.css:2155), and that flag used to be written by js/filters.js — a module, which the browser fetches and evaluates after the markup is already parsed. For one frame the rows sat in normal flow in the middle of the page, then the flag landed and `transform: translateY(101%)` took them off screen.
 
-The flag is now set by a three-line inline script at the top of `<body>` in catalog.html, before the filter block is parsed, so the rows never exist in the flow at any frame. js/filters.js still sets it in `mountSheet()`; the second write is a no-op and keeps the function usable on its own.
+The flag is now set by a three-line inline script at the top of `<body>` in pages/catalog.html, before the filter block is parsed, so the rows never exist in the flow at any frame. js/filters.js still sets it in `mountSheet()`; the second write is a no-op and keeps the function usable on its own.
 
-The no-JS fallback survives, which is why the inline script rather than a CSS-only default: with scripting off the line never runs, no flag is set, and the panel stays a plain block that still filters on form submit.
+The no-JS fallback survives, so the inline script rather than a CSS-only default: with scripting off the line never runs, no flag is set, and the panel stays a plain block that still filters on form submit.
 
 **Proved with JS actually blocked**, not just by reading the rule: with `Network.setBlockedURLs` stopping both modules, `#filters` computes to `position: fixed` with `matrix(1, 0, 0, 1, 0, 716.043)` and its box top at 851 — off screen on the first paint, before any module could run. With scripts allowed, the sheet still opens: `data-open="true"`, transform back to `matrix(1, 0, 0, 1, 0, 0)`, top 135, height 709, backdrop `block`, 48 cards underneath. Desktop at 1440 is untouched: `position: static`, `transform: none`, top 227, height 452, toggle `display: none`, no horizontal overflow.
 
@@ -648,9 +648,9 @@ Evidence: docs/evidence/_new/catalog-842-cards.png.
 
 After the 600–899 dead zone was fixed, an 813px window still had no way to search from the home page: the header search was hidden up to 899px, and the home search band had been removed when the search moved into the header. The header at that width only holds brand, the search field and three icons, so the field fits — it is now hidden only below 600px.
 
-Two numbers keep it from crowding the bar: `.nav-search` gets `width: clamp(180px, 25vw, 264px)` in the 600–899 band, so it never squeezes the brand at 600 and never runs into the icons at 899.
+The width is capped twice. `.nav-search` gets `width: clamp(180px, 25vw, 264px)` in the 600–899 band, so it never squeezes the brand at 600 and never runs into the icons at 899.
 
-The catalog page then had two search fields on screen (header field plus its own sticky one). The page already starts with a full-size search field pinned above the results, so `body.page-catalog .nav-search` is hidden at every width; catalog.html now carries a `page-catalog` body class for that rule.
+The catalog page then had two search fields on screen (header field plus its own sticky one). The page already starts with a full-size search field pinned above the results, so `body.page-catalog .nav-search` is hidden at every width; pages/catalog.html now carries a `page-catalog` body class for that rule.
 
 **Measured at 900px tall**: header field visible at 600 (180px), 640 (180), 768 (192), 813 (203), 899 (225), 900 (200 — desktop width rule), 1440 (264); hidden at 599 and 390. `.site-header__inner` scroll width equals client width at every one of those widths, so nothing is clipped; horizontal overflow stays at the scrollbar's 15px. Catalog: header field hidden and page field visible at both 813 and 1440; index: header field visible at 813, none at 390.
 
@@ -662,7 +662,7 @@ Evidence: docs/evidence/_new/nav-search-813-index.png, nav-search-813-catalog.pn
 
 The header search cannot live below ~520px: at 390px the brand is 146px and the three tool buttons 122px, leaving 75px inside the header — not enough for a field. The home page therefore had no search at all on a phone, which is exactly the width the client photographed at 578px and at 390px.
 
-Two mechanisms, one per range. From 520px up the header field is used again: `width: clamp(150px, 27vw, 264px)` keeps the header from clipping (measured overflow of `.site-header__inner` is 0 from 520px on; at 480px it was 27px, which is why 520 is the boundary and not 480). Below 520px the home page gets a `.search-bar--phone` strip under the header — the same `.search` component the catalog page already uses, 73px tall with a 46px input.
+Each range uses its own mechanism. From 520px up the header field is used again: `width: clamp(150px, 27vw, 264px)` keeps the header from clipping (measured overflow of `.site-header__inner` is 0 from 520px on; at 480px it was 27px, so 520 is the boundary and not 480). Below 520px the home page gets a `.search-bar--phone` strip under the header — the same `.search` component the catalog page already uses, 73px tall with a 46px input.
 
 Because that band is the first block on the phone screen, the hero can no longer pull itself up under the header on this range: `@media (max-width: 519px) { .page-hero .hero { margin-block-start: 0 } }` sits after the base pull-up rule. Measured at 900px tall: 360 / 390 / 430 / 479 / 519 → band `block`, 73px tall, hero starts exactly at its bottom edge (137px), header search hidden; 520 / 578 / 640 / 813 / 1440 → header field `flex`, band hidden, hero back under the header (top 0), header overflow 0 everywhere.
 
@@ -676,7 +676,7 @@ Evidence: docs/evidence/_new/home-search-phone-390.png.
 
 The rankings podium was three columns from 899px down, so an 897px window showed three oversized covers with two orphans underneath. It now keeps five across until 768, drops to three between 520 and 767, and two below 520 — the same "fill the row" logic the rest of the site uses.
 
-**Measured on rankings.html at 900px tall**: 390 → 2 columns, cover 166; 519 → 2, 230; 520 → 3, 150; 640 → 3, 184; 767 → 3, 227; 768 → 5, 131; 897 → 5, 157; 900 → 5, 158; 1440 → 5, 254. Five items render at every width, no horizontal overflow.
+**Measured on pages/rankings.html at 900px tall**: 390 → 2 columns, cover 166; 519 → 2, 230; 520 → 3, 150; 640 → 3, 184; 767 → 3, 227; 768 → 5, 131; 897 → 5, 157; 900 → 5, 158; 1440 → 5, 254. Five items render at every width, no horizontal overflow.
 
 The single-column ranking list below 900px is unchanged — only the podium row moved.
 
@@ -696,7 +696,7 @@ Evidence: docs/evidence/_new/header-no-avatar-1440.png.
 
 ## 55. The rankings kicker was inheriting body grey
 
-`rankings.html` opens with "The Popularity of Anime" above the page title. That line carried `page-head__kicker`, a class with no rule anywhere in the stylesheet, so it fell back to the body colour and read as a subtitle. The catalog page's equivalent line (`filters__kicker`, "Browse in Categories") is the accent purple, which is what the client pointed at.
+`pages/rankings.html` opens with "The Popularity of Anime" above the page title. That line carried `page-head__kicker`, a class with no rule anywhere in the stylesheet, so it fell back to the body colour and read as a subtitle. The catalog page's equivalent line (`filters__kicker`, "Browse in Categories") is the accent purple, which is what the client pointed at.
 
 `.page-head__kicker` now copies the catalog values: `color: var(--accent)`, `font-size: var(--fs-md)` (17px), weight 500, letter-spacing 0.01em, 4px below. Measured at 1440: rankings kicker rgb(189, 145, 200) / 17px / 500 — identical to the catalog's.
 
@@ -712,7 +712,7 @@ Rankings: the podium count now follows the viewport — five covers from 600 up,
 
 The ranking list rows on phones were 96×144 thumbnails in 160px rows, which dwarfed the three covers above them. They now use the render's compact row: 28px number, 48×72 thumbnail, 88px row, 10px gap. Desktop keeps 82×123 thumbnails and 139px rows.
 
-**Measured**: rankings.html at 390 → 3 podium cards of 113, cover 2:3, first list number 4, row 88 tall, thumbnail 48×72, overflow 0; at 1440 → 5 podium cards of 254, first list number 6, row 139 tall. Saved page and detail recommendations untouched (their own grids).
+**Measured**: pages/rankings.html at 390 → 3 podium cards of 113, cover 2:3, first list number 4, row 88 tall, thumbnail 48×72, overflow 0; at 1440 → 5 podium cards of 254, first list number 6, row 139 tall. Saved page and detail recommendations untouched (their own grids).
 
 Evidence: docs/evidence/_new/m3-catalog-390.png, m3-rank-390.png, m4-rank-list-390.png, m4-rank-desk-1440.png.
 
@@ -734,13 +734,13 @@ Evidence: docs/evidence/_new/m7-390-collapsed.png, m7-1256-collapsed.png, m7-125
 
 The client reported that rankings and bookmarks have no search on a phone ("手机上ranking 和 book mark 没有搜索", 2026-11-18). Correct: the header field is hidden below 520 (§52) and only the home page had a substitute band, so those two pages had no way in at all. The mobile renders put a magnifier first in the header tools, which is the entry they show.
 
-**Superseded by §59.** The icon first shipped as a link to `catalog.html`; the client then asked for matches to appear while typing (m09951), so the same icon now opens the field in place and the panel is written by `js/search.js`. The measurements below are from the link version and no longer describe the header.
+**Superseded by §59.** The icon first shipped as a link to `pages/catalog.html`; the client then asked for matches to appear while typing (m09951), so the same icon now opens the field in place and the panel is written by `js/search.js`. The measurements below are from the link version and no longer describe the header.
 
-That icon now exists on `rankings.html` and `saved.html` as a `<a class="icon-btn nav-search-link" href="catalog.html">`, first in `.header-tools`. It is `display: none` above 519px, where the field itself is already in the row, and it hands over to the catalog page's own bar rather than opening a second field in a 75px-wide header. No script changed — it is a link, and the catalog bar is the one that owns query state.
+That icon now exists on `pages/rankings.html` and `pages/saved.html` as a `<a class="icon-btn nav-search-link" href="pages/catalog.html">`, first in `.header-tools`. It is `display: none` above 519px, where the field itself is already in the row, and it hands over to the catalog page's own bar rather than opening a second field in a 75px-wide header. No script changed — it is a link, and the catalog bar is the one that owns query state.
 
-**Measured**: 390 → icon 30px visible, header field hidden, `.site-header__inner` scroll width equals client width (358/358), horizontal overflow 0, tap lands on catalog.html with the 265px field on screen; 560 and 1256 → icon hidden, field visible, overflow 0. The resulting header matches the mobile render's order: brand, magnifier, clock, bookmark.
+**Measured**: 390 → icon 30px visible, header field hidden, `.site-header__inner` scroll width equals client width (358/358), horizontal overflow 0, tap lands on pages/catalog.html with the 265px field on screen; 560 and 1256 → icon hidden, field visible, overflow 0. The resulting header matches the mobile render's order: brand, magnifier, clock, bookmark.
 
-**Not done at the time**: `detail.html` had no phone search entry. §59 added it.
+**Not done at the time**: `pages/detail.html` had no phone search entry. §59 added it.
 
 **Not verified**: a touch device; the icon is a plain link, so behaviour should match desktop clicks.
 
@@ -748,15 +748,15 @@ Evidence: docs/evidence/_new/m8-rankings-390-header.png, m8-saved-390-header.png
 
 ## 59. Matches appear under the keyword field on every page
 
-The client's second pass on search (m09951): "没有active searching, 就是我在任何页面输入关键词时候要显示结果. detail.html 可以加一个search". So the header field is no longer a submit-and-leave control. Typing two characters shows up to six matching titles under it, each a link to its detail page, with the full result list one tap away.
+The client's second pass on search (m09951): "没有active searching, 就是我在任何页面输入关键词时候要显示结果. pages/detail.html 可以加一个search". So the header field is no longer a submit-and-leave control. Typing two characters shows up to six matching titles under it, each a link to its detail page, with the full result list one tap away.
 
-The panel lives in `js/search.js`, mounted on `index.html`, `rankings.html`, `saved.html` and `detail.html`. `catalog.html` is excluded on purpose: its own field already re-filters the grid on every keystroke (300ms), and a second list of the same six titles over the results would be noise. The module reads the page's `input[name="q"]`, so the home page's phone band and the header pill share one implementation.
+The panel lives in `js/search.js`, mounted on `index.html`, `pages/rankings.html`, `pages/saved.html` and `pages/detail.html`. `pages/catalog.html` is excluded on purpose: its own field already re-filters the grid on every keystroke (300ms), and a second list of the same six titles over the results would be noise. The module reads the page's `input[name="q"]`, so the home page's phone band and the header pill share one implementation.
 
-Behaviour: 220ms debounce, minimum two characters; loading / empty / error states; ArrowDown and ArrowUp walk the list, Enter opens the highlighted row, Escape and a tap outside close it, and returning to a field that still holds a word re-runs the query. Each row is a cover (34x48), the title, and a meta line (`TV · 2023 · 90%`); the footer link is "See all results for "q"" → `catalog.html?q=`. Results are requested with `fresh: true`: the API caches answers for five minutes, and a throttled empty answer had already made one manual test report "No titles match" for a word that has matches.
+Behaviour: 220ms debounce, minimum two characters; loading / empty / error states; ArrowDown and ArrowUp walk the list, Enter opens the highlighted row, Escape and a tap outside close it, and returning to a field that still holds a word re-runs the query. Each row is a cover (34x48), the title, and a meta line (`TV · 2023 · 90%`); the footer link is "See all results for "q"" → `pages/catalog.html?q=`. Results are requested with `fresh: true`: the API caches answers for five minutes, and a throttled empty answer had already made one manual test report "No titles match" for a word that has matches.
 
 Below 520px the header field is hidden (§52), so the magnifier from §58 now opens that field in place instead of leaving the page: the brand, clock and bookmark step out, a close button takes their place, and the panel hangs off the header (16px gutters) rather than off the 256px field. Above 519px nothing changed in the header — the field is already there and the panel is 420px, right-aligned under it.
 
-**Measured**: 1440 → panel 420 wide, six rows, right edge on the field, horizontal overflow 0; ArrowDown twice + Enter → `detail.html?id=182255` (Frieren: Beyond Journey's End Season 2). 390 → icon opens the field (focused, 256 wide), panel x16 w358 right374, six rows, tap → `detail.html?id=20` (Naruto), overflow 0; close returns the header, field hidden. 519 → field hidden, icon grid; 520 → field flex, icon none. 560 → field visible, panel 420 at x25–445, overflow 0. Home's phone band → panel 356 wide inside the 390 viewport, six rows, overflow 0. Catalog → 0 panels, 0 toggles, its own field intact. Escape then refocus → panel reopens with the same six rows.
+**Measured**: 1440 → panel 420 wide, six rows, right edge on the field, horizontal overflow 0; ArrowDown twice + Enter → `pages/detail.html?id=182255` (Frieren: Beyond Journey's End Season 2). 390 → icon opens the field (focused, 256 wide), panel x16 w358 right374, six rows, tap → `pages/detail.html?id=20` (Naruto), overflow 0; close returns the header, field hidden. 519 → field hidden, icon grid; 520 → field flex, icon none. 560 → field visible, panel 420 at x25–445, overflow 0. Home's phone band → panel 356 wide inside the 390 viewport, six rows, overflow 0. Catalog → 0 panels, 0 toggles, its own field intact. Escape then refocus → panel reopens with the same six rows.
 
 **Not verified**: a real touch device; a screen reader (roles and `aria-expanded` are set, but that is not the same as listening to it).
 
@@ -806,7 +806,7 @@ Evidence: docs/evidence/_new/theme-dark-1440.png, theme-light-1440.png, theme-li
 
 ## 62. Rankings' Day, Week and Month: three windows, each on the nearest signal AniList sells
 
-The client asked why Month and Day were greyed out on `rankings.html` (m10674), then chose the option that adds no new data source (m10683: "推荐方案（不新增数据源） 我说的是Ranking 页的"). The home Ranks panel keeps the behaviour described in §13; only `rankings.html` changed.
+The client asked why Month and Day were greyed out on `pages/rankings.html` (m10674), then chose the option that adds no new data source (m10683: "推荐方案（不新增数据源） 我说的是Ranking 页的"). The home Ranks panel keeps the behaviour described in §13; only `pages/rankings.html` changed.
 
 AniList publishes no daily or monthly chart. `mediaTrends` is keyed to one day, so a real 30-day gain would take thirty requests per page load, straight into the 30/min limit. Each window therefore reuses a signal AniList already returns:
 
@@ -828,13 +828,25 @@ On phones the six Time chips were wrapping Day onto a second row (row height 106
 
 **Not done**: no dedicated query, no extra requests, no change to the home Ranks panel.
 
+## 63. Two wording-and-measure clean-ups from the PRD feedback
+
+The October PRD feedback (Andre Gopal, 30 Oct 2026) left two interface notes that were still open on 18 November: the filter-status line read awkwardly, and the desktop synopsis ran the full width of the page. Both are content/CSS changes, no markup or logic moved.
+
+The result line used to read "A Total of 48 Titles have been found", copied from the render's placeholder sentence. It now reads "48 titles found": number in the same bold accent, suffix pluralised ("1 title found"). The line still counts what is on the page rather than AniList's total, and still grows when Load More runs. Measured at 1440: 48 cards, "48 titles found", tag line "No tags selected", horizontal overflow 0; after Load More, "96 titles found". A search for "Nia Liston: The Merciless Maiden" returns one card and "1 title found"; at 390 the q=naruto result reads "26 titles found" across 26 cards with overflow 0.
+
+Synopsis line length. `.detail__copy` was `max-width: none`, so at 1440 the paragraph stretched 1320px. It is now capped at 68ch: 558px inside the 1320px block at 13px, six lines before the Read more clamp. At 390 the block is 343px and the cap does nothing, which is the point — the phone width is already a readable measure. Horizontal overflow 0 at both widths.
+
+Earlier measurements in §26, §28, §31 and §40 quote the old "A Total of N Titles have been found" sentence; they are left as the record of what was on screen at the time. The new sentence is what ships.
+
+**Not verified**: a long title on a phone where 68ch would interact with the clamp; a screen reader reading the new count line.
+
 ## What was *not* changed
 
 - Four states (loading / success / error / empty), skeleton geometry and `aria-busy`.
 - The wide shelves' 6/4/3 ladder and the 3:4 cover frame (§19); only the catalog's phone step moved (§56).
 - Four GSAP moments (Timeline, ScrollTrigger, MotionPath, Draggable) and the reduced-motion branch.
 - The dark palette. It stays the default and every light token has a dark twin holding the old value (§61).
-- Ranking lists: home's Day/Week read the airing schedule, Season/Year filter by season and year, Month is the trending proxy described in §13. `rankings.html` now gives Day/Month/Week their own meanings too (§62); the home Ranks panel was not touched.
+- Ranking lists: home's Day/Week read the airing schedule, Season/Year filter by season and year, Month is the trending proxy described in §13. `pages/rankings.html` now gives Day/Month/Week their own meanings too (§62); the home Ranks panel was not touched.
 - PRD feedback items: all 20 are mapped in `PRD-FEEDBACK-MAP.md`. #20 / #13 / #12 (home search), #17+#15 (rankings genre), #04 / #08 / #07 (ranking thumbnails) and #14 (Overview) were the last five gaps and were closed on 2026-11-17 (§40); #05's visible label became an icon (§20) and #07 / #16 stay as written refusals with reasons in that file.
 
 ## How to re-check
