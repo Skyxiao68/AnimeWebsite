@@ -41,9 +41,30 @@
   --text-muted: #978fa3; /* body and secondary text (PRD; >= 4.5:1 on bg and surface) */
   --text-dim: #6f6880; /* placeholders and disabled states */
 
-  --accent: #BD91C8; /* primary accent: buttons, scores, current page (PRD accent) */
+  --accent: #BD91C8; /* primary accent used as text: links, current page, hover (PRD accent) */
+  /* Fill and ink are separate roles: one value cannot stay legible as text and as a plate.
+     In the dark theme they are the submitted accent pair; the light theme moves each one. */
+  --accent-fill: #BD91C8; /* chips, buttons, badges: a surface that carries ink */
+  --accent-ink: #1A0F1E; /* text on accent-fill: deep ink, keeps contrast */
   --accent-soft: rgba(189, 145, 200, 0.16);
-  --accent-ink: #1A0F1E; /* text on accent: deep ink, keeps contrast */
+  --on-art-accent: #BD91C8; /* accent drawn over artwork, where page tokens do not apply */
+  --brand: rgb(130 121 145);
+  --text-soft: rgba(242, 238, 249, 0.78); /* card titles: one step below body text */
+  --icon: #efeaf5;
+  --search-line: rgb(180 164 200 / 0.42);
+  --search-placeholder: rgb(196 190 196 / 0.72);
+  --search-go: rgb(214 208 222 / 0.85);
+  --header-glass: rgb(10 8 14 / 0.42);
+  --header-glass-stuck: rgb(10 8 14 / 0.72);
+  --header-blur: blur(14px) saturate(115%) brightness(0.86);
+  --scrim: rgb(8 6 12 / 0.62);
+  --scrim-strong: rgba(0, 0, 0, 0.55);
+  --skeleton-hi: #2c2339;
+  --footer-text: #fff;
+  --footer-note: rgb(255 255 255 / 0.55);
+  --danger-ink: #f87171;
+  --danger-fill: #f87171;
+  --danger-on-fill: #170f16;
   --focus: #8b7bf7; /* focus ring, kept distinct from the accent */
   --ok: #4ec9a4;
   --warn: #f0b456;
@@ -110,6 +131,54 @@
   --font-sans: "Inter", "Segoe UI", "Noto Sans SC", system-ui, -apple-system, sans-serif;
   --font-display: "Inter", "Segoe UI", "Noto Sans SC", system-ui, sans-serif;
   --font-brand: "Caveat", "Segoe Script", cursive;
+}
+
+/* Light theme: Hatsune Miku's teal and pink instead of the PRD's night purple.
+   Every colour role is restated, so a component only has to use tokens to follow the switch.
+   Artwork overlays are not here: white text on a poster stays white on a poster. */
+[data-theme="light"] {
+  --bg: #E7F3F1;
+  --bg-soft: #DDF0ED;
+  --surface: #FBFEFD;
+  --surface-2: #D8ECE9;
+  --main: #CFE8E4;
+  --line: rgba(16, 74, 75, 0.12);
+  --line-strong: rgba(16, 74, 75, 0.24);
+
+  --text: #113033;
+  --text-muted: #44666A;
+  --text-dim: #6E8D8F;
+  --text-soft: #2E5154;
+
+  --accent: #0A7A76;
+  --accent-fill: #39C5BB;
+  --accent-ink: #06302E;
+  --accent-soft: rgba(10, 122, 118, 0.12);
+  --on-art-accent: #6FE7DA;
+  --brand: #0A7A76;
+  --icon: #113033;
+  --search-line: rgba(16, 74, 75, 0.3);
+  --search-placeholder: #6E8D8F;
+  --search-go: #44666A;
+
+  /* Over the home artwork the glass stays dark, like a photo caption; it turns to light
+     glass only once the page scrolls under it (.is-stuck). White glyphs need that floor. */
+  --header-glass: rgb(10 8 14 / 0.42);
+  --header-glass-stuck: rgb(244 251 251 / 0.92);
+  --header-blur: blur(14px) saturate(115%) brightness(0.86);
+  --scrim: rgb(16 40 40 / 0.38);
+  --scrim-strong: rgba(16, 40, 40, 0.34);
+  --skeleton-hi: #CFECE9;
+  --footer-text: #113033;
+  --footer-note: #44666A;
+
+  --danger-ink: #C62828;
+  --danger-fill: #D93A3A;
+  --danger-on-fill: #FFFFFF;
+  --focus: #0A7A76;
+  --ok: #0C7A5B;
+  --warn: #9A6410;
+  --danger: #C62828;
 }
 
 /* Reduced motion: every transition collapses, and motion.js checks the same query */

@@ -13,7 +13,7 @@ open a title, keep a bookmark in the browser.
 | --- | --- | --- |
 | Home | `index.html` | Four shelves — Weekly, Top Rated, TV, Movies — plus the sticky search bar |
 | Catalog | `catalog.html` | Six filter groups (region, format, status, genre, year, sort), its own full-width search box (no nav search on this page), the "A Total of N Titles have been found" line, Load more |
-| Rankings | `rankings.html` | Trending / all-time popular / highest rated lists with a genre filter |
+| Rankings | `rankings.html` | Popularity / score / favourites lists, five time windows, genre filter |
 | Detail | `detail.html?id=` | Score, format, episodes, synopsis with Read more, related titles, recommendations, a local rating |
 | Bookmarks | `saved.html` | Saved titles, grouped into collections, with search and sort — the full version of the drawer |
 
@@ -41,6 +41,8 @@ js/detail.js     detail page controller
 js/bookmarks.js  localStorage bookmarks, collections, drawer, recently-viewed store
 js/saved.js      bookmarks page controller
 js/motion.js     the four GSAP moments
+js/search.js     keyword typeahead under the header field
+js/theme.js      light / dark switch (localStorage, no system preference)
 vendor/          GSAP 3.12.5
 ```
 
@@ -72,9 +74,12 @@ cannot carry:
   wrong synopsis and the wrong relations. An error state with a retry button is
   better than quietly wrong data.
 
-**Rankings** offers three lists rather than the four tabs in the mock-up. AniList
-does not publish a weekly chart, so a "this week" tab would be invented. The page
-says so in its own lede rather than pretending.
+**Rankings** has three sort lists (popularity, average score, favourites) and five
+time windows. AniList has no daily or monthly chart, so each window borrows the
+nearest signal it does publish: Day and Month read `TRENDING_DESC` (Month
+restricted to airing titles), Week is the last seven days of the airing schedule
+sorted by popularity, and Season/Year filter by season and year. The chips label
+the proxies in their tooltips instead of pretending to be something else.
 
 ## Interactions
 
@@ -95,6 +100,10 @@ Four, distinct in mechanism:
    instead of re-rendering, keeps the rank numbering continuous, and hides
    itself when the API says there is nothing left.
 
+One more control rides alongside rather than counting as one of the four: the
+**light / dark theme switch** beside the clock (`js/theme.js`). It is written up
+under [Theme](#theme) below.
+
 ## Motion
 
 | Technique | Where | What it does |
@@ -108,12 +117,42 @@ Four, distinct in mechanism:
 The on-screen "Back to top" button uses `behavior: smooth` only when the user
 has not asked for reduced motion.
 
+Two smaller uses of the same library: bookmarking a title pulses the control and
+the header badge, and when the hero pick changes its tags, title and lede leave
+and return as three staggered lines. Both fall back to the CSS behaviour, and to
+no motion at all, under `prefers-reduced-motion: reduce`.
+
+## Theme
+
+Dark is the designed default; the light theme is a second, complete palette
+rather than an inverted one, drawn from Miku's teal (`#39C5BB` fill,
+`#0A7A76` for text and links, `#E7F3F1` for the page). The switch sits next to
+the clock on every page, remembers the choice in `localStorage`, and an inline
+snippet in each `<head>` applies it before first paint, so a light-theme reload
+does not flash dark.
+
+Two details are worth knowing:
+
+- the accent is split into a **text** accent and a **fill** accent. One teal
+  cannot be readable as 14 px text on white and still hold dark ink as a chip
+  behind it, so `--accent` and `--accent-fill` carry separate values; in dark
+  mode both are the original `#BD91C8`.
+- the header keeps its dark glass while it floats over the home hero, even in
+  light mode, because the banner is a photograph and white links need it. It
+  turns light once you scroll and the header sticks.
+
+The theme is an additional feature, not a fifth "interaction" in the
+assessment's sense — the four counted mechanisms stay the ones above.
+
 ## Accessibility
 
 - Text contrast measured, not eyeballed: `#978FA3` on `#141018` is 6.06:1, on
   `#1A1424` is 5.79:1; the accent `#BD91C8` is 7.20:1; accent on ink
   (`#1A0F1E`) is 7.12:1. An earlier `#6F6880` body colour came out at 3.55:1 and
-  was replaced everywhere.
+  was replaced everywhere. The light palette was measured the same way: body
+  `#113033` on `#E7F3F1` 12.37:1, muted `#44666A` on `#FBFEFD` 6.17:1, accent
+  `#0A7A76` on `#FBFEFD` 5.10:1, ink `#06302E` on the teal fill 6.72:1. The dim
+  tone (`#6E8D8F`) is 3.53:1 and only used on disabled chips.
 - Loading, empty and error are three separate rendered states, each with its own
   copy and its own next step; `aria-busy` marks the grid while it loads.
 - A malformed year is a *validation* message, not a "no results" message — the

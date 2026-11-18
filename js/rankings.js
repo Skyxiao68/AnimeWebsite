@@ -2,7 +2,7 @@
 // badges, then ranks 6-25 as a two-column list. Phones get a TOP 3 row and the
 // list starts at 4. AniList supplies the numbers.
 
-import { search, userMessage } from './api.js';
+import { search, airingWindow, userMessage } from './api.js';
 import { renderState, titleText, mountToTop } from './ui.js';
 import { mountBookmarks } from './bookmarks.js';
 
@@ -27,8 +27,9 @@ const phoneQuery = window.matchMedia('(max-width: 599px)');
 const topCount = () => (phoneQuery.matches ? TOP_PHONE : TOP_WIDE);
 let lastItems = [];
 
-// AniList has seasonYear and season, but no month or day window. Those two
-// chips are disabled in the markup instead of pretending to work.
+// AniList has no daily or monthly chart, so those two windows reuse the
+// nearest signal it does sell: trending for Day and Month, a local popularity
+// sort over the last seven days of airing for Week. See DESIGN-DEVIATIONS 62.
 function seasonNow() {
   const m = new Date().getMonth() + 1;
   if (m === 12 || m <= 2) return 'WINTER';
@@ -38,7 +39,7 @@ function seasonNow() {
 }
 
 function queryFor() {
-  const f = { sort: state.time === 'week' ? 'trending' : state.sort };
+  const f = { sort: sortLocked() ? 'trending' : state.sort };
   if (state.country) f.country = state.country;
   if (state.format) f.format = state.format;
   if (state.genre) f.genre = state.genre;
@@ -47,7 +48,23 @@ function queryFor() {
     f.year = YEAR;
     f.season = seasonNow();
   }
+  if (state.time === 'month') f.status = 'RELEASING';
   return f;
+}
+
+// Day, Week and Month bring their own ordering, so the three sort buttons cannot
+// apply to them. Locking them here keeps a press from looking like it worked.
+function sortLocked() {
+  return state.time === 'day' || state.time === 'week' || state.time === 'month';
+}
+
+// Week asks the schedule for the last seven days, then filters locally: that
+// query carries country and genres, which the paged search does not need to.
+function inWeekFilters(m) {
+  if (state.country && m.countryOfOrigin !== state.country) return false;
+  if (state.format && m.format !== state.format) return false;
+  if (state.genre && !(m.genres || []).includes(state.genre)) return false;
+  return true;
 }
 
 const esc = (s) =>
@@ -112,7 +129,16 @@ async function load() {
   const mine = ++ticket;
   showSkeletons();
   try {
-    const { items, source } = await search('', queryFor(), { page: 1, perPage: TOTAL });
+    let items = [];
+    let source = 'anilist';
+    if (state.time === 'week') {
+      const week = await airingWindow({ days: 7 });
+      items = week.filter(inWeekFilters).slice(0, TOTAL);
+    } else {
+      const res = await search('', queryFor(), { page: 1, perPage: TOTAL });
+      items = res.items;
+      source = res.source;
+    }
     if (mine !== ticket) return;
     if (!items.length) {
       topSection.hidden = true;
@@ -150,8 +176,10 @@ async function load() {
 }
 
 function syncPressed() {
+  const locked = sortLocked();
   panel.querySelectorAll('.rank-sort').forEach((b) => {
     b.setAttribute('aria-pressed', String(b.dataset.sort === state.sort));
+    b.setAttribute('aria-disabled', String(locked));
   });
   panel.querySelectorAll('.rank-row').forEach((row) => {
     const current = state[row.dataset.group];
@@ -185,6 +213,7 @@ function setGenreOpen(row, open) {
 panel.addEventListener('click', (e) => {
   const sortBtn = e.target.closest('.rank-sort');
   if (sortBtn) {
+    if (sortLocked()) return;
     state.sort = sortBtn.dataset.sort;
     syncPressed();
     load();

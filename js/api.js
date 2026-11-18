@@ -525,6 +525,8 @@ const WINDOW_QUERY = `query ($from: Int, $to: Int, $page: Int) {
         id
         type
         format
+        countryOfOrigin
+        genres
         averageScore
         popularity
         title { romaji english }
@@ -580,7 +582,7 @@ function byPopularity(a, b) {
 // Cache by day: the hero and the Day chart ask for the same window and should not fetch twice.
 const airingCache = new Map();
 
-async function airingWindow({ days = 1 } = {}) {
+export async function airingWindow({ days = 1 } = {}) {
   const now = new Date();
   const span = Math.max(1, days);
   // The week window starts seven days back from today. This used to miss the (days - 1) term, so the
@@ -623,6 +625,8 @@ const WINDOW_FIELDS = `
         id
         type
         format
+        countryOfOrigin
+        genres
         averageScore
         popularity
         title { romaji english }
