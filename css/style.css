@@ -1,6 +1,6 @@
-/* css/style.css —— 排版、组件、四态、响应式（S3 骨架）
- * 依赖 tokens.css，只用变量，不写死颜色/间距。
- * 结构对应 index.html：header / hero / 四段 section / footer / 移动 tab bar / 收藏抽屉。
+/* css/style.css - type, components, the four states, responsive rules
+ * Depends on tokens.css; use variables, never hard-coded colours or spacing.
+ * Structure mirrors index.html: header / hero / four sections / footer / tab bar / bookmark drawer.
  */
 
 /* ---------------------------------------------------------------- reset-lite */
@@ -58,7 +58,7 @@ a {
   border-radius: var(--r-sm);
 }
 
-/* ---------------------------------------------------------------- 基础排版 */
+/* ---------------------------------------------------------------- base type */
 body {
   min-height: 100dvh;
   background: var(--bg);
@@ -66,7 +66,7 @@ body {
   font-family: var(--font-sans);
   font-size: var(--fs-md);
   line-height: var(--lh-body);
-  /* 移动端底部 tab bar 会压住内容；它悬浮离底 10px，这里连那 10px 一起让开 */
+  /* the floating tab bar sits 10px off the bottom; clear that gap too */
   padding-block-end: calc(var(--tabbar-h) + var(--sp-4) + 10px + env(safe-area-inset-bottom, 0px));
 }
 
@@ -113,9 +113,10 @@ h3 {
   top: var(--sp-2);
 }
 
-/* ---------------------------------------------------------------- 顶栏 */
-/* 渲染图（refs/home--render-desktop.png 顶部）交代了三件事：字标是手写笔刷体、
- * 导航链接是纯文字（当前页压暗、不是紫色药丸）、右侧是一颗宽搜索胶囊加三个裸图标。 */
+/* ---------------------------------------------------------------- header */
+/* The render settles three things: the wordmark is a brush face, the nav links are
+ * plain text (current page dimmed, no purple pill), and the right side is one wide
+ * search pill plus three bare icons. */
 .site-header {
   position: sticky;
   top: 0;
@@ -128,8 +129,8 @@ h3 {
   border-block-end: 1px solid var(--line);
 }
 
-/* 和搜索条贴在一起时（catalog），两段是同一层玻璃，中间那条线去掉，
-   分界只留搜索条下面那条——否则顶栏底边 + 搜索条底边会读成两条线。 */
+/* Joined to the search strip (catalog): both are the same pane of glass, so the
+   divider is dropped here and only the strip keeps its own bottom edge. */
 .site-header--joined {
   border-block-end-color: transparent;
 }
@@ -160,9 +161,9 @@ h3 {
 }
 
 .site-nav {
-  display: none; /* 移动端靠 tab bar，桌面端才出链接 */
+  display: none; /* tab bar on mobile; links only from desktop up */
   gap: 46px;
-  /* 渲染图里 Home 的字形起点离字标结束 ~43px；顶栏 gap 16 + 这里 24 + 链接无内边距 ≈ 40。 */
+  /* in the render the wordmark ends ~43px before "Home": gap 16 + 24 here + no padding ~= 40. */
   margin-inline-start: var(--sp-4);
 }
 
@@ -178,13 +179,14 @@ h3 {
   color: var(--accent);
 }
 
-/* 渲染图里当前页和别的链接没差别（没有药丸、没有颜色）。2026-11-17 客户要能一眼看出
-   自己在哪一页，于是当前页改用主色；形状仍不加，避免又长出一个渲染图里没有的元素。 */
+/* The render shows no difference between the current page and the others (no pill, no
+   colour). It became an accent because that was hard to spot, but the shape stays
+   plain - no element the render does not have. */
 .site-nav__link[aria-current="page"] {
   color: var(--accent);
 }
 
-/* ---------------------------------------------------------------- 顶栏右侧 */
+/* ---------------------------------------------------------------- header tools */
 .header-tools {
   display: flex;
   align-items: center;
@@ -244,7 +246,7 @@ h3 {
   color: var(--accent);
 }
 
-/* 图标是裸字形：渲染图里没有圆形描边外框。 */
+/* Bare glyphs: the render shows no circular outline around the icons. */
 .icon-btn {
   display: grid;
   place-items: center;
@@ -284,7 +286,7 @@ h3 {
   color: var(--accent);
 }
 
-/* 「时钟」= 最近看过的详情页。图标在渲染图里就在，点开是一个小面板。 */
+/* The clock is "recently viewed". The icon is in the render; it opens a small popover. */
 .recent-pop {
   position: absolute;
   inset-block-start: calc(var(--header-h) - 8px);
@@ -350,8 +352,8 @@ h3 {
   font-size: var(--fs-sm);
 }
 
-/* ---------------------------------------------------------------- 海报 Hero */
-/* 首页的头部压在 hero 上（设计稿就是这样），其它页面仍是常规 sticky 头。 */
+/* ---------------------------------------------------------------- hero */
+/* The home header sits on top of the hero (as in the design); other pages keep a normal sticky one. */
 .page-hero .site-header {
   position: absolute;
   inset-block-start: 0;
@@ -361,50 +363,50 @@ h3 {
   backdrop-filter: none;
 }
 
-/* 顶栏压在插画上时，白链接要能读出来；只给字加影，不动画面亮度。 */
+/* White links over artwork: shadow the text instead of dimming the image. */
 .page-hero .site-header .site-nav__link {
   text-shadow: 0 1px 3px rgb(10 8 14 / 0.62), 0 1px 14px rgb(10 8 14 / 0.5);
 }
 
 .hero {
-  /* 照 cycani 的口径：hero 高度就是 60vw（实测 800 宽 486、877 宽 531），
-     文案和海报压在图上、底对齐，图绝对铺满整条带子。 */
+  /* cycani's rule: hero height is 60vw (measured 486 at 800 wide, 531 at 877). Copy and
+     posters sit on the image bottom-aligned while the artwork covers the whole band. */
   position: relative;
   display: grid;
   grid-template-areas: "hero";
   min-height: clamp(360px, 60vw, 980px);
   padding-block: 0;
-  /* 面板紧贴 hero，只留一档间距（设计稿里下面两块面板离得很近）。 */
+  /* Panels sit right under the hero with one step of spacing (the design keeps them close). */
   margin-block-end: var(--sp-3);
   overflow: hidden;
   isolation: isolate;
 }
 
-/* 大窗口按比例走（60vw），但最多到「一屏减 40px」：cycani 也是宽度驱动的
-   （1400 宽 813、1600 宽 907、2200 宽 1048），不是硬撑满一屏。
-   减 40px 是为了让下一段露出一点边，同时保证海报名字不被折线切掉。 */
+/* Wide windows scale with width (60vw) but cap at "one screen minus 40px", the way cycani
+   does (813 at 1400, 907 at 1600, 1048 at 2200) rather than filling the screen. The 40px
+   shows a sliver of the next section and keeps the poster title off the fold. */
 @media (min-width: 1200px) {
   .hero {
-    /* 照 cycani：桌面按 16:9 由宽度撑高，上限就是视口高度（他们写 max-h-[100dvh]），
-       所以窗口宽高比过 16:9 之后 hero 就是一整屏。这里保留 60vw 的口径，
-       只把「减 40px」和 980 的封顶去掉，矮窗口仍由 560 地板兜住。 */
+    /* cycani again: desktop height follows width at 16:9, capped by the viewport (they use
+       max-h-[100dvh]), so once the window is wider than 16:9 the hero is a full screen. The
+       60vw rule stays, the -40px and 980 caps go, and the 560 floor holds short windows. */
     min-height: max(560px, min(60vw, 100dvh));
   }
 
 }
 
-/* 又宽又矮的窗口（笔记本外接屏常见）：hero 内容本身就 600 多高，
-   上下留白各收一档，名字才不会被折线切掉。 */
+/* Wide and short windows (external monitors): hero content alone is 600-odd tall, so
+   trim the vertical padding a step to keep the title off the fold. */
 @media (min-width: 1200px) and (max-height: 640px) {
   .hero__body {
     padding-block: calc(var(--header-h) + var(--sp-4)) var(--sp-3);
   }
 }
 
-/* 图在文档流里撑高度：16:9，超过一屏就截住。
-   高度封到一屏，海报才不会掉到折线以下只剩半张。 */
+/* The image sets the height in flow: 16:9, cut at one screen,
+   so the poster never drops past the fold as half a card. */
 .hero__media {
-  /* 底部过渡的高度：海报名字 + 底部留白，名字压在渐变上。 */
+  /* height of the bottom fade: poster title plus the gap under it, which the gradient carries. */
   --hero-fade: 190px;
   grid-area: hero;
   position: relative;
@@ -415,7 +417,7 @@ h3 {
   background: linear-gradient(140deg, var(--surface-2), var(--bg));
 }
 
-/* 桌面段图铺满整条 hero（cycani 就是整幅插画到底），高度由 .hero 的 60vw 决定。 */
+/* Desktop: artwork covers the whole band (cycani's full-bleed illustration); height comes from 60vw. */
 @media (min-width: 640px) {
   .hero__media {
     position: absolute;
@@ -432,9 +434,9 @@ h3 {
   height: 100%;
   object-fit: cover;
   object-position: center 20%;
-  /* 换片的走法照 cycani 实测：两张叠着各自横移 4%、放大到 1.02，同时交叉淡化，
-     650ms、cubic-bezier(.4,0,.2,1)。不是整幅推走，是很轻的一下位移。
-     --zoom 留给 PV 封面图裁掉右下角「本PV」，--pop 是换片时那 2% 的起伏。 */
+  /* Swap timing copied from cycani: both layers shift 4% and scale to 1.02 while cross-fading
+     over 650ms with cubic-bezier(.4,0,.2,1) - a light drift, not a slide. --zoom trims the
+     PV badge out of frame, --pop is the 2% used during a swap. */
   transform: translateX(var(--slide, 0%)) scale(calc(var(--zoom, 1) * var(--pop, 1)));
   opacity: var(--fade, 1);
   transition: transform 0.65s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.65s cubic-bezier(0.4, 0, 0.2, 1);
@@ -442,7 +444,7 @@ h3 {
   backface-visibility: hidden;
 }
 
-/* 换片时推进来的那张，叠在原图上面；平时藏着，免得压住点击层 */
+/* The incoming frame stacks above the current one; hidden otherwise so it never eats clicks */
 .hero__img--ghost {
   visibility: hidden;
   z-index: 1;
@@ -456,7 +458,7 @@ h3 {
   visibility: visible;
 }
 
-/* 换片时图和文案一起淡出→换内容→淡回；缩略图不参与，免得整排闪 */
+/* On swap, image and copy fade out, content changes, then both fade back; thumbnails stay put */
 .hero__tags,
 .hero__title,
 .hero__lede {
@@ -491,10 +493,10 @@ h3 {
   }
 }
 
-/* 海报是浅色画面时白字读不出来，所以字的那半边压一层深色渐变，
-   底部再盖一层到页面底色，缩略图才不会像浮在空中。 */
-/* PV 截帧右下角带着视频自带的「本PV」字样。放大到 1.2 能把它挤出画面，
-   代价是整幅放大两成、构图也被裁——先不放大，只按原样铺满。 */
+/* Light artwork makes white text unreadable, so the text half carries a dark gradient and
+   the bottom fades into the page colour, which stops the thumbnails floating in air. */
+/* The PV frame has a video badge baked into its corner. Scaling to 1.2 pushes it out of
+   frame but enlarges the whole image 20% and crops the composition - not worth it here. */
 .hero__img--pv {
   --zoom: 1;
   transform-origin: left center;
@@ -506,34 +508,34 @@ h3 {
   inset: 0;
   z-index: 3;
   pointer-events: none;
-  /* 2026-11-17：客户要 cycani 那种「插画原样铺开」+ 底部一层带颗粒的磨砂。
-     毛玻璃只负责质感（blur 7px 不糊掉人物），压光交给底下那层渐变（::before）。
-     再叠一层很淡的底把毛玻璃压一点，字才咬得住。 */
+  /* cycani-style treatment: the illustration stays as it is, with a grainy frost on top.
+     The blur only adds texture (7px, characters stay legible); the gradient below does the
+     dimming. A faint wash under the frost keeps the text readable. */
   background:
     linear-gradient(0deg, rgb(10 8 14 / 0.42) 0 18%, rgb(10 8 14 / 0.18) 34%, rgb(10 8 14 / 0) 52%),
-    /* 颗粒：SVG 噪声贴在蒙版里，像磨砂玻璃的油墨感 */
+    /* grain: an SVG noise tile inside the mask, the ink of frosted glass */
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.34'/%3E%3C/svg%3E");
   background-blend-mode: normal, soft-light;
   backdrop-filter: blur(7px) saturate(108%) brightness(0.8);
   -webkit-backdrop-filter: blur(7px) saturate(108%) brightness(0.8);
-  /* 蒙版让毛玻璃往上渐隐，和原画之间没有硬边 */
-  /* 底部留一条透明带：最下面几行只留下层渐变，正好等于页面底色，
-     否则毛玻璃的压光会一直压到底边，和下一段接出一条硬线。 */
+  /* the mask fades the frost upward so there is no hard edge against the artwork */
+  /* A clear band at the bottom: the last few rows are the gradient alone, matching the page
+     colour, otherwise the frost dims right to the edge and leaves a seam with the next section. */
   mask-image: linear-gradient(0deg, transparent 0 4%, #000 12% 24%, rgb(0 0 0 / 0.6) 38%, transparent 56%);
   -webkit-mask-image: linear-gradient(0deg, transparent 0 4%, #000 12% 24%, rgb(0 0 0 / 0.6) 38%, transparent 56%);
 }
 
-/* 磨砂底下的那层渐变：把画面收到页面底色，毛玻璃再把它糊一遍，
-   两块内容之间就没有硬边。z-index 比 ::after 低，所以是「渐变在下、磨砂在上」。 */
+/* The gradient under the frost: it takes the artwork down to the page colour and the frost
+   blurs it, so the two blocks meet without a seam. Below ::after in z-order. */
 .hero__media::before {
   content: "";
   position: absolute;
   inset: 0;
-  /* 换片时推进来的 ghost 图是 z-index 1，这层必须比它高，
-     否则 650ms 的交叉淡化里渐变会被新图盖住、看着像「消失又出现」。 */
+  /* the ghost frame of a swap is z-index 1, so this layer must sit above it, or the gradient
+     gets covered mid-fade and the swap looks like a disappear-and-reappear. */
   z-index: 2;
   pointer-events: none;
-  /* 底部先留 ~10% 的纯页面底色，再往上收：接下一段时是一条宽缓坡，不是一条线。 */
+  /* hold the page colour for the bottom ~10% and ramp above it: a wide slope into the next section. */
   background: linear-gradient(
     0deg,
     var(--bg) 0 10%,
@@ -544,19 +546,19 @@ h3 {
 }
 
 .hero__body {
-  /* 文案 + 缩略图压在图上（同一块 grid 单元，靠底对齐）。 */
+  /* copy and thumbnails sit on the artwork (same grid cell, bottom-aligned). */
   grid-area: hero;
   align-self: end;
   position: relative;
   inset: auto;
   z-index: 1;
-  /* cycani 名字下到 hero 底边恒定 ~52px；上面留出导航条 + 一档间距兜底。 */
+  /* cycani keeps ~52px between the title and the hero edge; the nav bar and a step of spacing sit above. */
   padding-block: calc(var(--header-h) + var(--sp-4)) var(--sp-4);
 }
 
-/* hero 满了整屏之后，文案+缩略图整块贴底（只留 16px），1080 高的窗口里
-   文案顶会掉到屏幕中线以下。这里把底距按视口高放一档，整块往上抬 20–30px；
-   窗口越矮抬得越少，1366×768 那种基本不动。 */
+/* With the hero filling a screen, the copy block hugs the bottom (16px), which puts its top
+   below the midpoint on a 1080-tall window. Scale the bottom gap with viewport height to
+   lift the block 20-30px; short windows move hardly at all. */
 @media (min-width: 1200px) {
   .hero__body {
     padding-block-end: clamp(var(--sp-4), 4vh, 48px);
@@ -571,8 +573,8 @@ h3 {
 }
 
 .hero__tag {
-  /* 早先照设计稿填了实心 --surface（#1A1424），压在亮画面上像三块黑补丁；
-     改成半透明深色 + 一道细边，字仍是白的，画面透得出来。 */
+  /* The design's filled --surface read as three black patches on a bright illustration;
+     translucent dark plus a hairline keeps the text white and lets the artwork through. */
   padding: 4px 12px;
   border: 1px solid rgb(255 255 255 / 0.18);
   border-radius: var(--r-pill);
@@ -591,11 +593,12 @@ h3 {
   font-size: 1.25rem;
   line-height: 1.2;
   letter-spacing: -0.02em;
-  /* 顶部不再压暗后，标题会落在浅色画面上；细影压住字边，大范围那层托住整体。 */
+  /* with no dimming at the top the title lands on light artwork; a tight shadow holds
+     the letters and a wide one anchors the block. */
   text-shadow: 0 1px 3px rgb(0 0 0 / 0.6), 0 2px 18px rgb(0 0 0 / 0.6), 0 4px 34px rgb(0 0 0 / 0.45);
 }
 
-/* 标题本身就是去详情页的入口（cycani 也这样）；下划线只在悬停/聚焦时出现，免得抢视线。 */
+/* The title is the link to the detail page (cycani does the same); underline only on hover/focus. */
 .hero__title-link {
   color: inherit;
   text-decoration: none;
@@ -612,10 +615,10 @@ h3 {
   max-width: 58ch;
   margin-block: var(--sp-2) var(--sp-6);
   overflow: hidden;
-  /* 设计稿副文是 muted 灰紫（取色 rgb(138,129,152)），比纯白暗一档。 */
-  /* 画面上半是浅色（婚纱、白衬衫）时 muted 灰字糊成一片，
-     所以正文加一档字重、提一档亮度，并给两层影子：细描边压住亮部，大范围压暗兜底。 */
-  /* 2026-11-17：PV 越来越亮，muted 灰字在浅色画面上糊；提到近白，靠影子压边。 */
+  /* the design's synopsis is muted grey-purple (sampled rgb(138,129,152)), a step below white. */
+  /* On light artwork (wedding dress, white shirt) muted grey dissolves, so body text gains a
+     weight, a lighter value, and two shadows: a tight one for bright areas and a wide one for
+     the rest. */
   color: rgb(246 242 252 / 0.94);
   font-size: 15px;
   font-weight: 600;
@@ -625,14 +628,14 @@ h3 {
   -webkit-line-clamp: 2;
 }
 
-/* 原文的 <b> 不再单独描白：整段已经加粗，再强调只会让句子高低不平 */
+/* Bold no longer gets its own white stroke: the paragraph is already bold and more emphasis just makes it uneven */
 .hero__lede strong {
   font-weight: inherit;
   color: inherit;
 }
 
 .hero__arrow {
-  /* 换片箭头压在 hero 区正中线上（左右两侧各一个）。 */
+  /* the swap arrows sit on the hero's vertical centre, one per side */
   position: absolute;
   top: 50%;
   bottom: auto;
@@ -660,18 +663,17 @@ h3 {
 .hero__arrow--prev { left: var(--sp-4); }
 .hero__arrow--next { right: var(--sp-4); }
 
-/* 缩略图在文案下方左侧，和设计稿一致（原来浮在右下角）。 */
+/* thumbnails sit under the copy on the left, as in the design (they used to float bottom-right) */
 .hero__thumbs {
   display: flex;
-  /* 和卡片同一口径：缝 ≈ 缩略图宽的 10.8%（cycani 的量法），
-     1440 下缩略图 199 → 21.6px */
+  /* the gap is ~10.8% of a thumbnail's width, the way cycani measures it: 21.6px for a 199px thumbnail at 1440 */
   gap: clamp(12px, 1.5vw, 24px);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-/* 边框只围海报本身，标题落在框外——原来边框把标题也圈进去了，字看着像被裁掉一截。 */
+/* the border wraps the poster only; the title sits outside so it never looks clipped */
 .hero__thumb-btn {
   display: block;
   padding: 0;
@@ -682,7 +684,7 @@ h3 {
   transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 海报单独裁一层：hover 时图放大，框不动（cycani 的小卡也是同一套） */
+/* the poster gets its own clipping layer so hover can scale it while the frame stays put */
 .hero__thumb-frame {
   display: block;
   width: clamp(96px, 13.8vw, 214px);
@@ -701,7 +703,7 @@ h3 {
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 指针设备上悬停：海报放大 4%、整块抬 2px（都是 cycani 的实测数） */
+/* pointer devices: the poster scales 4% and the block lifts 2px (cycani's numbers) */
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
   .hero__thumb-btn:hover img,
   .hero__thumb-btn:focus-visible img {
@@ -729,8 +731,8 @@ h3 {
   transition: color 0.18s ease;
 }
 
-/* 选中的那张用主色框 + 主色字；框和海报之间留 4px 空隙（cycani 就是浮在卡外面的），
-   用 outline + offset 画，不占布局、也不会把海报挤小一圈。 */
+/* the selected thumbnail takes an accent frame and accent text, 4px clear of the poster;
+   outline plus offset draws it without adding layout or shrinking the image */
 .hero__thumb.is-current .hero__thumb-name {
   color: var(--accent);
   font-weight: 600;
@@ -741,7 +743,7 @@ h3 {
   color: var(--accent);
 }
 
-/* 设计稿的导航只有文字标，没有那块方形标记。 */
+/* the design keeps the wordmark alone; no square marker */
 .site-header .brand__mark {
   display: none;
 }
@@ -758,24 +760,24 @@ h3 {
   border-color: var(--accent);
 }
 
-/* 1200 以下页面左右只有 16px 边距，箭头的 34px 会压到副文上：
-   整块文案（含缩略图）往内收一个箭头宽度，箭头就落在画面边上。 */
+/* under 1200 the page has 16px gutters and the 34px arrows would land on the synopsis,
+   so the copy block is inset by one arrow width and the arrows sit on the artwork edge */
 @media (max-width: 1199px) {
   .hero__body {
     padding-inline: calc(var(--sp-4) + 34px);
   }
 }
 
-/* ---------------------------------------------------------------- 书架 */
+/* ---------------------------------------------------------------- shelves */
 .pair {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  /* 渲染图两块面板之间只有 9px */
+  /* the render keeps 9px between the two panels */
   gap: 10px;
   margin-block-end: 64px;
 }
 
-/* Weekly / Ranks 各占一块面板——设计稿里它们是并排的一对，不是两张表直接摊在页面上 */
+/* Weekly and Ranks each own a panel: the design pairs them side by side rather than laying two tables on the page */
 .pair > .shelf {
   margin-block-end: 0;
   padding: 20px;
@@ -784,13 +786,13 @@ h3 {
   border-radius: var(--r-lg);
 }
 
-/* 面板自己就是底色，卡片不再重复一层表面，只留海报和文字 */
+/* the panel is the surface, so cards add neither background nor border - poster and text only */
 .pair .card {
   background: none;
   border-color: transparent;
 }
 
-/* 无框卡片 hover 时整块浮起会浮出一个透明方块，改成只让海报抬手 + 投影 */
+/* a boxless card floating up leaves a visible rectangle, so only the poster lifts and takes the shadow */
 .pair .card:hover,
 .pair .card:focus-within,
 .shelf--wide .card:hover,
@@ -799,10 +801,10 @@ h3 {
   box-shadow: none;
 }
 
-/* 卡片的圆角由 .card 自己的 overflow 裁出来，海报层不再单独设圆角，
-   否则放大时圆角跟着一起放大，边角会抖。 */
+/* the card's own overflow does the rounding; the poster layer must not round separately,
+   or the corners wobble as it scales */
 
-/* 无框卡片 hover 的反馈交给海报放大，投影会卡在卡片边界上，删掉 */
+/* hover feedback belongs to the poster scale; a card shadow would clip at the edge, so it is gone */
 
 
 .pair .card__body {
@@ -817,7 +819,7 @@ h3 {
   gap: 10px;
 }
 
-/* TV Shows / Movies 跟面板同一套语言：没有卡片底色和边框，海报 + 标题直接落在页面底色上 */
+/* TV Shows / Movies speak the panel's language: no card background or border, poster and title straight on the page colour */
 .shelf--wide .card {
   background: none;
   border-color: transparent;
@@ -826,7 +828,7 @@ h3 {
 
 
 .shelf--wide .card__body {
-  /* cycani 海报底到标题 13px（卡宽 194），按同比例给了 12 */
+  /* cycani keeps 13px between poster and title at 194px wide; the same ratio gives 12 here */
   padding: var(--sp-3) 0 0;
 }
 
@@ -834,26 +836,26 @@ h3 {
   font-size: 14px;
 }
 
-/* 目录、书签页、详情推荐用同一套卡语言：不套卡底，海报和标题直接落在页面底色上，
-   跟首页 TV Shows / Movies 一致——那里也是 .shelf--wide 去掉卡底后的样子。 */
+/* catalog, bookmarks and detail recommendations share this card language: no card box,
+   poster and title straight on the page colour, same as the home shelves */
 .grid > .card {
   background: none;
   border-color: transparent;
 }
 
-/* 无框卡片 hover 时整块浮起会浮出一个透明方块，跟首页一样只让海报抬手 */
+/* as on the home page, hover lifts the poster only; a boxless card would leave a rectangle */
 .grid > .card:hover,
 .grid > .card:focus-within {
   border-color: transparent;
   box-shadow: none;
 }
 
-/* 卡底没了，标题的左右内边距也归零，否则文字比海报往里缩一截 */
+/* with no card box the title loses its side padding, or the text sits inset from the poster */
 .grid > .card .card__body {
   padding: var(--sp-3) 0 0;
 }
 
-/* 面板只有半屏宽，标题 + 7 个日选 + More 要挤在一行：字号和间距都比整页时小一档 */
+/* the panel is half a screen wide and title, seven day chips and More share one line, so type and gaps drop a step */
 .pair .shelf__title {
   font-size: 22px;
 }
@@ -862,8 +864,8 @@ h3 {
   gap: var(--sp-1) var(--sp-2);
 }
 
-/* 手机上面板只有 328px：标题和 More 占第一行，日选整体换到第二行，
-   否则日选会先换行、More 再独占一行的三行头。 */
+/* phones give the panel 328px: title and More take the first line and the day chips
+   move to a second one, which avoids a three-line header */
 @media (max-width: 659px) {
   .pair .shelf__head {
     display: grid;
@@ -886,8 +888,8 @@ h3 {
     flex-wrap: wrap;
   }
 
-  /* 七个日选要在 288px 里排成一行：手机上收窄内边距和间距，
-     选择器比基础规则多一级，否则会被后面的 .pair .chip-chip 覆盖。 */
+  /* seven day chips have to fit 288px, so padding and gap shrink on phones; the selector
+     is one step more specific so the later .pair .chip-chip does not win */
   .pair .chips {
     gap: 3px;
   }
@@ -903,13 +905,13 @@ h3 {
 }
 
 .pair .card__title {
-  /* 行高是 19px（见 .card__title），两行 = 38px。之前按 22px 写成 44px，
-     比裁切框高 6px，第三行会漏出一条残字。 */
+  /* line height is 19px (see .card__title), so two lines are 38px; written at 22px it was 44,
+     6px taller than the clip box, and a third line leaked through */
   min-height: 40px;
 }
 
 .shelf {
-  /* 渲染图区块之间约 87px（上区块下缘到下一个标题上缘） */
+  /* the render leaves about 87px between blocks, from one block's bottom to the next heading */
   margin-block-end: 64px;
 }
 
@@ -923,7 +925,7 @@ h3 {
 
 .shelf__title {
   margin: 0;
-  /* 渲染图里区块标题是 26px */
+  /* the render sets section headings at 26px */
   font-size: 26px;
   letter-spacing: -0.01em;
 }
@@ -995,16 +997,14 @@ h3 {
   font-size: var(--fs-xs);
 }
 
-/* 页脚字标跟顶栏同尺寸，设计图里它并不缩成小字 */
+/* the footer wordmark keeps the header size; the design does not shrink it */
 .brand--sm { font-size: 25px; }
 
-/* 卡片上的 Bookmark 在桌面上不占位置：平时藏起来，hover 或键盘聚焦时才出现，
-   移动端没有 hover，所以始终可见。设计稿的卡片本来就只有封面 + 标题 + 分数。 */
+/* Bookmark stays out of the way on desktop: hidden until hover or keyboard focus. Touch has no hover, so it is always visible. The design card is just cover, title and score. */
 .grid .card { position: relative; }
 
 @media (min-width: 600px) {
-  /* 基础规则里的 margin 在文件更靠后的位置，这里用双类名压过它。
-     图标占海报左上角，跟右上角的分数角标分居两侧。 */
+  /* The base rule sets margin later in the file; the double class here outranks it. The icon sits top-left of the poster, opposite the score badge. */
   .grid .card__save {
     position: absolute;
     inset-block-start: 8px;
@@ -1026,7 +1026,7 @@ h3 {
       color var(--t-fast) var(--ease);
   }
 
-  /* 基础规则在文件末尾，同为两段的特异度，这里靠类名前缀压回去 */
+  /* The base rule lives at the end of the file with the same two-segment specificity; the prefixed class wins. */
   .grid .card__save:hover,
   .grid .card__save:focus-visible {
     background: var(--accent);
@@ -1039,7 +1039,7 @@ h3 {
     opacity: 1;
   }
 
-  /* 已收藏：变实心，但同样等 hover 才出现——海报上不想常驻一块紫色 */
+  /* Saved state fills the icon, still only on hover - no permanent purple patch on every poster. */
   .grid .card__save[aria-pressed="true"] {
     background: var(--accent);
     color: #1a0f1e;
@@ -1050,17 +1050,13 @@ h3 {
   fill: currentColor;
 }
 
-/* 搜索条：PRD #13 要求移动端搜索常驻。
- * sticky 必须挂在 .search-bar 上、且它是 body 直系子元素（在 .hero 之外）——
- * 以前把 sticky 挂在 .hero 内的 .search 上，hero 一滚出视口，搜索就跟着走了。
- * top 用顶栏高度变量（--header-h 64）对齐，顶栏固定在 0，不然会压住半行。 */
+/* Search bar: PRD #13 wants search always reachable on mobile. The sticky must hang on .search-bar, a direct child of body (outside .hero) - it used to hang off .search inside the hero and scrolled away with it. top uses the header height (--header-h 64) because the header is fixed at 0. */
 .search-bar {
   position: sticky;
   top: var(--header-h);
   z-index: calc(var(--z-header) - 1);
   padding-block: var(--sp-3);
-  /* 底色和模糊跟 .site-header 同一个口径：两条 bar 上下相接，透明度不一样就
-     会在接缝处看出一个台阶。 */
+  /* Same recipe as .site-header: the two bars meet edge to edge, so a different alpha shows up as a step at the seam. */
   background: color-mix(in srgb, var(--bg) 82%, transparent);
   backdrop-filter: blur(12px);
   border-block-end: 1px solid var(--line);
@@ -1071,7 +1067,7 @@ h3 {
   justify-content: center;
 }
 
-/* 搜索框：PRD #20 —— 桌面宽 ≥640px、高 56px、字号 20px */
+/* Field: PRD #20 - 640px+ wide, 56px tall, 20px text. */
 .search {
   flex: 1 1 auto;
   display: flex;
@@ -1115,8 +1111,7 @@ h3 {
   color: var(--text-muted);
 }
 
-/* 聚焦信号由外层 .search 负责（边框转紫 + 3px ring）；输入框自己再画一圈
-   outline 会在胶囊里套出第二个圆角圈，看着像叠了两层。 */
+/* The focus ring is drawn by the outer .search (purple border + 3px ring). A second outline on the input would nest another rounded ring inside the pill. */
 .search__input:focus-visible {
   outline: none;
 }
@@ -1137,8 +1132,7 @@ h3 {
   background: color-mix(in srgb, var(--accent) 88%, white);
 }
 
-/* 手机上搜索条要常驻在首屏，太高会把 hero 挤下去：输入框 46、按钮 40，
-   加起来一条 62 的带子，和顶栏一样高。 */
+/* On phones the bar has to stay in the first screen, so keep it low: 46px field + 40px button = one 62px band, the same height as the header. */
 @media (max-width: 599px) {
   .search-bar {
     padding-block: var(--sp-2);
@@ -1157,7 +1151,7 @@ h3 {
   }
 }
 
-/* 手机首页那条搜索只在 520 以下出现（520 以上顶栏放得下），见 index.html。 */
+/* The phone home search band only shows under 520px; above that the header fits the field (see index.html). */
 @media (min-width: 520px) {
   .search-bar--phone {
     display: none;
@@ -1166,7 +1160,7 @@ h3 {
 
 
 
-/* ---------------------------------------------------------------- 四段 */
+/* ---------------------------------------------------------------- four sections */
 main {
   display: flex;
   flex-direction: column;
@@ -1201,16 +1195,15 @@ main {
   color: var(--accent);
 }
 
-/* ---------------------------------------------------------------- 卡片网格 */
+/* ---------------------------------------------------------------- card grid */
 .grid {
   display: grid;
   grid-template-columns: repeat(1, minmax(0, 1fr));
-  /* 渲染图写 10px，但 cycani 的卡缝是卡宽的 10.8%（卡 194 / 缝 21），
-     我们 1440 卡 211 只有 10 就显得挤。按列数分档跟上去。 */
+  /* The render shows 10px, but cycani's gap is 10.8% of the card width (194 card / 21 gap); our 1440 card is 211 wide, where 10px reads tight. Step the gap with the column count. */
   gap: 10px;
 }
 
-/* 卡缝跟着列数走：列越少卡片越大，缝也跟着松一档 */
+/* The gap follows the column count: fewer, bigger cards get a looser gap. */
 @media (min-width: 600px) {
   .grid {
     gap: 16px;
@@ -1229,12 +1222,12 @@ main {
   }
 }
 
-/* 半屏面板里的四张卡本来就小，缝保持紧凑，否则一排挤不下 */
+/* The four cards in a half-width panel are small already; keep the gap tight or a row will not fit. */
 .pair .grid {
   gap: 10px;
 }
 
-/* 书签页沿用同一套卡与同一套列数阶梯（6 / 4 / 3），只是不限行数 */
+/* The Bookmarks page reuses the same card and the same column ladder (6 / 4 / 3), just without a row limit. */
 #saved-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
@@ -1247,7 +1240,7 @@ main {
   #saved-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 }
 
-/* 这一页常常只有几张卡，页脚要压在窗口底部，不能半途浮起来 */
+/* This page often holds only a few cards; the footer should sit on the window bottom instead of floating mid-page. */
 body.page-saved {
   display: flex;
   flex-direction: column;
@@ -1257,7 +1250,7 @@ body.page-saved main {
   flex: 1 0 auto;
 }
 
-/* 错误 / 空态面板横跨整行，别只占一格（1 列时 1 / -1 就是整行，无害） */
+/* Error and empty panels span the full row rather than one cell (1 / -1 is the whole row at a single column, harmless). */
 .grid[data-state="error"] > .state,
 .grid[data-state="empty"] > .state {
   grid-column: 1 / -1;
@@ -1269,7 +1262,7 @@ body.page-saved main {
   flex-direction: column;
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 10px; /* 渲染图的海报圆角很小，16px 显得像圆按钮 */
+  border-radius: 10px; /* The render uses a small poster radius; 16px reads like a button. */
   overflow: hidden;
   transition: transform var(--t-base) var(--ease), border-color var(--t-base) var(--ease),
     box-shadow var(--t-base) var(--ease);
@@ -1288,7 +1281,7 @@ body.page-saved main {
   flex: 1;
 }
 
-/* 海报外面这层只管裁切：hover 放大时不让图压到标题上 */
+/* The frame only clips: on hover the zoomed image must not spill onto the title. */
 .card__frame {
   display: block;
   position: relative;
@@ -1297,15 +1290,15 @@ body.page-saved main {
 
 .card__cover {
   display: block;
-  aspect-ratio: var(--card-cover-ratio); /* PRD #08：统一 2:3 */
+  aspect-ratio: var(--card-cover-ratio); /* PRD #08: one 2:3 ratio everywhere. */
   width: 100%;
   object-fit: cover;
   background: var(--surface-2);
-  /* cycani 的卡是 group-hover:scale-[1.04] + 300ms，照抄 */
+  /* cycani does group-hover scale 1.04 over 300ms; copy it. */
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 只在真有指针设备、且没开「减少动态效果」时放大 */
+/* Only zoom on real pointers, and never when reduced motion is requested. */
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
   .card:hover .card__cover,
   .card:focus-within .card__cover {
@@ -1313,8 +1306,7 @@ body.page-saved main {
   }
 }
 
-/* 和封面同比例的覆盖层：桌面上给 Bookmark 当锚点（海报右下角），
-   手机上它 display:contents 拆掉，按钮回到文档流里、仍然在标题下面 */
+/* The overlay shares the cover ratio and anchors Bookmark at the poster's bottom-right on desktop; on phones it becomes display:contents so the button returns to flow under the title. */
 .card__overlay {
   position: absolute;
   inset-block-start: 0;
@@ -1338,19 +1330,19 @@ body.page-saved main {
   overflow: hidden;
   font-family: var(--font-sans);
   font-size: 14px;
-  color: rgb(242 238 249 / 0.78); /* 渲染图的卡题比正文浅一档，不是纯白 */
+  color: rgb(242 238 249 / 0.78); /* The render's card title is one step dimmer than body text, not pure white. */
   font-weight: 400;
   line-height: 20px;
   transition: color 0.18s ease;
 }
 
-/* 悬停（或键盘聚焦）时标题转成主色，跟顶栏链接、hero 缩略图的名字一个反馈 */
+/* Hover or keyboard focus turns the title accent, the same feedback as header links and hero thumbnail names. */
 .card:hover .card__title,
 .card:focus-within .card__title {
   color: var(--accent);
 }
 
-/* 分数是海报右上角的小牌子（cycani 同款）；Bookmark 挪到海报右下角 */
+/* The score sits top-right as a small badge (cycani style); Bookmark moved to the poster's bottom-right. */
 .card__score {
   position: absolute;
   inset-block-start: 8px;
@@ -1361,7 +1353,7 @@ body.page-saved main {
   gap: 4px;
   padding: 2px 7px;
   border-radius: var(--r-sm);
-  /* cycani 的角标是半透明黑底 + 白字 + 一个小电视图标，比实心紫牌安静 */
+  /* cycani's badge is translucent black with white text and a small TV glyph - quieter than a solid purple plate. */
   background: rgb(0 0 0 / 0.55);
   backdrop-filter: blur(4px);
   color: #fff;
@@ -1378,8 +1370,7 @@ body.page-saved main {
   opacity: 0.9;
 }
 
-/* 收藏按钮：图标（aria-label 带标题，state 走 aria-pressed）。
-   桌面端浮在海报左上角，手机端跟着 .card__overlay 回到标题下面。 */
+/* Bookmark button: icon plus an aria-label carrying the title, state on aria-pressed. Floats top-left on the poster on desktop, returns under the title with .card__overlay on phones. */
 .card__save {
   display: grid;
   place-items: center;
@@ -1407,8 +1398,10 @@ body.page-saved main {
   color: var(--accent);
 }
 
-/* ---------------------------------------------------------------- 四态 */
-/* loading：骨架卡，尺寸与真卡片一致，避免加载完跳动 */
+/*
+   ---------------------------------------------------------------- four states
+   loading: skeleton cards, the same size as real ones, so nothing jumps when data lands.
+ */
 .card--skeleton {
   pointer-events: none;
 }
@@ -1450,7 +1443,7 @@ body.page-saved main {
   }
 }
 
-/* success 无额外样式；error / empty 共用面板 */
+/* success needs nothing extra; error and empty share the panel. */
 .state {
   display: grid;
   gap: var(--sp-2);
@@ -1484,7 +1477,7 @@ body.page-saved main {
   margin-block-start: var(--sp-2);
 }
 
-/* ---------------------------------------------------------------- 收藏抽屉（PRD #06）*/
+/* ---------------------------------------------------------------- bookmarks drawer (PRD #06) */
 .drawer {
   position: fixed;
   inset-block: 0;
@@ -1539,11 +1532,10 @@ body.page-saved main {
   cursor: pointer;
 }
 
-/* ---------------------------------------------------------------- 移动 tab bar */
-/* 层级：--z-tabbar 100 < --z-drawer 200，抽屉/遮罩打开时盖住它；不跟 header 抢层。
- * 只有 <600 存在（≥600 的媒体查询里 display:none），不靠 JS 挂载。 */
-/* 悬浮玻璃条：离屏幕三边各留一段，圆角收口，糊的是它下面的内容而不是页面底色。
- * 底下那条 env() 是给全面屏手势区让位的。 */
+/*
+   ---------------------------------------------------------------- mobile tab bar
+   Layering: --z-tabbar 100 < --z-drawer 200, so drawers cover it. Only exists under 600px (hidden from 600 up in a media query), not mounted by JS. Floating glass bar: inset from three edges, rounded, blurring what is behind it rather than the page colour. The env() term clears the home-indicator area.
+ */
 .tabbar {
   position: fixed;
   inset-block-end: calc(env(safe-area-inset-bottom, 0px) + 10px);
@@ -1579,7 +1571,7 @@ body.page-saved main {
   transition: background-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
 }
 
-/* 选中项自己带一块底色，跟参考稿一样是「圆角小块」而不是整格高亮 */
+/* The current item gets its own plate - a rounded block, not a full-column highlight, as in the reference. */
 .tabbar__item[aria-current="page"] {
   color: var(--accent);
   background: color-mix(in srgb, var(--accent) 18%, transparent);
@@ -1596,7 +1588,7 @@ body.page-saved main {
   height: 20px;
 }
 
-/* ---------------------------------------------------------------- 页脚 */
+/* ---------------------------------------------------------------- footer */
 .site-footer {
   padding-block: 36px;
   background: var(--main);
@@ -1604,7 +1596,7 @@ body.page-saved main {
   font-size: var(--fs-sm);
 }
 
-/* 三栏：字标靠左、版权居中、链接靠右（设计图里版权就落在页面正中） */
+/* Three columns: wordmark left, copyright centred, links right (the render centres the copyright). */
 .site-footer__inner {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
@@ -1612,14 +1604,16 @@ body.page-saved main {
   align-items: center;
 }
 
-/* ---------------------------------------------------------------- 响应式 */
-/* 移动端：搜索 → Top Rated → Weekly（PRD #12，用 order 调，不复制 DOM） */
+/*
+   ---------------------------------------------------------------- responsive
+   Mobile order: search, Top Rated, Weekly (PRD #12) - done with order, no duplicated DOM.
+ */
 @media (max-width: 599px) {
   :root {
     --gutter: var(--sp-4);
   }
 
-  /* 窄屏三栏挤不下，改成一列，字标在上、链接在下 */
+  /* Three columns do not fit narrow screens; stack to one, wordmark first then links. */
   .site-footer__inner {
     grid-template-columns: 1fr;
     justify-items: start;
@@ -1641,7 +1635,7 @@ body.page-saved main {
     order: 3;
   }
 
-  /* 移动端段头：标题独占一行，副标题 + See all 排第二行，不然三块各折两三行 */
+  /* Section head on mobile: the title takes a line, subtitle + See all share the next, otherwise all three wrap into two or three lines. */
   .section__head {
     flex-wrap: wrap;
     row-gap: var(--sp-1);
@@ -1655,19 +1649,18 @@ body.page-saved main {
     flex: 1 1 auto;
   }
 
-  /* tab bar 遮挡兜底：body 已留 --tabbar-h + 16（footer 也够），main 再补一段，
-     保证最后一张卡的 Bookmark 按钮不贴着 bar。 */
+  /* Tab bar clearance: body already reserves --tabbar-h + 16 (footer included); main adds a little more so the last card's Bookmark never sits under the bar. */
   main {
     padding-block-end: calc(var(--tabbar-h) + var(--sp-4) + 10px);
   }
 
-  /* sticky 搜索条压在顶栏下面，别让它盖住 header 的下边线 */
+  /* The sticky search bar parks under the header; keep it off the header's bottom border. */
   .search-bar {
     box-shadow: 0 1px 0 var(--line);
   }
 }
 
-/* ≥600：平板双列。导航仍然交给底部 tab bar，到 900 才交接给顶栏。 */
+/* 600+: two columns on tablets. Navigation stays on the bottom tab bar until 900 hands it back to the header. */
 @media (min-width: 600px) {
   .grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1678,9 +1671,7 @@ body.page-saved main {
   }
 }
 
-/* 600–899 这一档原来两边都没有导航：tab bar 在 600 被收掉、顶栏要 900 才出来，
-   中间 300px 宽的窗口里一个导航入口都没有。tab bar 现在留到 899，
-   只是限宽居中——满屏横着一条会像桌面底栏，收窄才像手机和平板的手势条。 */
+/* 600-899 used to have no navigation at all: the tab bar stopped at 600, the header nav started at 900, leaving a 300px dead zone. The bar now runs to 899, just capped and centred - full width it reads like a desktop dock, narrowed it reads like a phone pill. */
 @media (min-width: 600px) and (max-width: 899px) {
   .tabbar {
     inset-inline: auto;
@@ -1690,7 +1681,7 @@ body.page-saved main {
   }
 }
 
-/* ≥900：桌面导航出现，底部 tab bar 让位 */
+/* 900+: desktop nav appears, the bottom tab bar steps aside. */
 @media (min-width: 900px) {
   body {
     padding-block-end: 0;
@@ -1705,7 +1696,7 @@ body.page-saved main {
   }
 }
 
-/* ≥992：桌面三列 */
+/* 992+: three columns. */
 @media (min-width: 992px) {
   :root {
     --gutter: var(--sp-5);
@@ -1720,26 +1711,22 @@ body.page-saved main {
   }
 }
 
-/* 大屏：六列（HiFi 稿与 PLAN.md 都按 6 列记，1440 上也是 6 不是 5）
- * 1200 容器 / 6 列 → 每张约 180px；标题靠 .card__title 的 2 行 clamp 兜住 */
+/* Large screens get six columns (1440 shows 6, not 5). The 1200 container at 6 gives roughly 180px per card; .card__title clamps to two lines so the rows line up. */
 @media (min-width: 1280px) {
   .grid {
     grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 
-  /* 首页前两段是 4 张横向条（设计稿里 Weekly 与 Ranks 并排、各占一半），
-   * 6 列会空出两格，这里单独压回 4 列；TV / Movies 仍是 6 列。 */
+  /* The first two home sections are four-wide rows (Weekly and Ranks sit side by side in the render); six columns would leave two holes, so pin them back to four. TV and Movies stay at six. */
   .grid[data-section="weekly"],
   .grid[data-section="topRated"] {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
-/* ================================================================ Catalog 页
+/* ================================================================ Catalog page */
 
-   结构照 Figma HiFi「Filter Out Your Anime」：一行 = 组名 | All | 选项值 | Expand。
-   选项默认只是文字（不画框），只有选中的那个变成胶囊。
-   状态全在 JS 里，CSS 只认三个钩子：aria-pressed、aria-expanded、data-expanded。 */
+   /* Matches Figma HiFi 'Filter Out Your Anime': one row = group | All | values | Expand. Options are plain text; only the selected one becomes a pill. All state lives in JS; CSS only reacts to aria-pressed, aria-expanded and data-expanded. */
 
 .filters {
   margin-block: var(--sp-5) var(--sp-4);
@@ -1753,7 +1740,7 @@ body.page-saved main {
   margin-block-end: var(--sp-3);
 }
 
-/* 渲染图在标题上面还有一行小字，用的是主色；手机端同一处也是它。 */
+/* The render has a small accent line above the title; on phones it is the same element. */
 .filters__kicker {
   margin: 0 0 4px;
   color: var(--accent);
@@ -1762,8 +1749,7 @@ body.page-saved main {
   letter-spacing: 0.01em;
 }
 
-/* 标题要撑得起面板：22px 比渲染图小了一档（客户端嫌小，2026-11-17），
-   上限仍卡在 36px，跟首页区块标题同一梯子。 */
+/* The panel title carries the panel, so it sits a size above body text: 34.56px at 1440, capped at 36px on the same ladder as the home section titles. */
 .filters__title {
   margin: 0;
   font-size: clamp(1.6rem, 2.4vw, 2.25rem);
@@ -1812,7 +1798,7 @@ body.page-saved main {
   line-height: 1;
 }
 
-/* 一行四列：组名（固定宽）· All · 选项 · Expand */
+/* One row, four columns: group (fixed width), All, options, Expand. */
 .filters__row {
   display: grid;
   grid-template-columns: 5.5rem 2.75rem minmax(0, 1fr) auto;
@@ -1826,7 +1812,7 @@ body.page-saved main {
   border-bottom: 1px solid var(--line);
 }
 
-/* 六组筛选坐在一块比页面亮一档的面板里，横向留白由面板给 */
+/* The six filter groups sit on a panel one step lighter than the page; the panel supplies the horizontal padding. */
 .filters__panel {
   margin-block-start: var(--sp-4);
   padding: 4px var(--sp-5);
@@ -1846,14 +1832,14 @@ body.page-saved main {
   letter-spacing: -0.01em;
 }
 
-/* All：整页唯一的实心胶囊，一点清空这一组 */
+/* All: the only solid pill on the page; one click clears this group. */
 .filters__all {
   justify-self: start;
   min-width: 2.75rem;
   padding: 2px 10px;
   border: 0;
   border-radius: 999px;
-  /* 设计渲染里选中的胶囊是实心 accent + 深字，不是半透明紫配浅字（2026-11-17 修）。 */
+  /* Selected pill: solid accent with dark ink, not translucent purple with light text. */
   background: var(--accent);
   color: #1a0f1e;
   font: inherit;
@@ -1869,7 +1855,7 @@ body.page-saved main {
   box-shadow: inset 0 0 0 1px var(--line-strong);
 }
 
-/* Sort 没有 All：留出同宽的占位，四列才对得齐 */
+/* Sort has no All, so leave a same-width spacer to keep the four columns aligned. */
 .filters__all.is-static {
   visibility: hidden;
 }
@@ -1887,7 +1873,7 @@ body.page-saved main {
   min-width: 0;
 }
 
-/* 选项：默认是文字，只有 aria-pressed="true" 才变成胶囊 */
+/* Options are plain text by default; only aria-pressed=true turns one into a pill. */
 .opt {
   padding: 4px 9px;
   border: 0;
@@ -1913,15 +1899,13 @@ body.page-saved main {
 }
 
 .opt[aria-pressed="true"] {
-  /* 同 .chip-chip[aria-pressed="true"]：实心 accent 底 + 深字，对比 8.4:1。 */
+  /* Same as .chip-chip[aria-pressed=true]: solid accent with dark text, 8.4:1 contrast. */
   background: var(--accent);
   color: #1a0f1e;
   font-weight: 700;
 }
 
-/* 折叠行：data-collapsible 的值就是「收起时露几个」，纯 CSS，JS 只切 data-expanded。
-   5 = Genre 露 5 个，3 = Status 露 3 个。评审原话是「一次给太多选择」，
-   所以默认露出的数量比设计稿更少，而不是持平。 */
+/* Collapsed row: data-collapsible is how many stay visible; pure CSS, JS only flips data-expanded. 5 = Genre shows five, 3 = Status shows three. The review said 'too many choices at once', so we show fewer than the render rather than the same. */
 .filters__row[data-collapsible="5"][data-expanded="false"] .opt:nth-child(n + 6),
 .filters__row[data-collapsible="3"][data-expanded="false"] .opt:nth-child(n + 4) {
   display: none;
@@ -1956,8 +1940,7 @@ body.page-saved main {
   transform: rotate(180deg);
 }
 
-/* 年份：输入框，不是一长串年份列表（PRD #19）。
-   11ch + min-width：再窄 placeholder 会被截断。 */
+/* Year is a text input, not a long list of years (PRD #19). 11ch + min-width so the placeholder does not clip. */
 .filters__number {
   width: 11ch;
   min-width: 104px;
@@ -1979,8 +1962,7 @@ body.page-saved main {
   font-size: var(--fs-xs);
 }
 
-/* 结果头：左边「选了哪些标签」，右边「找到多少条」。两边都是 13px 灰字，
-   只有数字那句加粗上主色 —— 照渲染图。Reset 在筛选区右上角。 */
+/* Result head: chosen tags on the left, count on the right. Both 13px grey; only the number phrase is bold accent, as in the render. Reset sits top-right of the filter area. */
 .catalog-head {
   display: flex;
   flex-wrap: wrap;
@@ -2001,15 +1983,13 @@ body.page-saved main {
   font-variant-numeric: tabular-nums;
 }
 
-/* 「A Total of 24」这一段是主色粗体，后半句保持灰字 */
+/* 'A Total of 24' is bold accent; the rest of the sentence stays grey. */
 .result-count__lead {
   color: var(--accent);
   font-weight: 600;
 }
 
-/* ---------------------------------------------------------------- 按钮
-   之前 .btn 没有任何规则，按钮拿的是浏览器默认的灰底方块——在深色页面上
-   看着像禁用态。统一成描边按钮：主色边 + 主色字，hover 才填实。 */
+/* .btn had no rules at all, so buttons fell back to the browser's grey box, which reads as disabled on a dark page. One outlined style: accent border and text, filling in on hover. */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -2043,7 +2023,7 @@ body.page-saved main {
   cursor: default;
 }
 
-/* Load more：靠 [hidden] 控制显示，别用 display:none 的类名，否则 JS 要同步两处 */
+/* Load More is toggled through [hidden]; do not add a display:none class or JS has to keep two things in sync. */
 .load-more-wrap {
   display: flex;
   justify-content: center;
@@ -2055,7 +2035,7 @@ body.page-saved main {
 }
 
 @media (max-width: 599px) {
-  /* 窄屏：组名和 All 一行，选项整行铺开，Expand 落在最后一行右侧 */
+  /* Narrow screens: group name and All on one line, options across the next, Expand at the right of the last line. */
   .filters__row {
     grid-template-columns: auto minmax(0, 1fr);
   }
@@ -2082,7 +2062,7 @@ body.page-saved main {
   }
 }
 
-/* =================================================================== 详情页 */
+/* ================================================================= Detail page */
 
 
 .to-top { position:fixed; right:1rem; bottom:calc(var(--tabbar-h) + 1rem + 10px + env(safe-area-inset-bottom, 0px)); z-index:30; padding:.6rem .9rem; border:1px solid var(--line-strong); border-radius:999px; background: var(--surface-2); color: var(--text); font: inherit; font-size:.8125rem; font-weight:600; cursor:pointer; box-shadow:0 8px 24px rgb(0 0 0 / .35); }
@@ -2095,13 +2075,23 @@ body.page-saved main {
 }
 @media (min-width: 992px) { .detail { grid-template-columns: 320px minmax(0, 1fr); } }
 
-/* =================================================================== 榜单页 */
+/* ================================================================= Rankings page */
 
 .page-head { padding-block: var(--sp-4) var(--sp-2); }
+
+/* The rankings kicker had no rule and fell back to body grey while catalog's same slot is accent. Both pages now share one recipe: accent, 17px, 0.01em tracking. */
+.page-head__kicker {
+  margin: 0 0 4px;
+  color: var(--accent);
+  font-size: var(--fs-md);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
 .page-head__title { margin:0 0 .4rem; font-size: clamp(1.8rem, 3.6vw, 2.6rem); letter-spacing:-.02em; }
 .page-head__lede { margin:0; max-width:64ch; color: var(--text-muted); line-height:1.6; }
 
-/* 收藏抽屉每一行（bookmarks.js 生成）：封面 + 标题 + 分数，右侧是单个图标按钮 */
+/* One bookmarks drawer row (built by bookmarks.js): cover, title, score, and a single icon button on the right. */
 .drawer__list { align-content: start; gap:4px; }
 .drawer__item { display:flex; align-items:center; gap:2px; padding:8px; border-radius:14px; transition: background-color var(--t-fast) var(--ease); }
 .drawer__item:hover, .drawer__item:focus-within { background: var(--surface); }
@@ -2118,17 +2108,17 @@ body.page-saved main {
 .drawer__empty-mark { color: var(--line-strong); }
 .drawer__empty strong { color: var(--text); font-size:.95rem; }
 .drawer__empty span:last-child { font-size:.8125rem; line-height:1.45; max-width:30ch; }
-/* 手机上 Weekly 变成可以横拖的一条（motion.js 会把它标成 data-drag="true"） */
+/* On phones Weekly becomes a horizontally draggable row (motion.js marks it data-drag=true). */
 @media (max-width: 599px) {
   .grid[data-drag="true"] { display:flex; gap: var(--sp-3); overflow-x:hidden; grid-template-columns:none; padding-bottom:.25rem; cursor:grab; }
   .grid[data-drag="true"] .card { flex:0 0 68%; max-width:68%; }
   .grid[data-drag="true"].is-dragging { cursor:grabbing; }
 }
 
-/* =================================================================== 手机筛选抽屉 */
-/* PRD 反馈 #11「移动端筛选长什么样」：≤599px 时六组筛选收进底部抽屉，
-   页面上只留一个带计数的 Filters 按钮。只有 filters.js 跑起来
-   （body[data-filters-ready]）才把面板移出文档流——没 JS 时它仍是普通区块。 */
+/*
+   ================================================================= Mobile filter sheet
+   PRD feedback #11 'what does filtering look like on mobile': under 599px the six groups fold into a bottom sheet and the page keeps one Filters button with a count. The panel only leaves the flow once filters.js runs (body[data-filters-ready]); without JS it is still a normal block.
+ */
 .filters-toggle,
 .filters__close,
 .filters-backdrop { display: none; }
@@ -2173,8 +2163,7 @@ body.page-saved main {
     margin: 0;
     border: 0;
     border-radius: 18px 18px 0 0;
-    /* 抽屉要盖过 sticky 搜索条（--z-header - 1）和 tab bar（--z-tabbar），
-       跟收藏抽屉同一个层：抽屉 200 / 遮罩 199。 */
+    /* The sheet has to cover the sticky search bar (--z-header - 1) and the tab bar, so it shares the bookmarks drawer's layer: sheet 200 / scrim 199. */
     z-index: var(--z-drawer);
     padding-inline: var(--sp-4);
     padding-block-end: calc(var(--sp-5) + env(safe-area-inset-bottom, 0px));
@@ -2183,7 +2172,7 @@ body.page-saved main {
     transition: transform .28s var(--ease);
   }
 
-  /* 抽屉本身已是一块面板，里面的六行不再叠第二层底 */
+  /* The sheet is already a panel; the six rows do not stack a second background inside it. */
   .filters__panel {
     margin: 0;
     padding: 0;
@@ -2194,8 +2183,7 @@ body.page-saved main {
 
   body[data-filters-ready="true"] .filters[data-open="true"] { transform: translateY(0); }
 
-  /* 标题放大后，抽屉里两个按钮会把 intro 挤到 156px 宽（标题断两行、副文五行）。
-     手机上让 intro 独占一行，Reset / Done 退到第二行右侧。 */
+  /* With the bigger title the two buttons squeeze the intro to 156px (title wraps twice, lede five times). On phones give the intro its own line and drop Reset / Done to the right of the next one. */
   .filters__head {
     position: sticky;
     top: 0;
@@ -2330,8 +2318,7 @@ body.page-saved main {
   cursor: not-allowed;
 }
 
-/* Genre 行折叠：All + 前 8 个题材。data-expanded="true" 就 17 个全铺开。
-   nth-child 从 All 开始数，所以第 10 个 chip 才是第 9 个题材。 */
+/* Genre row collapses to All + first 8; data-expanded=true opens all 17. nth-child counts from All, so the 10th chip is the 9th genre. */
 .rank-row[data-collapsible="8"][data-expanded="false"] .rank-opt:nth-child(n + 10) {
   display: none;
 }
@@ -2509,17 +2496,23 @@ body.page-saved main {
   }
 }
 
-/* TOP 5 在窄窗里折行：一间只剩三张就变成两张大图加一只孤儿，
-   所以按 5 / 3 / 2 分档，897 这种宽度仍然是一整排五张。 */
+/* TOP 5 wraps on narrow windows; 897 still shows all five in one row. */
 @media (max-width: 767px) {
   .rank-top__row {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
-@media (max-width: 519px) {
+/* Phones show the design's three big covers - two would leave a hole on the last row and shrink the posters below the list thumbnails. */
+@media (max-width: 599px) {
   .rank-top__row {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  /* The mobile render drops the section label; the three badges already say what the row is. */
+  .rank-top__title {
+    display: none;
   }
 }
 
@@ -2534,14 +2527,12 @@ body.page-saved main {
     gap: 2px;
   }
 
-  /* 手机上 Genre 只露 4 个（All + 3），整块面板因此矮一截；点 More 仍铺开 17 个。
-     桌面保持 8 个，那条规则在上面的基础样式里。 */
+  /* Phones show only four genres (All + 3), which shortens the panel; More still opens all 17. Desktop keeps eight, rule above. */
   .rank-row[data-collapsible="8"][data-expanded="false"] .rank-opt:nth-child(n + 5) {
     display: none;
   }
 
-  /* 只留 4 个以后，More 在 chip 那一行放不下会掉到下一行单独成行，
-     所以手机上把它挂到标签行右端（和展开后的 Less 同一个位置）。 */
+  /* With only four chips, More no longer fits the row and would drop onto a line of its own, so pin it to the row's right edge on phones (where Less lands once expanded). */
   .rank-more {
     position: absolute;
     inset-block-start: 0;
@@ -2549,31 +2540,35 @@ body.page-saved main {
     margin-inline-start: 0;
   }
 
+  /* The mobile render keeps the rows compact under the three big covers: a small thumbnail, the number and the name on one line. */
   .rank-item__link {
-    grid-template-columns: 2rem 96px minmax(0, 1fr);
+    grid-template-columns: 1.75rem 48px minmax(0, 1fr);
+    gap: 10px;
+    padding: 8px;
   }
 
   .rank-item__num {
-    width: 2rem;
-    height: 2rem;
+    width: 1.75rem;
+    height: 1.75rem;
+    font-size: var(--fs-xs);
   }
 
   .rank-item__thumb {
-    width: 96px;
-    height: 144px;
+    width: 48px;
+    height: 72px;
   }
 
-  /* 96 的封面撑高了行，骨架也跟着长，数据落地时不会跳。 */
+  /* The skeleton matches the row it replaces, so nothing shifts when the data lands. */
   .rank-item.is-loading {
-    height: 160px;
+    height: 88px;
   }
 }
 
-/* ---------------------------------------------------------------- Detail 页 */
+/* ---------------------------------------------------------------- Detail page */
 
 .detail__top {
   display: grid;
-  /* 中间栏封顶，宽屏时多出来的空间均摊到两条间隙里，Related 仍贴右边。 */
+  /* Cap the middle column; extra width on big screens goes into the two gaps so Related stays right. */
   grid-template-columns: 296px minmax(0, 1fr) 340px;
   gap: var(--sp-4) var(--sp-5);
   align-items: start;
@@ -2662,7 +2657,7 @@ body.page-saved main {
   background: color-mix(in srgb, var(--accent) 18%, transparent);
 }
 
-/* 已收藏时图标实心，和卡片角上的收藏状态同一个读法。 */
+/* Saved fills the icon, the same read as the bookmark state on cards. */
 #detail-save[aria-pressed="true"] path {
   fill: currentColor;
 }
@@ -2719,7 +2714,7 @@ body.page-saved main {
   background: var(--surface-2);
 }
 
-/* 已收藏时整块填 accent，和评分胶囊、卡片角标同一个读法，按下去看得出来。 */
+/* Saved fills the whole pill with accent, the same read as the score pill and the card badge, so the pressed state is visible. */
 #detail-save[aria-pressed="true"] {
   border-color: var(--accent);
   background: var(--accent);
@@ -2729,9 +2724,7 @@ body.page-saved main {
 .related__title { margin: 0; font-size: 1.375rem; }
 .related__count { margin: 2px 0 var(--sp-3); color: var(--text-muted); font-size: var(--fs-xs); }
 
-/* 相关作品可能十几条，多到一定程度就在面板里滚，不把右栏撑成一条长条。
-   高度 = 三整行（82×3 + 8×2 = 262）再多露一点第四行，滚不滚一眼看得出来。
-   四周留 4px 是给 focus 描边（2px outline + 2px offset）腾地方，不然会被裁掉。 */
+/* Related can run to a dozen items, so past a point the list scrolls inside the panel instead of stretching the right column. Height = three full rows (82x3 + 8x2 = 262) plus a peek of the fourth, so it obviously scrolls. The 4px inset leaves room for the focus outline (2px + 2px offset). */
 .related__list {
   display: grid;
   gap: var(--sp-2);
@@ -2745,7 +2738,7 @@ body.page-saved main {
   scrollbar-color: var(--line-strong) transparent;
 }
 
-/* 只有还能往下滚时才淡出底部（detail.js 维护 data-more），避免把最后一条也糊掉。 */
+/* Fade the bottom only while there is more below (detail.js keeps data-more), so the last row is never washed out. */
 .related__list[data-more="true"] {
   mask-image: linear-gradient(to bottom, #000 calc(100% - 26px), transparent);
   -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 26px), transparent);
@@ -2822,7 +2815,7 @@ body.page-saved main {
 
 .ext-links {
   display: grid;
-  /* 渲染图里这一排是 5 个等宽胶囊，不是 6 个 */
+  /* The render shows five equal pills in this row, not six. */
   grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   gap: var(--sp-2);
 }
@@ -2845,12 +2838,12 @@ body.page-saved main {
 
 .ext-link__kind { flex: none; margin-inline-start: auto; color: var(--text-muted); font-size: var(--fs-xs); }
 
-/* 胶囊里的图标跟着文字一起灰，hover 时一起变 accent。 */
+/* The icon greys with its text and turns accent on hover. */
 .ext-link__icon { flex: none; width: 16px; height: 16px; color: var(--text-muted); }
 
 .ext-link:hover .ext-link__icon { color: var(--accent); }
 
-/* 品牌图标是图片，颜色跟着它自己的来，只把范围收干净。 */
+/* Brand icons are images with their own colours; only keep them inside their box. */
 .ext-link__icon--brand { border-radius: 3px; object-fit: contain; }
 
 .reco-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
@@ -2869,30 +2862,27 @@ body.page-saved main {
   .reco-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
-/* 错误提示块在没内容的时候不占位 */
+/* The error block takes no space when empty. */
 #detail-state:empty { display: none; }
 
-/* 页脚内容跟主体容器对齐，不然右端的链接会贴到窗口边上 */
+/* Footer aligns with the content container, otherwise the right-hand links hug the window edge. */
 .site-footer__inner {
   width: min(100% - 2 * var(--gutter), var(--container));
   margin-inline: auto;
 }
 
-/* 旧的 .detail-page 是 flex 布局 + 96px 的 gap，段落间距全被它撑开了，
-   改回普通块级流，间距交给各段自己的 padding。 */
+/* The old .detail-page was flex with a 96px gap, which spaced every paragraph apart. Back to normal block flow; each section owns its padding. */
 .detail-page {
   display: block;
-  /* 底部留一档和别的页一致（曾经写 0，卡片最后一行直接贴住页脚）。 */
+  /* Keep the same bottom step as other pages (it was 0 once and the last card row sat on the footer). */
   padding-block: var(--sp-6) var(--sp-7);
 }
 .detail__top { padding-block: 0; }
 .detail__block { padding-block-start: var(--sp-5); }
 
-/* ---------------------------------------------------------------- 窄屏 */
+/* ---------------------------------------------------------------- narrow screens */
 
-/* 900px 以下顶部导航让给底部 tab bar，头部只留品牌 + 工具。
-   搜索还留着：600–899 这一档（平板与窄窗）品牌 + 搜索 + 三个图标摆得下，
-   收掉以后这个宽度就只能绕到目录页才能搜。手机再收。 */
+/* Under 900px the top nav hands over to the bottom tab bar and the header keeps brand + tools. Search stays: at 600-899 (tablet and narrow windows) brand + search + three icons fit; dropping it would leave that width with catalog as the only search. Phones drop it too. */
 @media (max-width: 899px) {
   .site-nav {
     display: none;
@@ -2903,7 +2893,7 @@ body.page-saved main {
   }
 
   .nav-search {
-    /* 600 起放宽一点，480–599 这一档品牌 + 工具已经占掉 268，只能给到 150–190 */
+    /* From 600 give it room: at 480-599 brand + tools already take 268, so 150-190 is all that is left. */
     width: clamp(150px, 27vw, 264px);
   }
 }
@@ -2914,8 +2904,7 @@ body.page-saved main {
   }
 }
 
-/* 目录页自己就有一条大搜索框黏在顶上，顶栏再放一个会并排两个搜索框。
-   这一页只留下面那条。 */
+/* Catalog carries its own large search bar pinned at the top; a second one in the header would sit beside it. This page keeps only the lower one. */
 body.page-catalog .nav-search {
   display: none;
 }
@@ -2923,7 +2912,7 @@ body.page-catalog .nav-search {
 @media (max-width: 599px) {
   .hero__thumbs { display: none; }
 
-  /* 文案贴底之后，箭头留在底部会压住正文，放回画面中线。 */
+  /* With the copy at the bottom the arrows would sit on the text, so put them back on the vertical centre. */
   .hero__arrow {
     top: 50%;
     bottom: auto;
@@ -2937,12 +2926,10 @@ body.page-catalog .nav-search {
   }
 }
 
-/* 目录页的列数跟着首页 TV Shows / Movies 走：3 / 4 / 6。
-   原来用的是通用阶梯 2 / 3 / 6，842 这种窗口里只有两列，
-   两张大卡把整屏撑满，和首页同一批卡摆出来完全不像一套。 */
+/* Catalog columns follow the home TV Shows / Movies ladder: 3 / 4 / 6. The mobile design render shows three cards across, same as home. */
 @media (max-width: 599px) {
   #catalog-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -2965,7 +2952,7 @@ body.page-catalog .nav-search {
 }
 
 
-/* ---------------------------------------------------------------- 首页：hero 顶到页首，导航黏在顶上 */
+/* ---------------------------------------------------------------- Home: hero starts at the top, header sticks over it */
 .page-hero main {
   padding-block-start: 0;
 }
@@ -2973,8 +2960,7 @@ body.page-catalog .nav-search {
 .page-hero .site-header {
   position: sticky;
   min-height: 64px;
-  /* 2026-11-17：客户要顶栏也是毛玻璃 —— 和 hero 底部那条用同一个口径，
-     图从后面透出来、糊一层，导航字压在磨砂上。 */
+  /* Frosted header, same recipe as the hero's bottom edge: the image shows through blurred and the nav text sits on the frost. */
   background: rgb(10 8 14 / 0.42);
   border-block-end-color: transparent;
   backdrop-filter: blur(14px) saturate(115%) brightness(0.86);
@@ -2982,7 +2968,7 @@ body.page-catalog .nav-search {
   transition: background-color 0.3s ease, border-block-end-color 0.3s ease;
 }
 
-/* 贴顶后背景还不够，滚过 hero 的时候下面就没有图可糊了，补一点不透明度兜底。 */
+/* Once pinned the background alone is not enough: past the hero there is no image left to blur, so add a little opacity as a floor. */
 .page-hero .site-header.is-stuck {
   background: rgb(10 8 14 / 0.72);
   border-block-end-color: transparent;
@@ -2990,23 +2976,25 @@ body.page-catalog .nav-search {
 
 .page-hero .hero {
   margin-block-start: calc(-1 * var(--header-h));
-  /* 图底下不再留内边距：多出 32px 就把整块顶过一屏，海报掉到折线以下。 */
+  /* No padding under the image: 32px extra pushes the whole block past one screen and the posters fall below the fold. */
   padding-block: 0;
 }
 
-/* 520 以下首页多了一条搜索带，hero 不能再往顶栏里抽 64，否则压掉带子。 */
+/* Under 520 the home page gains a search band, so the hero can no longer pull 64px up into the header or it would cover the band. */
 @media (max-width: 519px) {
   .page-hero .hero {
     margin-block-start: 0;
   }
 }
 
-/* ---------------------------------------------------------------- 响应式列数
-   照 cycani 的三档（它的类名就写着 grid-cols-3 / sm:grid-cols-4 / lg:...）：
-     <640   三列
-     640+   四列（宽架）
-     1024+  六列，同时 Weekly / Ranks 两块面板并排、每边四列
-   1024 以下面板始终整行堆叠、三列——手机上也是三列，不是两列。 */
+/*
+   ---------------------------------------------------------------- responsive columns
+   Following cycani's three steps (its classes literally read grid-cols-3 / sm:grid-cols-4 / lg:...):
+   <640   3 columns
+   640+   4 columns (wide shelves)
+   1024+  6 columns, and the Weekly / Ranks panels go side by side at four each
+   Below 1024 the panels always stack full width at three columns - phones also get three, not two.
+ */
 .pair {
   grid-template-columns: minmax(0, 1fr);
 }
@@ -3015,7 +3003,7 @@ body.page-catalog .nav-search {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-/* 面板固定一张四格：三列时第 4 张会掉到下一行，堆叠状态下卡片又被撑到 278px。 */
+/* A panel is pinned to four: at three columns the fourth card drops to a new row and, stacked, the cards get stretched to 278px. */
 @media (min-width: 640px) {
   .pair .shelf__grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -3043,9 +3031,7 @@ body.page-catalog .nav-search {
 }
 
 @media (max-width: 599px) {
-  /* 手机上 Bookmark 贴在海报上，不再单独占标题下面一行。
-     覆盖层还是和海报同框（基础规则里就是 absolute），这里只是把按钮钉到右下角：
-     右上角归分数角标，右下角空着。触屏没有 hover，所以常驻显示。 */
+  /* On phones Bookmark sits on the poster instead of taking a line under the title. The overlay is still same-frame with the cover (absolute in the base rule); here we only pin the button bottom-right: top-right belongs to the score, bottom-right was empty. No hover on touch, so it stays visible. */
   .grid .card__save {
     position: absolute;
     inset-block-start: auto;
@@ -3073,9 +3059,10 @@ body.page-catalog .nav-search {
   }
 }
 
-/* ---------------------------------------------------------------- hero 断点
-   cycani 的口径：h1 20 / 26 / 32px（640、1024 两档），缩略图占视口 13.8%，
-   640px 以下换成 3:4 竖图并把缩略图收起来。 */
+/*
+   ---------------------------------------------------------------- hero breakpoints
+   cycani's scale: h1 20 / 26 / 32px (steps at 640 and 1024), thumbnails at 13.8% of the viewport, and under 640 a 3:4 portrait cover with the thumbnails dropped.
+ */
 @media (min-width: 640px) {
   .hero__title {
     max-width: 768px;
@@ -3083,8 +3070,7 @@ body.page-catalog .nav-search {
   }
 }
 
-/* 1024–1199 这一档 cycani 仍是 26px 标题（实测 954 下 h1 26px），到这里才放大，
-   否则文案块偏高，窄窗口里整块被顶到顶部。 */
+/* 1024-1199 is still 26px in cycani (measured 26px at 954); only from here do we grow it, otherwise the copy block gets too tall and the whole thing is pushed to the top of a narrow window. */
 @media (max-width: 1199px) {
   .hero__lede {
     max-width: 52ch;
@@ -3092,7 +3078,7 @@ body.page-catalog .nav-search {
     font-size: 13px;
   }
 
-  /* 名字这一档跟着标题一起收小，文案块矮 40px 左右，底对齐后才落得下来。 */
+  /* The name shrinks with the title, so the copy block is about 40px shorter and can sit bottom-aligned. */
   .hero__thumb-name {
     margin-block-start: 8px;
     font-size: 14px;
@@ -3111,8 +3097,7 @@ body.page-catalog .nav-search {
     aspect-ratio: 3 / 4;
   }
 
-  /* 竖版海报是满屏插画，文案直接压在角色身上；底部拉长渐变才读得清。
-     手机端不用毛玻璃：糊得面积太大，而且 blur 在移动端吃性能。 */
+  /* The portrait poster is full-bleed illustration with the copy right on the characters; only a long bottom gradient keeps it readable. No frosted layer on phones: too much area to blur, and blur is expensive on mobile. */
   .hero__media::after {
     background:
       linear-gradient(0deg, var(--bg) 0, rgb(10 8 14 / 0.86) 26%, rgb(10 8 14 / 0.2) 62%, rgb(10 8 14 / 0.32) 100%);
@@ -3122,10 +3107,10 @@ body.page-catalog .nav-search {
     -webkit-mask-image: none;
   }
 
-  /* 手机上这层渐变会把插画底部压两遍（::after 已经收到页面底色）。 */
+  /* On phones this gradient would darken the bottom of the illustration twice (::after already fades to the page colour). */
   .hero__media::before { display: none; }
 
-  /* 缩略图在手机上不显示，底部留白收一档，文案仍贴着插画底边。 */
+  /* Thumbnails are hidden on phones, so tighten the bottom padding; the copy still sits on the illustration's bottom edge. */
   .hero__body {
     padding-block-start: calc(var(--header-h) + var(--sp-4));
     padding-block-end: var(--sp-5);
@@ -3141,10 +3126,10 @@ body.page-catalog .nav-search {
   }
 }
 
-/* ---------------------------------------------------------------- 书签页
-   顶部是标题块 + 搜索/排序，下面一排集合 chip（选中态用 accent 实底），
-   再下面是卡片网格。整理动作都发生在这两条带上，卡片本身只多一个
-   「移动到…」按钮，避免每张卡都长出三四个图标。 */
+/*
+   ---------------------------------------------------------------- Bookmarks page
+   Top is a title block plus search/sort, then a row of collection chips (the active one solid accent), then the card grid. All organising happens in those two bands; the card only gains one Move button instead of three or four icons.
+ */
 .saved {
   display: flex;
   flex-direction: column;
@@ -3446,7 +3431,7 @@ body.page-catalog .nav-search {
   color: #170f16;
 }
 
-/* 每张卡底板上的「移动到…」：低存在感，点开才浮菜单 */
+/* The Move button on each card: low presence, opens the menu only when clicked. */
 .saved .card__body {
   padding-block-end: var(--sp-2);
 }
@@ -3492,7 +3477,7 @@ body.page-catalog .nav-search {
   border-color: var(--accent);
 }
 
-/* 浮层菜单：fixed 定位，位置由 js 按触发按钮算 */
+/* Popover menu: fixed positioning, coordinates computed in JS from the trigger. */
 .menu {
   position: fixed;
   z-index: calc(var(--z-drawer) + 10);
@@ -3590,7 +3575,7 @@ body.page-catalog .nav-search {
     width: 100%;
   }
 
-  /* 集合多了就横滑，别把标题块越推越低 */
+  /* Scroll the chips sideways once there are many, instead of pushing the title block further down. */
   .saved__chips {
     flex-wrap: nowrap;
     overflow-x: auto;
@@ -3622,14 +3607,13 @@ body.page-catalog .nav-search {
     padding: 0;
   }
 
-  /* 手机上两列，和目录页同一个口径：三列会让海报只剩 103px，
-     标题全被截断，下面的 Move 按钮也挤到放不下集合名。 */
+  /* Two columns on phones, same as catalog: three leaves a 103px poster, every title clipped, and the Move button too narrow to fit a collection name. */
   #saved-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-/* 抽屉底部的「看全部」：抽屉只做快速查看，整理在整页上做 */
+/* The drawer's See all link: the drawer is for quick looks, organising happens on the full page. */
 .drawer__all {
   margin-block-start: 4px;
   padding: 10px 4px 2px;

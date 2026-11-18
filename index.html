@@ -15,9 +15,9 @@
   <body class="page-hero">
     <a class="skip-link" href="#main">Skip to content</a>
 
-    <!-- 顶栏：logo / 三个主导航 / 搜索 / 时钟 / 收藏 / 头像。
-         时钟打开的是最近浏览小面板，不再做整页 History——整理收藏放在
-         saved.html，页脚与手机底栏都指向那里。 -->
+    <!-- Header: logo, three nav links, search, clock, bookmarks.
+         The clock opens a recently-viewed popover; organising bookmarks lives on
+         saved.html, which the footer and the phone tab bar both point at. -->
     <header class="site-header">
       <div class="site-header__inner">
         <a class="brand" href="index.html">MikuFansAnime</a>
@@ -74,8 +74,9 @@
       </div>
     </header>
 
-    <!-- 手机（<480）顶栏塞不下搜索：390 宽时品牌 146 + 工具 122 就只剩 75。
-         这一档把搜索放成顶栏下面一条，和目录页同款；480 以上回到顶栏那个。 -->
+    <!-- Below 480 a search field does not fit: at 390 the brand takes 146 and the tools
+         122, leaving 75. In that band search becomes a strip under the header, same
+         shape as the catalog page; from 480 up it returns to the header. -->
     <div class="search-bar search-bar--phone">
       <div class="container">
         <form class="search" action="catalog.html" method="get" role="search">
@@ -94,7 +95,7 @@
     </div>
 
     <main id="main">
-      <!-- 整幅海报 hero：趋势第一名。标题、标签、简介、箭头、三张缩略图都由 home.js 填 -->
+      <!-- Full-bleed hero for the most trending title; title, tags, synopsis, arrows and thumbnails come from home.js -->
       <section class="hero" id="hero" aria-labelledby="hero-title" data-state="loading">
         <div class="hero__media" aria-hidden="true">
           <img class="hero__img" id="hero-img" alt="" />
@@ -124,7 +125,7 @@
 
       <div class="container">
         <div class="pair">
-          <!-- Weekly Keep Ups：Mon–Sun 走 AniList 的 airingSchedule，真的换数据 -->
+          <!-- Weekly Keep Ups: Mon-Sun really switches on AniList's airingSchedule -->
           <section class="shelf" aria-labelledby="weekly-title">
             <div class="shelf__head">
               <h2 class="shelf__title" id="weekly-title">Weekly Keep Ups</h2>
@@ -147,8 +148,9 @@
             ></div>
           </section>
 
-          <!-- Ranks：Day/Week 由放送表按人气本地排，Season/Year 走 AniList 的季节/年份过滤，
-               Month 用连载中作品的 trending 排序（AniList 没有真月榜，这是最接近的替身） -->
+          <!-- Ranks: Day/Week re-sort the airing list by popularity, Season/Year use
+               AniList's season and year filters, and Month stands in with trending
+               because AniList has no real monthly chart -->
           <section class="shelf" aria-labelledby="ranks-title">
             <div class="shelf__head">
               <h2 class="shelf__title" id="ranks-title">Ranks</h2>

@@ -1,11 +1,13 @@
 // Rankings as the design frames it: a TOP 5 row of large covers with rank
-// badges, then ranks 6-25 as a two-column list. AniList supplies the numbers.
+// badges, then ranks 6-25 as a two-column list. Phones get a TOP 3 row and the
+// list starts at 4. AniList supplies the numbers.
 
 import { search, userMessage } from './api.js';
 import { renderState, titleText, mountToTop } from './ui.js';
 import { mountBookmarks } from './bookmarks.js';
 
-const TOP = 5;
+const TOP_WIDE = 5;
+const TOP_PHONE = 3;
 const TOTAL = 25;
 const YEAR = new Date().getFullYear();
 
@@ -18,6 +20,12 @@ const stateSlot = document.getElementById('rank-state');
 
 const state = { sort: 'popular', country: '', format: '', genre: '', time: '' };
 let ticket = 0;
+
+// The phone design shows three big covers; desktop keeps five. The list numbers
+// itself from wherever the row stops, so both counts stay contiguous.
+const phoneQuery = window.matchMedia('(max-width: 599px)');
+const topCount = () => (phoneQuery.matches ? TOP_PHONE : TOP_WIDE);
+let lastItems = [];
 
 // AniList has seasonYear and season, but no month or day window. Those two
 // chips are disabled in the markup instead of pretending to work.
@@ -70,11 +78,23 @@ function listItem(m, rank) {
     </li>`;
 }
 
+function paintRows(items) {
+  const top = topCount();
+  topRow.innerHTML = items.slice(0, top).map((m, i) => topCard(m, i + 1)).join('');
+  list.innerHTML = items.slice(top).map((m, i) => listItem(m, top + i + 1)).join('');
+  const label = document.getElementById('rank-top-title');
+  if (label) label.textContent = `TOP ${top}`;
+}
+
+phoneQuery.addEventListener('change', () => {
+  if (lastItems.length) paintRows(lastItems);
+});
+
 function showSkeletons() {
   stateSlot.hidden = true;
   stateSlot.replaceChildren();
   topSection.hidden = false;
-  topRow.innerHTML = '<li class="rank-top__item is-loading"></li>'.repeat(TOP);
+  topRow.innerHTML = '<li class="rank-top__item is-loading"></li>'.repeat(topCount());
   list.innerHTML = '<li class="rank-item is-loading"></li>'.repeat(8);
   countEl.textContent = 'Loading…';
 }
@@ -109,14 +129,8 @@ async function load() {
     stateSlot.hidden = true;
     stateSlot.replaceChildren();
     topSection.hidden = false;
-    topRow.innerHTML = items
-      .slice(0, TOP)
-      .map((m, i) => topCard(m, i + 1))
-      .join('');
-    list.innerHTML = items
-      .slice(TOP)
-      .map((m, i) => listItem(m, TOP + i + 1))
-      .join('');
+    lastItems = items;
+    paintRows(items);
     countEl.textContent =
       `${items.length} titles ranked${filtersOn()}` +
       (source === 'jikan' ? ' · fallback source, filters limited' : '');
@@ -157,7 +171,7 @@ function resetAll() {
   load();
 }
 
-// 展开 / 收起 Genre 行：data-expanded 管 CSS，按钮文字和 aria 跟着走。
+// Expand / collapse the Genre row: CSS owns the display, label and aria follow.
 function setGenreOpen(row, open) {
   row.dataset.expanded = String(open);
   const more = row.querySelector('.rank-more');
@@ -176,7 +190,7 @@ panel.addEventListener('click', (e) => {
     load();
     return;
   }
-  // Genre 行的 More / Less：只切 data-expanded，显示哪几个由 CSS 决定。
+  // Genre More / Less only flips data-expanded; CSS picks which chips show.
   const more = e.target.closest('[data-expand]');
   if (more) {
     setGenreOpen(more.closest('.rank-row'), more.closest('.rank-row').dataset.expanded !== 'true');
@@ -186,8 +200,8 @@ panel.addEventListener('click', (e) => {
   if (opt && !opt.disabled) {
     const row = opt.closest('.rank-row');
     state[row.dataset.group] = opt.dataset.value || '';
-    // 选中 genre 后把这一行撑开：折叠时 pressed 的 chip 会被 nth-child 藏掉，
-    // 用户就看不见自己选了什么。
+    // Opening the row keeps a pressed chip visible - the collapse rule would hide it.
+    
     if (row.dataset.group === 'genre' && state.genre) setGenreOpen(row, true);
     syncPressed();
     load();

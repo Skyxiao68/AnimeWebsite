@@ -1,11 +1,12 @@
-/* css/tokens.css —— 设计 token（S2 骨架）
- * 只放「值」，不放任何选择器以外的规则。改视觉先改这里，别去 style.css 里翻魔法数。
- * 8px 间距刻度；正文色 #978FA3 来自 PLAN.md:103（与 Handoff 一致）。
- * 断点写死在媒体查询里（CSS 变量不能用在媒体查询条件中）：<600 移动 / 600–991 平板 / ≥992 桌面。
+/* css/tokens.css - design tokens
+ * Values only, no selectors. Change the look here first instead of hunting magic
+ * numbers in style.css. 8px spacing scale; body colour #978FA3 comes from the PRD.
+ * Breakpoints are hard-coded inside media queries (CSS variables cannot be used in
+ * a query): <600 mobile / 600-991 tablet / >=992 desktop.
  */
 
-/* Inter（latin 子集，48KB，变量字体）：自托管，不走第三方 CDN。
- * 直接从 Google Fonts 取回同一份文件，48KB 覆盖 100–900 全部字重。 */
+/* Inter, latin subset, 48KB variable font: self-hosted rather than pulled from a
+ * third-party CDN, and one file covers weights 100-900. */
 @font-face {
   font-family: "Inter";
   font-style: normal;
@@ -15,8 +16,8 @@
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
-/* 品牌字标：渲染图里是一个手写笔刷体的 MikuFansAnime，
- * 不是正文字体排出来的。Caveat 700 的笔形和间距最接近，24KB，同样自托管。 */
+/* Brand wordmark: the render shows a handwriting brush face, not the body font.
+ * Caveat 700 is the closest match for stroke shape and rhythm, 24KB, self-hosted. */
 @font-face {
   font-family: "Caveat";
   font-style: normal;
@@ -27,28 +28,28 @@
 }
 
 :root {
-  /* ---- 颜色角色（对齐已交 PRD / Figma 设计系统：bg #141018 / surface #1A1424 / accent #BD91C8）---- */
-  --bg: #141018; /* 页面底色 */
-  --bg-soft: #17121F; /* 分段底色（hero 下方过渡），落在 bg 与 surface 之间 */
-  --surface: #1A1424; /* 卡片、面板 */
-  --surface-2: #231B2F; /* 悬停、输入框，比 surface 提一档 */
-  --main: #2A1F3A; /* PRD 的 main 色，页脚整条底色用 */
+  /* ---- colour roles (match the submitted PRD / Figma system: bg #141018, surface #1A1424, accent #BD91C8) ---- */
+  --bg: #141018; /* page base */
+  --bg-soft: #17121F; /* band under the hero, between bg and surface */
+  --surface: #1A1424; /* cards, panels */
+  --surface-2: #231B2F; /* hover states and inputs, one step above surface */
+  --main: #2A1F3A; /* the PRD's main colour; the whole footer band uses it */
   --line: rgba(255, 255, 255, 0.08);
   --line-strong: rgba(255, 255, 255, 0.16);
 
-  --text: #f2eef9; /* 主文字：标题、正文重点 */
-  --text-muted: #978fa3; /* 正文 / 次要信息（PLAN.md:103 指定，与 bg/surface 均 ≥ 4.5:1） */
-  --text-dim: #6f6880; /* 占位、禁用 */
+  --text: #f2eef9; /* primary text: headings and emphasis */
+  --text-muted: #978fa3; /* body and secondary text (PRD; >= 4.5:1 on bg and surface) */
+  --text-dim: #6f6880; /* placeholders and disabled states */
 
-  --accent: #BD91C8; /* 主强调：按钮、分数、当前页（PRD accent） */
+  --accent: #BD91C8; /* primary accent: buttons, scores, current page (PRD accent) */
   --accent-soft: rgba(189, 145, 200, 0.16);
-  --accent-ink: #1A0F1E; /* 强调色上的文字：深墨，保证对比 */
-  --focus: #8b7bf7; /* 焦点环，别跟强调色混用 */
+  --accent-ink: #1A0F1E; /* text on accent: deep ink, keeps contrast */
+  --focus: #8b7bf7; /* focus ring, kept distinct from the accent */
   --ok: #4ec9a4;
   --warn: #f0b456;
   --danger: #ff6b6b;
 
-  /* ---- 间距（8px 刻度）---- */
+  /* ---- spacing (8px scale) ---- */
   --sp-1: 4px;
   --sp-2: 8px;
   --sp-3: 12px;
@@ -59,7 +60,7 @@
   --sp-8: 64px;
   --sp-9: 96px;
 
-  /* ---- 字号 / 行高 ---- */
+  /* ---- type scale / line height ---- */
   --fs-xs: 13px;
   --fs-sm: 15px;
   --fs-md: 17px;
@@ -74,7 +75,7 @@
 
   --tracking-wide: 0.08em;
 
-  /* ---- 圆角 / 阴影 ---- */
+  /* ---- radii / shadows ---- */
   --r-sm: 6px;
   --r-md: 10px;
   --r-lg: 16px;
@@ -84,34 +85,34 @@
   --shadow-2: 0 8px 24px rgba(0, 0, 0, 0.45);
   --shadow-3: 0 16px 48px rgba(0, 0, 0, 0.55);
 
-  /* ---- 布局 ---- */
-  /* 设计交接稿是 1200 居中。中途跟 cycani 试过按窗口放宽到 1560，
-     但设计稿的留白和换行都按 1200 排的，放宽后面板和中缝都散了。 */
+  /* ---- layout ---- */
+  /* The handoff lays out 1200 centred. Widening to 1560 like cycani was tried and
+     reverted: the design's whitespace and line breaks assume 1200. */
   --container: clamp(1200px, 50vw + 600px, 1440px);
-  --gutter: var(--sp-5); /* 移动端由媒体查询降到 16px */
+  --gutter: var(--sp-5); /* drops to 16px on mobile via media query */
   --header-h: 64px;
-  --tabbar-h: 56px; /* 移动底部 tab bar 高度，body 要给它留 padding */
-  --card-cover-ratio: 3 / 4; /* PRD #08：封面统一 2:3 */
+  --tabbar-h: 56px; /* phone tab bar height; body reserves this much padding */
+  --card-cover-ratio: 3 / 4; /* covers are uniformly 2:3 */
 
-  /* ---- 层级 ---- */
+  /* ---- layers ---- */
   --z-header: 100;
   --z-tabbar: 100;
   --z-drawer: 200;
   --z-toast: 300;
 
-  /* ---- 动效（GSAP 接管后仍复用这些时长做 CSS 过渡）---- */
+  /* ---- motion (GSAP drives the tweens but CSS transitions reuse these) ---- */
   --t-fast: 120ms;
   --t-base: 200ms;
   --t-slow: 320ms;
   --ease: cubic-bezier(0.2, 0.6, 0.2, 1);
 
-  /* ---- 字体 ---- */
+  /* ---- fonts ---- */
   --font-sans: "Inter", "Segoe UI", "Noto Sans SC", system-ui, -apple-system, sans-serif;
   --font-display: "Inter", "Segoe UI", "Noto Sans SC", system-ui, sans-serif;
   --font-brand: "Caveat", "Segoe Script", cursive;
 }
 
-/* 系统偏好减少动效：所有过渡退化，GSAP 那边另有一段判断（motion.js） */
+/* Reduced motion: every transition collapses, and motion.js checks the same query */
 @media (prefers-reduced-motion: reduce) {
   :root {
     --t-fast: 0ms;

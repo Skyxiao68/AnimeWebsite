@@ -1,33 +1,24 @@
-// js/ui.js —— 渲染辅助：卡片 / 骨架 / 错误 / 空态
+// js/ui.js - render helpers: cards, skeletons, error and empty panels
 //
-// 分工（PLAN.md:47）：这一层只管「把一份数据变成 DOM」，不碰请求、不碰筛选、不碰动效。
-// S5 你要写的 home.js 只需要：拿 api.js 的 items → renderCards(容器, items)。
-//
-// 约定：
-//   - 所有函数都返回 DOM 节点（或 DocumentFragment），由调用方决定挂到哪儿
-//   - 不读全局状态、不写 localStorage —— 收藏状态用 data 属性表达，交给 bookmarks.js 改
-//   - 卡片的 class 结构与 index.html 里手写的静态卡片一致，别在别处另起一套
+// Everything here turns data into DOM and nothing else: no fetching, no filters, no
+// motion. Each function returns a node and the caller decides where it goes.
+// Bookmark state is expressed with data attributes so bookmarks.js can flip it,
+// and card markup matches the static cards that used to be hand-written in the HTML.
 
-const COVER_W = 400; // 2:3 的比例写进属性，图片没加载完时也不跳动
+const COVER_W = 400; // 2:3 goes into the attributes so nothing shifts before the image loads
 const COVER_H = 600;
 
-/** 把 averageScore 变成人能看的样子（null 是合法的：新番还没评分） */
+/** averageScore as a readable number; null is legal while a show is unaired */
 export function scoreText(media) {
   return typeof media?.averageScore === 'number' ? String(media.averageScore) : '—';
 }
 
-/** 标题只用 romaji/english，两者都空就退回 id，别渲染成 undefined */
+/** Title from romaji or english, falling back to the id so nothing renders "undefined" */
 export function titleText(media) {
   return media?.title?.english || media?.title?.romaji || `#${media?.id ?? '?'}`;
 }
 
-/**
- * 单张卡片。
- * @param {object} media  api.js 返回的条目（id/title/coverImage/averageScore/format）
- * @param {object} [opts]
- * @param {boolean} [opts.bookmarked=false] 收藏按钮的初始 aria-pressed
- * @param {string} [opts.href]  默认 detail.html?id=<id>
- */
+// One card: poster, title, score chip and bookmark button.
 export function card(media, { bookmarked = false, href } = {}) {
   const title = titleText(media);
   const id = media?.id ?? '';
@@ -56,21 +47,21 @@ export function card(media, { bookmarked = false, href } = {}) {
   h3.className = 'card__title';
   h3.textContent = title;
 
-  // 分数做成海报角上的小牌子（cycani 的卡就是这个长相）。
-  // 标题下不再挂分数/格式行：设计稿和 cycani 的卡都只有海报 + 标题，
-  // 多一行灰字会让整排卡片的文字基线参差。
+  // Score rides on the poster as a small chip (the reference cards look like this).
+  // Nothing sits under the title: reference cards are poster plus title, and an extra
+  // grey row makes baselines ragged across a shelf.
   const score = document.createElement('span');
   score.className = 'card__score';
-  // 小电视图标 + 分数，跟 cycani 的角标一个长相
+  // small TV glyph plus the score, same shape as the reference chip
   const glyph = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   glyph.setAttribute('viewBox', '0 0 16 16');
   glyph.setAttribute('aria-hidden', 'true');
   glyph.innerHTML = '<rect x="1.5" y="3.5" width="13" height="9" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M6 6.4l4 1.8-4 1.8z" fill="currentColor"/>';
   score.append(glyph, document.createTextNode(scoreText(media)));
-  score.title = `平均分 ${scoreText(media)}`;
+  score.title = `Average score ${scoreText(media)}`;
 
-  // 海报包一层只负责裁切：hover 时图放大 4%，超出的部分被这层剪掉，
-  // 不会盖到下面的标题（卡片本身只裁到自己的圆角边界）。
+  // The wrapper does the cropping: on hover the poster scales 4% and this layer cuts
+  // the overflow so it never reaches the title.
   const frame = document.createElement('span');
   frame.className = 'card__frame';
   frame.append(img);
@@ -78,8 +69,8 @@ export function card(media, { bookmarked = false, href } = {}) {
   body.append(h3);
   link.append(frame, body);
 
-  // 收藏按钮：图标 + aria-pressed（PRD #05）。
-  // 这里只写初始状态，点击行为归 bookmarks.js —— 它只改 aria-pressed 和标签，不动图标。
+  // Bookmark: icon plus aria-pressed (PRD #05).
+  // Initial state only - clicks belong to bookmarks.js, which touches aria-pressed and the label.
   const save = document.createElement('button');
   save.className = 'card__save';
   save.type = 'button';
@@ -88,8 +79,8 @@ export function card(media, { bookmarked = false, href } = {}) {
   save.title = bookmarked ? 'Remove bookmark' : 'Bookmark';
   save.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M6.2 4.4h11.6a1.4 1.4 0 0 1 1.4 1.4V20l-7.2-4.1L4.8 20V5.8a1.4 1.4 0 0 1 1.4-1.4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
 
-  // 海报右下角是 Bookmark 的位置（cycani 在那儿放「已完结」这类标签）。
-  // 用一个和封面同比例的覆盖层当锚点，桌面端浮在海报上、手机端拆回文档流。
+  // Bottom-right of the poster is where the reference puts its tags ("finished" etc).
+  // A cover-proportioned overlay anchors it: floating on desktop, in flow on mobile.
   const overlay = document.createElement('div');
   overlay.className = 'card__overlay';
   overlay.append(save);
@@ -100,11 +91,8 @@ export function card(media, { bookmarked = false, href } = {}) {
   return article;
 }
 
-/**
- * 把条目列表渲染进容器（先清空）。
- * @param {Element} container
- * @param {object[]} items
- * @param {object} [opts] 透传给 card()；也可以给 opts.isBookmarked(media) => boolean
+/** Replace the container contents with cards for these items
+ * @param {object} [opts] forwarded to card(); opts.isBookmarked(media) seeds the button
  */
 export function renderCards(container, items, opts = {}) {
   const { isBookmarked, ...rest } = opts;
@@ -113,7 +101,7 @@ export function renderCards(container, items, opts = {}) {
   );
 }
 
-/** n 张骨架卡；尺寸与真卡片一致，加载完不跳版 */
+/** n skeleton cards, sized like the real ones so nothing jumps on load */
 export function skeletonCards(n = 6) {
   const frag = document.createDocumentFragment();
   for (let i = 0; i < n; i += 1) {
@@ -136,29 +124,25 @@ export function skeletonCards(n = 6) {
   return frag;
 }
 
-/** 骨架态：清空容器并塞入 n 张骨架卡 */
+/** Loading state: clear the container and show n skeletons */
 export function showSkeleton(container, n = 6) {
   container.replaceChildren(skeletonCards(n));
 }
 
-/**
- * 错误 / 空态面板。
+/** Error / empty panel.
  * @param {'error'|'empty'} kind
  * @param {object} opts
- * @param {string} opts.title
- * @param {string} [opts.message]
- * @param {string} [opts.actionLabel] 给了才出按钮
- * @param {Function} [opts.onAction]
+ * @param {string} [opts.actionLabel] only renders the button when given
  */
 export function statePanel(kind, { title, message = '', actionLabel, onAction } = {}) {
   const box = document.createElement('div');
   box.className = `state state--${kind === 'error' ? 'error' : 'empty'}`;
-  // 错误要立刻被读屏念出来；空态不需要打断
+  // errors should be announced right away; an empty shelf is not urgent
   if (kind === 'error') box.setAttribute('role', 'alert');
 
   const h = document.createElement('h3');
   h.className = 'state__title';
-  h.textContent = title || (kind === 'error' ? '加载失败' : '这里还空着');
+  h.textContent = title || (kind === 'error' ? 'Could not load' : 'Nothing here yet');
 
   box.append(h);
 
@@ -181,7 +165,7 @@ export function statePanel(kind, { title, message = '', actionLabel, onAction } 
   return box;
 }
 
-/** 四态的统一入口：section 容器里该显示什么，这里一次说清 */
+/** The one entry point for the four states: what goes inside the section */
 export function renderState(container, kind, opts) {
   if (kind === 'loading') {
     showSkeleton(container, opts?.count ?? 6);
@@ -190,58 +174,38 @@ export function renderState(container, kind, opts) {
   container.replaceChildren(statePanel(kind, opts));
 }
 
-/**
- * 把 AniList 的 description（HTML）变成一行安全的富文本。
- *
- * 描述里带 <b>、<br>、&quot; 这类标记：直接 textContent 会把 "<b>" 原样打出来，
- * 直接 innerHTML 又等于让接口决定我们能插什么。这里只保留加粗，其余标签拆成
- * 文字、<br> 当一个空格，最后按字数裁断。
- *
- * @param {string} html 原始描述
- * @param {number} [max=190] 最多保留多少字
- * @returns {string} 可直接塞进 innerHTML 的字符串（已转义）
- */
+// AniList writes the synopsis as HTML with <b>, <br> and entities. Flatten it to
+// text, keep the bold spans (the lede styles <strong>), then cut on characters.
+const BOLD_ON = '\u0001';
+const BOLD_OFF = '\u0002';
+
 export function synopsisHtml(html, max = 190) {
-  const doc = document.implementation.createHTMLDocument('');
-  const box = doc.createElement('div');
-  box.innerHTML = String(html || '');
+  const flat = String(html || '')
+    .replace(/<br\s*\/?>/gi, ' ')
+    .replace(/<\s*(?:b|strong)\s*>/gi, BOLD_ON)
+    .replace(/<\s*\/\s*(?:b|strong)\s*>/gi, BOLD_OFF)
+    .replace(/<[^>]*>/g, '');
 
-  const segments = [];
-  const walk = (node, bold) => {
-    for (const child of node.childNodes) {
-      if (child.nodeType === 3) {
-        segments.push({ text: child.nodeValue.replace(/\s+/g, ' '), bold });
-      } else if (child.nodeType === 1) {
-        const tag = child.tagName.toLowerCase();
-        if (tag === 'br') segments.push({ text: ' ', bold });
-        else walk(child, bold || tag === 'b' || tag === 'strong');
-      }
-    }
-  };
-  walk(box, false);
+  // round-trip through a detached node to decode &quot; and friends
+  const holder = document.createElement('div');
+  holder.innerHTML = flat;
+  const text = (holder.textContent || '').replace(/\s+/g, ' ').trim();
 
-  const escape = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  const parts = [];
-  let left = max;
-  let cut = false;
+  const cut = text.length > max;
+  let body = cut ? text.slice(0, max).replace(/[\s,.;:-]+$/, '') : text;
+  body = body.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-  for (const seg of segments) {
-    if (!left) { cut = true; break; }
-    if (!seg.text) continue;
-    const piece = seg.text.length > left ? seg.text.slice(0, left) : seg.text;
-    if (piece.length < seg.text.length) cut = true;
-    left -= piece.length;
-    parts.push(seg.bold ? `<strong>${escape(piece)}</strong>` : escape(piece));
-    if (cut) break;
-  }
+  const opens = (body.match(new RegExp(BOLD_ON, 'g')) || []).length;
+  const closes = (body.match(new RegExp(BOLD_OFF, 'g')) || []).length;
+  let out = body.split(BOLD_ON).join('<strong>').split(BOLD_OFF).join('</strong>');
+  if (closes > opens) out = out.replace(/^(<\/strong>)+/, '');
+  if (opens > closes) out += '</strong>'.repeat(opens - closes);
 
-  const joined = parts.join('').replace(/\s+/g, ' ').trim();
-  return cut ? `${joined.replace(/[\s,.;:-]+$/, '')}…` : joined;
+  return cut ? `${out}…` : out;
 }
 
-/**
- * 回到顶部：滚过一屏才出现，见到页脚就收起。
- * fixed 元素抬多少都会跟着页面滚，只有收起来才真不压版权行。
+/** Back to top: shows after one screen and retracts once the footer appears.
+ * Raising a fixed button only moves it along with the page, so it hides instead.
  */
 export function mountToTop(button) {
   const btn = button || document.getElementById('to-top');

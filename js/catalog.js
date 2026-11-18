@@ -4,7 +4,7 @@ import { card, renderCards, renderState, mountToTop } from './ui.js';
 import { getQuery, getState, initFilters, onChange, resetAll } from './filters.js';
 import { isBookmarked, mountBookmarks, syncWithin } from './bookmarks.js';
 
-// 48 = 每 6 列一行的整数倍（桌面 8 行），AniList 单页上限是 50。
+// 48 = whole rows of six (eight on desktop), and AniList caps a page at 50.
 const PER_PAGE = 48;
 
 const grid = document.getElementById('catalog-grid');

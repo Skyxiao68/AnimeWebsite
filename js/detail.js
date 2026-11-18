@@ -97,7 +97,7 @@ function paintRating(id) {
   els.rate.setAttribute('aria-pressed', String(Boolean(score)));
 }
 
-// 列表能滚的时候，底部淡出一点提示"下面还有"，滚到底就收掉。
+// Fade the bottom edge while the list can scroll; drop the fade at the end.
 function syncRelatedFade() {
   const list = els.relatedList;
   list.dataset.more = String(list.scrollHeight - list.clientHeight - list.scrollTop > 8);
@@ -109,7 +109,7 @@ function paintRelated(item) {
     els.related.hidden = true;
     return;
   }
-  // 列表在面板里滚（见 .related__list 的 max-height），所以关系全渲染，不再截三条。
+  // The panel scrolls (see .related__list), so every relation is rendered.
   const rows = edges.map((edge) => {
     const node = edge.node;
     const li = document.createElement('li');
@@ -135,8 +135,8 @@ function paintRelated(item) {
   syncRelatedFade();
 }
 
-// 外链按类型给一个线稿图标：播放 / 社交 / 信息 / 其他。
-// 各家品牌 logo 是十几套不同的画法，统一成一种线风格反而更像一个界面。
+// One line glyph per link type: play / chat / info / external.
+// Brand marks are a dozen different drawings; one line style reads calmer.
 const LINK_GLYPH = {
   STREAMING: '<path d="M9 6.6v10.8l9-5.4z" fill="currentColor" stroke="none"/>',
   SOCIAL: '<path d="M4.6 5.6h14.8v9.6H9.4l-4.8 4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>',
@@ -144,10 +144,10 @@ const LINK_GLYPH = {
   OTHER: '<path d="M13.4 4.6h5.8v5.8M19.2 4.6l-8 8M11 5.2H5.4v13.4h13.4V13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>',
 };
 
-// 胶囊右侧那两个字：每种链接都标一下是哪一类，不只是 Info 才有。
+// The word on the right: every link says what kind it is, not just Info.
 const LINK_KIND = { STREAMING: 'Streaming', SOCIAL: 'Social', INFO: 'Info', OTHER: 'Other' };
 
-// AniList 自带每家的官方小图标，有图就用图；没有图或者图挂了，退回上面的类型线稿。
+// AniList ships an official icon per site; fall back to the glyph when it is missing or broken.
 function externalIcon(link) {
   if (link.icon) {
     const img = document.createElement('img');

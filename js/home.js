@@ -6,8 +6,8 @@ import { card, titleText, synopsisHtml, mountToTop } from './ui.js';
 import { isBookmarked, mountBookmarks, syncWithin } from './bookmarks.js';
 
 const WEEK = 4;
-// TV / Movies 固定三排（客户 2026-11-16 定的）。列数由 CSS 断点决定（6 / 4 / 3），
-// homeFeed() 按上限 18 张取回来，这里再按「三排 × 当前列数」切 —— 手机上就是三排三格。
+// TV / Movies stay at three rows; columns come from CSS (6 / 4 / 3), and
+// homeFeed() asks for 18 so three rows stay full at the widest layout.
 const WIDE_ROWS = 3;
 
 const el = {
@@ -29,15 +29,15 @@ const el = {
   rankChips: document.getElementById('rank-chips'),
 };
 
-// 换片时推进来的那张图：两张叠着往同一个方向滑，才有 cycani 那种左右切换。
+// The outgoing image leaves the way the incoming one arrives - that is what reads as a slide.
 const ghost = document.createElement('img');
 ghost.className = 'hero__img hero__img--ghost';
 ghost.alt = '';
 ghost.setAttribute('aria-hidden', 'true');
 el.img.after(ghost);
 
-// YouTube 缺 maxres 时会回一张 120px 的灰图，只有 PV 帧才按尺寸判废；
-// 海报本来就窄（cover/large 约 460px），拿 1000 去卡会把手机端的主视觉换成横幅。
+// YouTube returns a 120px grey frame when maxres is missing, so only PV frames are
+// size-checked: a poster is ~460px wide and a 1000px threshold would swap the phone hero for a banner.
 [el.img, ghost].forEach((img) => {
   img.addEventListener('load', () => {
     const banner = img.dataset.banner || '';
@@ -96,8 +96,8 @@ let index = 0;
 
 function artFor(m, portrait) {
   const cover = m.coverImage || {};
-  // AniList 的 bannerImage 是 1900x400 的横幅，铺进 16:9 的框要纵向放大两倍多，糊；
-  // 它同时还存着 PV 的 YouTube id，1280x720 的封面图才是正经的 16:9 主视觉。
+  // bannerImage is 1900x400, so a 16:9 box would upscale it more than 2x and blur it.
+  // AniList also keeps the PV's YouTube id, and its maxres frame is a real 16:9 still.
   const pv = m.trailer && m.trailer.site === 'youtube' && m.trailer.id
     ? `https://img.youtube.com/vi/${m.trailer.id}/maxresdefault.jpg`
     : '';
@@ -108,7 +108,7 @@ function artFor(m, portrait) {
 }
 
 function setArt(img, art) {
-  // PV 封面图右下角有「本PV」白框，用类名让 CSS 往左上放大一点，把它裁到画外。
+  // The PV frame carries a badge in the corner; the class lets CSS push it out of frame.
   img.classList.toggle('hero__img--pv', art.isPv);
   img.dataset.banner = art.banner;
   img.style.setProperty('--slide', '0%');
@@ -144,9 +144,9 @@ function paintMeta(m) {
     .join('');
 }
 
-// 换片照 cycani 的实测数据：两张图各自横移 4%、放大到 1.02，同时交叉淡化，
-// 650ms、cubic-bezier(.4,0,.2,1)——不是整幅推走，所以看着慢而轻。
-// 文案在淡到一半时换掉再淡回来；缩略图不参与，免得整排跟着闪。
+// Timing copied from cycani: both images shift 4% and scale to 1.02 while cross-fading
+// over 650ms with cubic-bezier(.4,0,.2,1). Nothing is pushed off screen, so it reads light.
+// The copy swaps halfway and fades back in; thumbnails stay put so the row does not blink.
 const SLIDE_MS = 650;
 const AUTO_MS = 7000;
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -170,7 +170,7 @@ function showPick(i, { animate = true } = {}) {
     return;
   }
 
-  // 上一轮还没落定就来了新的：先把主图扶回原位，不然它会停在半路。
+  // A new pick arrived mid-transition: settle the main image first or it parks halfway.
   if (el.hero.classList.contains('is-sliding')) {
     el.img.style.transition = 'none';
     el.img.style.opacity = '1';
@@ -183,7 +183,7 @@ function showPick(i, { animate = true } = {}) {
   el.hero.classList.add('is-swapping', 'is-sliding');
   ghost.classList.toggle('hero__img--pv', art.isPv);
   ghost.dataset.banner = art.banner;
-  // 进来的那张先站到右边一点点、比画面大 2%，然后和旧图一起往左挪 4%。
+  // The incoming frame starts slightly right and 2% larger, then both drift 4% left.
   ghost.style.transition = 'none';
   ghost.style.opacity = '0';
   ghost.style.setProperty('--slide', '4%');
@@ -209,7 +209,7 @@ function showPick(i, { animate = true } = {}) {
     paintMeta(m);
   }, SLIDE_MS / 2);
 
-  // 淡完把新图落到主图、两张都复位，人眼几乎看不出这一下。
+  // Settle the new frame into the main slot and reset both; the swap is hard to spot.
   window.setTimeout(() => {
     if (token !== swapToken) return;
     el.img.style.transition = 'none';
@@ -236,8 +236,8 @@ function stopAuto() {
   autoTimer = 0;
 }
 
-// 自动轮播：鼠标进来、键盘聚焦、标签页切走都停，离开再继续；
-// 系统开了「减少动态效果」就整个不转，让人自己点。
+// Autoplay stops on hover, on focus and in a hidden tab, then resumes;
+// under prefers-reduced-motion it never runs and the arrows do the work.
 function startAuto() {
   stopAuto();
   if (reduceMotion.matches || picks.length < 2) return;
@@ -284,7 +284,7 @@ el.thumbs.addEventListener('click', (e) => {
   const btn = e.target.closest('[data-pick]');
   if (!btn) return;
   const pick = Number(btn.dataset.pick);
-  // 点已经选中的那张就是「我想看详情」（cycani 也是这个行为），不是重播一遍切换。
+  // Tapping the selected thumbnail means "open the detail page", not "replay the swap".
   if (pick === index && picks[index]) {
     window.location.href = `detail.html?id=${encodeURIComponent(picks[index].id)}`;
     return;
@@ -293,7 +293,7 @@ el.thumbs.addEventListener('click', (e) => {
   startAuto();
 });
 
-// 悬停 / 聚焦时暂停，离开后重新计时
+// Pause on hover or focus, resume on leave
 el.hero.addEventListener('mouseenter', stopAuto);
 el.hero.addEventListener('mouseleave', startAuto);
 el.hero.addEventListener('focusin', stopAuto);
@@ -310,14 +310,14 @@ reduceMotion.addEventListener('change', () => {
 });
 
 // ----------------------------------------------------------------- shelves
-// 列数与 CSS 的三档保持一致：>=1024 六列、>=640 四列、其余三列。
+// Same three steps as the CSS grid: six columns from 1024, four from 640, three below.
 function wideColumns() {
   if (window.matchMedia('(min-width: 1024px)').matches) return 6;
   if (window.matchMedia('(min-width: 640px)').matches) return 4;
   return 3;
 }
 
-// 取回来的整批先存着，窗口改宽度时只重切，不再打一次接口。
+// Keep the fetched batch and re-slice on resize instead of asking again.
 const shelfItems = new Map();
 
 function fillShelf(grid, name) {
@@ -325,8 +325,8 @@ function fillShelf(grid, name) {
   paint(grid, items.slice(0, WIDE_ROWS * wideColumns()));
 }
 
-// TV / Movies 的两份数据由 homeFeed() 一起带回来，这里只负责落进 shelfItems 和上屏；
-// 曾经各自 section() 一条，等于首页开局就多发两条请求。
+// homeFeed() returns TV and Movies together; this only splits them into shelves.
+// (Both used to fetch on their own, which cost two extra calls on every home load.)
 function showShelves(feed) {
   shelfItems.set('tv', feed.tv);
   shelfItems.set('movies', feed.movies);
@@ -380,7 +380,7 @@ el.dayChips.addEventListener('click', (e) => {
   if (btn) loadDay(Number(btn.dataset.day), btn);
 });
 
-// Ranks 的五个窗口都换真数据：Day/Week 是放送表按人气本地排，Season/Year 走季节、年份过滤。
+// All five Ranks windows use real data: Day/Week sort the airing list by popularity; Season/Year filter.
 async function loadChart(which) {
   pressOnly(el.rankChips, 'window', which);
   el.ranks.dataset.state = 'loading';
@@ -406,8 +406,8 @@ el.rankChips.addEventListener('click', (e) => {
 });
 
 // ----------------------------------------------------------------- boot
-// 先发一条合并请求把放送窗口和两条 shelf 拿回来，再让 hero / 今日 / Ranks 吃缓存。
-// 顺序是有意的：hero 和 Ranks 都依赖那份放送窗口，先拿它就不用各自再发一条。
+// One merged request fills the airing window and both shelves; hero, today and Ranks read the cache.
+// The order is deliberate: hero and Ranks both need the airing window, so it goes first.
 async function boot() {
   let feed = null;
   try {
@@ -435,8 +435,8 @@ window.addEventListener('resize', () => {
   }, 150);
 });
 
-// ---------------------------------------------------------------- 导航
-// 首页的导航压在 hero 上（透明），滚过一段后切成实心条，否则一直看不清。
+// ------------------------------------------------------------- navigation
+// The home nav sits on the hero at first and turns solid once you scroll past it.
 const headerEl = document.querySelector('.site-header');
 if (headerEl && document.body.classList.contains('page-hero')) {
   const syncHeader = () => headerEl.classList.toggle('is-stuck', scrollY > 24);

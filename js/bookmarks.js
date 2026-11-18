@@ -431,8 +431,8 @@ function closeDrawer() {
 // bookmarks, but capped and trimmed on every visit, and only written by detail.js.
 
 const RECENT_KEY = 'mf.recent.v1';
-const RECENT_KEEP = 24; // 时钟面板只露 6 条，这里多留一档，换布局不用动存储
-const RECENT_POP = 6; // 顶栏那个小面板只露最近几条
+const RECENT_KEEP = 24; // the clock panel shows 6; a spare tier keeps layout changes out of storage
+const RECENT_POP = 6; // the header popover shows a few of the most recent
 
 function readRecent() {
   try {
