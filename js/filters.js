@@ -1,5 +1,5 @@
 // Filter bar: chips, Expand rows, Reset, and the address bar.
-// The module knows nothing about fetching — catalog.js subscribes to onChange().
+// This module does not fetch. catalog.js subscribes to onChange().
 import { SEARCH_SORTS } from './api.js';
 
 const GROUPS = ['country', 'format', 'status', 'genre', 'year', 'sort'];
@@ -120,7 +120,7 @@ function mountSheet() {
   });
 }
 
-// How many things are actually narrowing the result — tuned groups plus a term.
+// How many active groups are narrowing the result, plus a search term.
 function countSelected() {
   const badge = document.getElementById('filters-count');
   if (!badge) return;
@@ -211,7 +211,7 @@ export function initFilters() {
     typing = setTimeout(() => emit(), 300);
   });
 
-  // The form still works without JS; with JS we just stay on the page.
+  // The form works without JS. With JS we stay on the page.
   document.querySelector('.search')?.addEventListener('submit', (event) => {
     event.preventDefault();
     clearTimeout(typing);

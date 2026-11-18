@@ -1,9 +1,8 @@
-// js/ui.js - render helpers: cards, skeletons, error and empty panels
+// js/ui.js - render helpers: cards, skeletons, error and empty panels.
 //
-// Everything here turns data into DOM and nothing else: no fetching, no filters, no
-// motion. Each function returns a node and the caller decides where it goes.
-// Bookmark state is expressed with data attributes so bookmarks.js can flip it,
-// and card markup matches the static cards that used to be hand-written in the HTML.
+// Turns data into DOM only. No fetching, filters or motion. Each function
+// returns a node; the caller decides where it goes.
+// Bookmark state uses data attributes so bookmarks.js can flip it.
 
 import { pageHref } from './paths.js';
 

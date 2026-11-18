@@ -1,6 +1,6 @@
-// Bookmarks page: the same store the drawer reads, laid out with collections,
-// a text filter and a sort. Storage lives in bookmarks.js; this file only reads
-// it, asks it to change, and paints the result.
+// Bookmarks page: same store as the drawer, with collections, text filter
+// and sort. Storage lives in bookmarks.js. This file reads it, asks it to
+// change, and paints the result.
 
 import { card, statePanel, mountToTop } from './ui.js';
 import { pageHref } from './paths.js';

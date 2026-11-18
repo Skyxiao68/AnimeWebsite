@@ -31,8 +31,8 @@ function say(text) {
   if (count) count.textContent = text;
 }
 
-// Left half of the result line: which tags are on. Sort is always set, so it
-// is not a "tag"; the search box counts separately and reads as a quote.
+// Left half of the result line: which tags are on. Sort is always set,
+// so it is not a tag. The search box is shown separately, in quotes.
 const TAGS = ['country', 'format', 'status', 'genre', 'year'];
 
 function sayTags(source) {
@@ -54,8 +54,8 @@ function sayTags(source) {
   tagLine.textContent = parts.join(' · ');
 }
 
-// Right half: how many titles are on the page right now. The number grows when
-// Load More is used, which is why it is read from the running total.
+// Right half: how many titles are on the page now. The number grows with
+// Load More, so read it from the running total.
 function sayFound() {
   if (!count) return;
 
@@ -94,8 +94,8 @@ function errorState(err) {
   say('Load failed');
 }
 
-// A year like "20" or "18xx" is not an empty result — it is input the app can
-// tell is wrong before it asks anyone. Kept separate on purpose (PRD review #11).
+// A year like "20" or "18xx" is bad input, not an empty result. The app can
+// tell before it asks the API. Kept separate for PRD review #11.
 function badYearState(problem) {
   grid.dataset.state = 'error';
   renderState(grid, 'error', {
