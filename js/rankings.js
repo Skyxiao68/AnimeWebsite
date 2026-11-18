@@ -28,9 +28,9 @@ const phoneQuery = window.matchMedia('(max-width: 599px)');
 const topCount = () => (phoneQuery.matches ? TOP_PHONE : TOP_WIDE);
 let lastItems = [];
 
-// AniList has no daily or monthly chart, so those two windows reuse the
-// nearest signal it does sell: trending for Day and Month, a local popularity
-// sort over the last seven days of airing for Week. See DESIGN-DEVIATIONS 62.
+// AniList has no daily or monthly chart. Day and Month use trending, the
+// nearest signal it has. Week sorts the last seven days of airing by
+// popularity. See DESIGN-DEVIATIONS 62.
 function seasonNow() {
   const m = new Date().getMonth() + 1;
   if (m === 12 || m <= 2) return 'WINTER';
@@ -53,8 +53,8 @@ function queryFor() {
   return f;
 }
 
-// Day, Week and Month bring their own ordering, so the three sort buttons cannot
-// apply to them. Locking them here keeps a press from looking like it worked.
+// Day, Week and Month bring their own ordering, so the three sort buttons
+// do not apply. Locking them stops a click from looking like it worked.
 function sortLocked() {
   return state.time === 'day' || state.time === 'week' || state.time === 'month';
 }

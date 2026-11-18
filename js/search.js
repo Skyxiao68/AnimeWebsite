@@ -1,11 +1,11 @@
-// js/search.js - matches under the keyword field while it is being typed
+// js/search.js - matches under the keyword field while typing.
 //
-// The header field and the phone band were plain forms: nothing happened until
-// Enter carried the text to the catalog. This mounts a six-row popover with the
-// current matches, so a keyword shows results as it is typed.
+// The header field and phone band were plain forms. Nothing happened until
+// Enter sent the text to the catalog. This adds a six-row popover with current
+// matches, so results show as you type.
 //
-// The catalog page is skipped on purpose - its grid already refetches on every
-// keystroke (js/filters.js), and a popover there would print the same rows twice.
+// Catalog is skipped: its grid already refetches on every keystroke
+// (js/filters.js), and a popover would print the same rows twice.
 
 import { search } from './api.js';
 import { titleText } from './ui.js';
@@ -130,8 +130,8 @@ function mount(form) {
     note('Searching…');
 
     try {
-      // Fresh on purpose: a cached empty answer (a throttled minute, say) would keep
-      // claiming there are no matches for the rest of the cache window.
+      // Fresh call: a cached empty answer (say, a throttled minute) would keep
+      // saying "no matches" for the rest of the cache window.
       const { items } = await search(query, {}, { perPage: PER_PAGE, fresh: true });
       if (token !== pending) return;
 
@@ -163,8 +163,8 @@ function mount(form) {
     timer = setTimeout(() => run(query), DEBOUNCE);
   });
 
-  // Coming back to a field that already holds a word (after Escape, or a tap elsewhere)
-  // should show those matches again, not an empty panel.
+  // Coming back to a field that still has a word (after Escape, or a tap elsewhere)
+  // should show the matches again.
   input.addEventListener('focus', () => {
     const query = input.value.trim();
     if (query.length < MIN_CHARS || !pop.hidden) return;

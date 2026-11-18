@@ -1,6 +1,6 @@
-// Saved titles live in localStorage — the PRD has no account, so there is no
-// server-side collection. Each entry keeps what a drawer row needs, which means
-// opening the drawer never calls the API again.
+// Saved titles live in localStorage. The PRD has no account, so there is no
+// server-side collection. Each entry keeps what a drawer row needs, so opening
+// the drawer does not call the API again.
 import { pageHref } from './paths.js';
 
 const KEY = 'mf.bookmarks.v1';
@@ -22,7 +22,7 @@ function write(list) {
   try {
     localStorage.setItem(KEY, JSON.stringify(list.slice(0, LIMIT)));
   } catch {
-    /* quota or private mode: the button still flips, the save just won't last */
+    /* quota or private mode: the button still flips, but the save won't last */
   }
 }
 
@@ -53,7 +53,7 @@ function writeCollections(list) {
   try {
     localStorage.setItem(COLLECTIONS_KEY, JSON.stringify(list.slice(0, COLLECTIONS_LIMIT)));
   } catch {
-    /* private mode: organising just won't survive a reload */
+    /* private mode: the collection order won't survive a reload */
   }
 }
 
@@ -178,7 +178,7 @@ export function remove(id) {
 
 // ---------------------------------------------------------------- buttons
 
-// One short pulse on the control that was just tapped. Without it a save only
+// One short pulse on the control that was tapped. Without it a save only
 // changes colour, which is easy to miss on a phone where there is no hover.
 export function pulseSave(node) {
   const gsap = window.gsap;
@@ -477,7 +477,7 @@ function writeRecent(list) {
   try {
     localStorage.setItem(RECENT_KEY, JSON.stringify(list.slice(0, RECENT_KEEP)));
   } catch {
-    /* private mode: the panel simply stays empty */
+    /* private mode: the panel stays empty */
   }
 }
 
@@ -508,7 +508,7 @@ function paintRecent() {
   if (!rows.length) {
     const empty = document.createElement('p');
     empty.className = 'recent-pop__empty';
-    empty.textContent = 'Nothing yet — open any title and it shows up here.';
+    empty.textContent = 'Nothing yet. Open a title and it shows up here.';
     pop.replaceChildren(head, empty);
     return;
   }
@@ -572,8 +572,8 @@ export function mountBookmarks() {
       const cover = card?.querySelector('.card__cover');
       const score = card?.querySelector('.card__score');
 
-      // The card already drew the title and cover, so reuse them — that is what
-      // keeps the drawer row intact after a reload, without a second request.
+      // Reuse the title and cover already on the card. This keeps the drawer row
+      // intact after reload, without a second request.
       const saved = toggle({
         id: card?.dataset.id,
         title: { romaji: save.getAttribute('aria-label')?.replace(/^Bookmark: /, '') },

@@ -13,7 +13,7 @@ if (!gsap) {
 
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // 1 — Timeline: the homepage hero arrives in reading order.
+  // 1 Timeline: the homepage hero arrives in reading order.
   function heroTimeline() {
     const parts = ['.hero__eyebrow', '.hero__title', '.hero__lede', '.search']
       .map((sel) => document.querySelector(sel))
@@ -25,7 +25,7 @@ if (!gsap) {
       .from(parts, { y: 18, opacity: 0, stagger: 0.09 });
   }
 
-  // 2 — ScrollTrigger: cards appear once, in small batches, as they are reached.
+  // 2 ScrollTrigger: cards appear once, in small batches, as they are reached.
   // Cards render asynchronously, so this covers the first paint and later inserts.
   function revealBatch(nodes) {
     if (!ScrollTrigger) return;
@@ -70,7 +70,7 @@ if (!gsap) {
     observer.observe(document.body, { childList: true, subtree: true });
   }
 
-  // 3 — MotionPath: the Weekly row lands along a shallow arc instead of a rise.
+  // 3 MotionPath: the Weekly row lands along a shallow arc instead of a rise.
   function weeklyArc() {
     if (!ScrollTrigger || !MotionPathPlugin) return;
 
@@ -104,7 +104,7 @@ if (!gsap) {
     });
   }
 
-  // 4 — Draggable: on phones the Weekly row is a strip you can push sideways
+  // 4 Draggable: on phones the Weekly row is a strip you can push sideways
   // (PRD review #16 asked for a horizontal list rather than a stacked column).
   function draggableStrip() {
     if (!Draggable) return;
