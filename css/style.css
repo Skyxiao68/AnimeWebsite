@@ -2323,6 +2323,48 @@ body.page-saved main {
   display: none;
 }
 
+/* Open, the seventeen chips used to run across the full panel and fold into a ragged
+   second line, which pushed the panel taller than the page header. Give them equal
+   columns instead and top-align the label so it sits on the first line. */
+.rank-row[data-group="genre"][data-expanded="true"] {
+  align-items: start;
+}
+
+/* Column counts are fixed rather than auto-filled: with 18 chips a natural split
+   leaves enough room on the last line for Less, so the row never grows an extra line. */
+.rank-row[data-group="genre"][data-expanded="true"] .rank-row__opts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 2px 4px;
+}
+
+@media (min-width: 768px) {
+  .rank-row[data-group="genre"][data-expanded="true"] .rank-row__opts {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1200px) {
+  .rank-row[data-group="genre"][data-expanded="true"] .rank-row__opts {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+}
+
+.rank-row[data-group="genre"][data-expanded="true"] .rank-row__label {
+  padding-block-start: 4px;
+}
+
+/* Pills keep their own width; only the columns are equal, so "All" stays a pill. */
+.rank-row[data-group="genre"][data-expanded="true"] .rank-opt {
+  justify-self: start;
+}
+
+.rank-row[data-group="genre"][data-expanded="true"] .rank-more {
+  grid-column: -2 / -1;
+  justify-self: end;
+  margin-inline-start: 0;
+}
+
 .rank-more {
   margin-inline-start: auto;
   padding: 4px 10px;
@@ -2527,8 +2569,8 @@ body.page-saved main {
     gap: 2px;
   }
 
-  /* Phones show only four genres (All + 3), which shortens the panel; More still opens all 17. Desktop keeps eight, rule above. */
-  .rank-row[data-collapsible="8"][data-expanded="false"] .rank-opt:nth-child(n + 5) {
+  /* The mobile render has no Genre row - Region, Format and Time carry the panel, and seventeen chips would bury the list. */
+  .rank-row[data-group="genre"] {
     display: none;
   }
 

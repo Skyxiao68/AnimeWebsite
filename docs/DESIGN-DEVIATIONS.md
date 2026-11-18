@@ -716,6 +716,20 @@ The ranking list rows on phones were 96×144 thumbnails in 160px rows, which dwa
 
 Evidence: docs/evidence/_new/m3-catalog-390.png, m3-rank-390.png, m4-rank-list-390.png, m4-rank-desk-1440.png.
 
+## 57. The genre row left the phone, and columns replace the long line
+
+The client called the Genre row too long on the rankings page ("genre 这里太长了,", 2026-11-18). Two separate lengths were in it: on a phone it held a row above Time, and once opened the seventeen chips ran the width of the panel and folded into a ragged second line, with the label centred against the pair.
+
+Phones now drop the row entirely — `.rank-row[data-group="genre"] { display: none }` inside the same `max-width: 599px` block — which is what the mobile render shows (Region, Format, Time only). The panel goes from 442 to 370 at 390×844. Genre filtering on a phone goes with it; the desktop page keeps it. This supersedes §48's four-chip compromise, whose rule and its dead `nth-child(5)` collapse are gone.
+
+Desktop keeps the closed state as it was — eight genres plus `More`, one line, panel 266 at 1256 — but the open state is a fixed-column grid instead of a flowing line: `grid-template-columns: repeat(4, …)`, five from 768, seven from 1200, with `justify-self: start` so every pill stays at text width, the label top-aligned, and `Less` on the tail of the last row. The counts are deliberately not divisors of 18: an exact fill would push `Less` onto a line of its own and undo the height saved.
+
+**Measured**: 1256 → 3 chip rows, row 116, panel 338 (was 80 / 266 with the ragged line); 768 → 4 chip rows, row 176, panel 398; 390 → row hidden, panel 370; 18/18 chips visible when open, none clipped, horizontal overflow 0 at every width.
+
+Evidence: docs/evidence/_new/m7-390-collapsed.png, m7-1256-collapsed.png, m7-1256-expanded.png, m7-768-expanded.png.
+
+**Not verified**: a touch device; hiding the row means genre filtering is desktop-only, which is a product call, not a layout one.
+
 ## What was *not* changed
 
 - Four states (loading / success / error / empty), skeleton geometry and `aria-busy`.
