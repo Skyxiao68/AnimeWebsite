@@ -2,7 +2,14 @@
 // everything goes in via textContent or createElement — no innerHTML anywhere.
 import { media } from './api.js';
 import { card, mountToTop, renderCards, renderState } from './ui.js';
-import { isBookmarked, recordView, toggle as toggleSave, syncWithin, mountBookmarks } from './bookmarks.js';
+import {
+  isBookmarked,
+  pulseSave,
+  recordView,
+  toggle as toggleSave,
+  syncWithin,
+  mountBookmarks,
+} from './bookmarks.js';
 
 const RATING_KEY = 'mf.ratings.v1';
 const FORMAT = { TV: 'TV Show', TV_SHORT: 'TV Short', MOVIE: 'Movie', OVA: 'OVA', ONA: 'ONA', SPECIAL: 'Special', MUSIC: 'Music' };
@@ -218,8 +225,10 @@ function paintActions(item) {
   sync();
 
   els.save.addEventListener('click', () => {
-    toggleSave(row);
+    const saved = toggleSave(row);
     sync();
+    pulseSave(els.save);
+    if (saved) pulseSave(document.getElementById('open-bookmarks'));
   });
 
   els.actions.hidden = false;

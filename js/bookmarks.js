@@ -176,6 +176,20 @@ export function remove(id) {
 
 // ---------------------------------------------------------------- buttons
 
+// One short pulse on the control that was just tapped. Without it a save only
+// changes colour, which is easy to miss on a phone where there is no hover.
+export function pulseSave(node) {
+  const gsap = window.gsap;
+  if (!gsap || !node) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  gsap.fromTo(
+    node,
+    { scale: 0.84 },
+    { scale: 1, duration: 0.34, ease: 'back.out(2.6)', overwrite: true, clearProps: 'transform' }
+  );
+}
+
 function paintButton(btn, saved) {
   // The control is an icon now, so only the state and the labels change;
   // writing textContent here would wipe the bookmark glyph out.
@@ -389,7 +403,21 @@ function renderDrawer() {
       drop.title = 'Remove';
       drop.append(icon(TRASH_PATH));
       drop.setAttribute('aria-label', 'Remove ' + row.title + ' from bookmarks');
-      drop.addEventListener('click', () => remove(row.id));
+      drop.addEventListener('click', () => {
+        const gsap = window.gsap;
+        if (!gsap || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          remove(row.id);
+          return;
+        }
+        // Collapse this row first, then let the list re-render without the jump.
+        gsap.to(item, {
+          opacity: 0,
+          x: -8,
+          duration: 0.16,
+          ease: 'power1.in',
+          onComplete: () => remove(row.id),
+        });
+      });
 
       item.append(link, drop);
       return item;
@@ -544,12 +572,15 @@ export function mountBookmarks() {
 
       // The card already drew the title and cover, so reuse them — that is what
       // keeps the drawer row intact after a reload, without a second request.
-      toggle({
+      const saved = toggle({
         id: card?.dataset.id,
         title: { romaji: save.getAttribute('aria-label')?.replace(/^Bookmark: /, '') },
         coverImage: { large: cover?.getAttribute('src') || '' },
         averageScore: Number(score?.textContent) || undefined,
       });
+
+      pulseSave(save);
+      if (saved) pulseSave(document.getElementById('open-bookmarks'));
       return;
     }
 

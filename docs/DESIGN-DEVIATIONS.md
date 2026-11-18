@@ -204,7 +204,7 @@ So the Day/Week tabs mean *"among the titles that air in that window, the most p
 
 **Month, opened on 2026-11-17.** No public anime API sells a monthly chart: AniList has only schedule windows plus season/year filters, Jikan exposes `top` and `seasons`, TMDB's trending windows are day/week. A real 30-day window built from `airingSchedules` is not an option either — that window holds 5000 records (100 pages of 50), so a page load can only sample ~6% of it. So `Month` now means *"currently airing titles, ordered by `TRENDING_DESC`"* (`MONTH_QUERY` in js/api.js). Trending is computed from recent activity, which is the closest thing AniList has to a monthly signal, and it is a genuinely different list from Week (ONE PIECE sits third, behind a season-show nobody would call the most popular title of all time). This is a proxy and is labelled as one: the chip tooltip reads "Airing titles ranked by what people are watching this month".
 
-On `rankings.html` the same name stays disabled on purpose: that page's **Week** filter is already `TRENDING_DESC`, so a monthly chip there would repeat Week exactly. Its tooltip says so instead of claiming the data does not exist.
+On `rankings.html` the same name stayed disabled on purpose at the time: that page's **Week** filter was `TRENDING_DESC`, so a monthly chip there would have repeated Week exactly. **Superseded by §62** — on the client's request the rankings page now gives all three windows their own meaning.
 
 Re-checked in the browser: all five chip states paint `data-state="success"` with 4 cards, e.g. Day → `Hello, I am a Witch…` (74), `PSYREN` (70), `So What's Wrong with Getting Reborn as a Goblin?` (65), `MAGICAL GIRL RAISING PROJECT restart` (61). Screenshots `docs/evidence/ranks-day-1460.png`, `ranks-week-1460.png`, `ranks-season-1460.png`.
 
@@ -730,12 +730,111 @@ Evidence: docs/evidence/_new/m7-390-collapsed.png, m7-1256-collapsed.png, m7-125
 
 **Not verified**: a touch device; hiding the row means genre filtering is desktop-only, which is a product call, not a layout one.
 
+## 58. On phones the magnifier in the header is the search entry for rankings and bookmarks
+
+The client reported that rankings and bookmarks have no search on a phone ("手机上ranking 和 book mark 没有搜索", 2026-11-18). Correct: the header field is hidden below 520 (§52) and only the home page had a substitute band, so those two pages had no way in at all. The mobile renders put a magnifier first in the header tools, which is the entry they show.
+
+**Superseded by §59.** The icon first shipped as a link to `catalog.html`; the client then asked for matches to appear while typing (m09951), so the same icon now opens the field in place and the panel is written by `js/search.js`. The measurements below are from the link version and no longer describe the header.
+
+That icon now exists on `rankings.html` and `saved.html` as a `<a class="icon-btn nav-search-link" href="catalog.html">`, first in `.header-tools`. It is `display: none` above 519px, where the field itself is already in the row, and it hands over to the catalog page's own bar rather than opening a second field in a 75px-wide header. No script changed — it is a link, and the catalog bar is the one that owns query state.
+
+**Measured**: 390 → icon 30px visible, header field hidden, `.site-header__inner` scroll width equals client width (358/358), horizontal overflow 0, tap lands on catalog.html with the 265px field on screen; 560 and 1256 → icon hidden, field visible, overflow 0. The resulting header matches the mobile render's order: brand, magnifier, clock, bookmark.
+
+**Not done at the time**: `detail.html` had no phone search entry. §59 added it.
+
+**Not verified**: a touch device; the icon is a plain link, so behaviour should match desktop clicks.
+
+Evidence: docs/evidence/_new/m8-rankings-390-header.png, m8-saved-390-header.png.
+
+## 59. Matches appear under the keyword field on every page
+
+The client's second pass on search (m09951): "没有active searching, 就是我在任何页面输入关键词时候要显示结果. detail.html 可以加一个search". So the header field is no longer a submit-and-leave control. Typing two characters shows up to six matching titles under it, each a link to its detail page, with the full result list one tap away.
+
+The panel lives in `js/search.js`, mounted on `index.html`, `rankings.html`, `saved.html` and `detail.html`. `catalog.html` is excluded on purpose: its own field already re-filters the grid on every keystroke (300ms), and a second list of the same six titles over the results would be noise. The module reads the page's `input[name="q"]`, so the home page's phone band and the header pill share one implementation.
+
+Behaviour: 220ms debounce, minimum two characters; loading / empty / error states; ArrowDown and ArrowUp walk the list, Enter opens the highlighted row, Escape and a tap outside close it, and returning to a field that still holds a word re-runs the query. Each row is a cover (34x48), the title, and a meta line (`TV · 2023 · 90%`); the footer link is "See all results for "q"" → `catalog.html?q=`. Results are requested with `fresh: true`: the API caches answers for five minutes, and a throttled empty answer had already made one manual test report "No titles match" for a word that has matches.
+
+Below 520px the header field is hidden (§52), so the magnifier from §58 now opens that field in place instead of leaving the page: the brand, clock and bookmark step out, a close button takes their place, and the panel hangs off the header (16px gutters) rather than off the 256px field. Above 519px nothing changed in the header — the field is already there and the panel is 420px, right-aligned under it.
+
+**Measured**: 1440 → panel 420 wide, six rows, right edge on the field, horizontal overflow 0; ArrowDown twice + Enter → `detail.html?id=182255` (Frieren: Beyond Journey's End Season 2). 390 → icon opens the field (focused, 256 wide), panel x16 w358 right374, six rows, tap → `detail.html?id=20` (Naruto), overflow 0; close returns the header, field hidden. 519 → field hidden, icon grid; 520 → field flex, icon none. 560 → field visible, panel 420 at x25–445, overflow 0. Home's phone band → panel 356 wide inside the 390 viewport, six rows, overflow 0. Catalog → 0 panels, 0 toggles, its own field intact. Escape then refocus → panel reopens with the same six rows.
+
+**Not verified**: a real touch device; a screen reader (roles and `aria-expanded` are set, but that is not the same as listening to it).
+
+**Not done**: the submit button inside the field still exists, so Enter on an unhighlighted row still goes to the catalog result page, which is the behaviour a plain search form should keep.
+
+Evidence: docs/evidence/_new/m9-rankings-1440-popover.png, m9-rankings-390-open.png, m9-home-390-strip.png.
+
+## 60. A save confirms itself, and the hero copy steps back in
+
+The client asked for one more pass on GSAP (m10190) and approved save feedback plus a hero re-entry (m10199). Neither adds a plugin: both ride the `gsap` instance the five pages already load.
+
+- **Saving** — the card icon and the detail button pulse `scale .84 → 1` over 340 ms with `back.out(2.6)`, and the header badge bumps on the same tick; removing a row from the drawer collapses it (opacity plus 8 px left, 160 ms) before the list re-renders. Before this a save only changed colour and `aria-pressed`, which is easy to miss on a phone with no hover.
+- **Hero copy** — tags, title and lede leave as three staggered lines over 300 ms, swap at 325 ms with the image, then return with `power2.out` over 450 ms and a 60 ms stagger. The CSS path (`css/style.css:461-494`) still runs when `window.gsap` is missing, so the old one-block fade is the fallback rather than dead code.
+- **Measured** — at 150 ms the three opacities were .26 / .41 / .60, all zero by 550 ms and back to 1 by 1350 ms with no inline styles left behind; autoplay still advanced after 7 s with the copy at 1. With `prefers-reduced-motion: reduce` forced through `Emulation.setEmulatedMedia` the swap is instant, the hero keeps `class="hero"`, no inline styles appear and a 390 px viewport stays at 0 horizontal overflow. The drawer went 2 rows → 2 rows at opacity .88 → 1 row, badge 2 → 1.
+
+**Not verified**: a real touch device; whether a 340 ms pulse reads as deliberate rather than accidental at 60 Hz.
+
+**Not done**: rating stars and filter chips still change with no feedback tween; opening and closing the drawer stays instant.
+
+## 61. A light theme built from Miku's teal, without touching the dark one
+
+The client asked for a light theme in Miku's colours while keeping the dark theme as the default (m10290): "帮我弄一个亮色主题, 我们现在这个是暗色的. 我们的亮色主题是按照初音未来的颜色做."
+
+The dark theme already passed the PRD's palette check, so it had to stay byte-for-byte identical rather than being re-tuned to share values with the new one. That ruled out swapping `--accent` alone: the dark accent does two jobs — text/link colour on dark surfaces (53 uses) and the fill behind dark ink (17 uses) — and one teal cannot satisfy both contrasts on white. So the roles were split first, with the dark values left as they were:
+
+- `--accent` stays the text/outline/marker colour; `--accent-fill` is what sits under `--accent-ink` (chips, badges, the primary button's hover, a selected save). In dark both are `#BD91C8`; in light the text is `#0A7A76` and the fill is `#39C5BB` under `#06302E` ink.
+- Artwork keeps its own accent: `--on-art-accent` stays `#BD91C8` in dark and becomes `#6FE7DA` in light so thumbnail frames and arrow hovers stay legible on a photograph.
+- Everything else got a named twin (`--brand`, `--icon`, `--text-soft`, `--header-glass`, `--header-glass-stuck`, `--header-blur`, `--scrim`, `--scrim-strong`, `--skeleton-hi`, `--search-line`, `--search-placeholder`, `--search-go`, `--footer-text`, `--footer-note`, `--danger-ink`, `--danger-fill`, `--danger-on-fill`). The dark block carries the exact previous values, so the default rendering does not move.
+
+Light palette: background `#E7F3F1`, page wash `#DDF0ED`, panels `#FBFEFD`, second panel `#D8ECE9`, footer band `#CFE8E4`, body text `#113033`, muted `#44666A`, dim `#6E8D8F`, lines `rgba(16 74 75 / .12)` and `…/24`. The first cut used `#F4FBFB` with pure-white panels; on screen it read as a white page with a faint tint, and the client asked for less white (m10581). The panel wash `.pair > .shelf` was also still the hard-coded purple `rgb(189 145 200 / …)` from the dark design, which looked pink over white; it now mixes `--accent-fill`, so dark stays the identical purple and light gets the same mint as the rest of the page.
+
+Three places needed more than a token swap:
+
+1. **The header over the home hero.** A light glass pane over a bright banner puts white links on pale artwork. In light mode the pane keeps the dark glass and the white links until the header sticks, then turns to `rgb(244 251 251 / .92)` with the ink brand; the theme button follows on the same rule.
+2. **Hero thumbnail names.** They sit where the hero gradient meets the page, which is near-white in light mode, so the name drops to `--text-muted` and only the current item takes the teal accent.
+3. **Streaming logos.** Crunchyroll, Hulu, Twitter and Netflix ship white artwork for dark chips; on a white panel they vanish. In light mode each brand icon gets a 4px-radius `#1A1424` tile under its 16px box (2px halo), which keeps the marks readable without recolouring someone's logo.
+
+The switch is a header button beside the clock (`js/theme.js`, `data-theme-toggle`), present on all five pages; it writes `localStorage['mf.theme']`, mirrors `aria-pressed` and a changing `aria-label` ("Switch to light theme" / "Switch to dark theme"), and syncs across tabs via `storage`. A four-line inline script in each `<head>` reads the stored value before the stylesheets paint, so a light-theme reload does not flash dark. The default stays dark; the system preference is deliberately not followed — the brief asks for a designed pair, not an automatic one.
+
+**Measured**: at 1440 the light ranking page reported `--bg #E7F3F1`, `--surface #FBFEFD`, `--text #113033`, `--accent #0A7A76`, `--accent-fill #39C5BB`; the button read `aria-pressed="true"` and `localStorage` was `light`, and a reload kept it. Dark comparison values were unchanged: header `rgba(10, 8, 14, 0.42)`, brand `rgb(130, 121, 145)`, card title `rgba(242, 238, 249, 0.78)`, footer `rgb(255, 255, 255)` / note `rgba(255, 255, 255, 0.55)`, panel hairline `color(srgb 0.741 0.569 0.784 / 0.22)`. On a 390 viewport the button is 30×30 at x344 on all five pages, header `scrollWidth - clientWidth` is 0 and page overflow is 0; 375 / 519 / 520 / 768 behaved the same, with the search field hidden at ≤519 and visible from 520 as before. Tapping the moon on a phone switched to dark, stored `dark` and put `body` back to `rgb(20, 16, 24)`. The light search popover is white, 420 wide at 1440 with dark rows; the 390 empty detail state keeps its red dashed card readable. Contrast of the light pairs, computed by value: body `#113033` on `#E7F3F1` 12.37:1, muted `#44666A` on `#FBFEFD` 6.17:1, link/accent `#0A7A76` on `#FBFEFD` 5.10:1, ink `#06302E` on the teal fill 6.72:1. The dim tone, `#6E8D8F` on `#FBFEFD`, is 3.53:1 — it is used on disabled chips (Month / Day), which are inactive controls.
+
+**Not verified**: a real phone; a screen reader on the toggle (it is a labelled `<button>`, but that is not the same as hearing it); an automated contrast audit of every light pair — the body and accent pairs were checked by value, not by a tool run over the rendered page.
+
+**Not done**: no "follow system" option, no per-page override, and the two full-page browser screenshots in `docs/evidence/` still show the dark theme.
+
+Evidence: docs/evidence/_new/theme-dark-1440.png, theme-light-1440.png, theme-light-home-1440.png, theme-light-home-1440-scrolled.png, theme-light-home-1440-footer.png, theme-light-rankings-390.png, theme-light-catalog-390.png, theme-light-detail-390.png, theme-light-saved-390.png, theme-light-index-390.png, theme-light-detail-1440.png, theme-light-search-1440.png, theme-dark-rankings-390.png, theme-dark-home-1440.png, theme-dark-home-1440-footer.png.
+
+## 62. Rankings' Day, Week and Month: three windows, each on the nearest signal AniList sells
+
+The client asked why Month and Day were greyed out on `rankings.html` (m10674), then chose the option that adds no new data source (m10683: "推荐方案（不新增数据源） 我说的是Ranking 页的"). The home Ranks panel keeps the behaviour described in §13; only `rankings.html` changed.
+
+AniList publishes no daily or monthly chart. `mediaTrends` is keyed to one day, so a real 30-day gain would take thirty requests per page load, straight into the 30/min limit. Each window therefore reuses a signal AniList already returns:
+
+| Chip | Now shows | How |
+|---|---|---|
+| Day | site-wide trending | `search('', { sort: 'trending' })` → `TRENDING_DESC` |
+| Week | aired in the last 7 days, most popular first | `airingWindow({ days: 7 })` (three pages of 50 schedule rows), filtered locally, already sorted by `popularity` |
+| Month | airing now, ordered by trending | the same search with `status: 'RELEASING'` |
+
+All three still honour Region, Format and Genre. Week does its own filtering because the schedule query has no country/genre arguments: `js/api.js` now exports `airingWindow`, and both `WINDOW_QUERY` and `WINDOW_FIELDS` carry `countryOfOrigin` and `genres` (`JP/CN/KR`, `TV/MOVIE/OVA`). `js/rankings.js` gained `inWeekFilters()`, so Week + Action + Japan + TV narrows the list the same way the other windows do.
+
+The three sort buttons cannot apply while a window is on — Day/Week/Month bring their own order. Rather than let a press look like it worked, `sortLocked()` sets `aria-disabled` on the buttons and the click handler returns early; the pressed look dims to 45%. This also fixed the older Week chip, which silently ignored the sort buttons.
+
+On phones the six Time chips were wrapping Day onto a second row (row height 106px, Day alone at y=627). At ≤599px the Time chips drop to `--fs-xs` with 8px side padding, so all six sit on one line at 375 and 390: row height 67px, one y value, no horizontal overflow.
+
+**Measured** (cache disabled, cache-busting query string): at 1440 Day returned "The World's Strongest Witch / The Laid-Off Cheat-Granting Mage / ONE PIECE …", Week returned "The Apothecary Diaries Season 3 / Black Clover Season 2 / Detective Conan / The Exiled Heavy Knight …", Month returned the trending list restricted to airing titles; 25 rows in each. Week + Action changed the top five ("Black Clover Season 2 / The Exiled Heavy Knight / Overgeared / Reincarnated as a Sword Season 2 / STEEL BALL RUN …"), Week + Action + Japan + TV changed it again (Tokyo Revengers, A Returner's Magic, Dragon Ball Super: Beerus). Clicking Average Score while Week was on left the list and the count unchanged and all three sort buttons reported `aria-disabled="true"`. At 390 Day painted three big covers, `scrollWidth - clientWidth` was 0, and the Time row measured 67px on one line. Evidence: `docs/evidence/_new/m10-rankings-1440-week.png`, `m10-rankings-1440-day.png`, `m10-rankings-390-month.png`, `m10-rankings-390-day.png`.
+
+**Not verified**: a real phone or a screen reader on the new tooltips; the Week sample is the first 150 schedule rows of a seven-day window, not the full week; Day and Month are both trending, so with no filters they overlap heavily (Month only drops finished titles); neither is a 24-hour or 30-day gain, and the chips say so in their `title`.
+
+**Not done**: no dedicated query, no extra requests, no change to the home Ranks panel.
+
 ## What was *not* changed
 
 - Four states (loading / success / error / empty), skeleton geometry and `aria-busy`.
 - The wide shelves' 6/4/3 ladder and the 3:4 cover frame (§19); only the catalog's phone step moved (§56).
 - Four GSAP moments (Timeline, ScrollTrigger, MotionPath, Draggable) and the reduced-motion branch.
-- Ranking lists: home's Day/Week read the airing schedule, Season/Year filter by season and year, Month is the trending proxy described in §13; `rankings.html` keeps its own Month/Day chips disabled (its Week is already trending).
+- The dark palette. It stays the default and every light token has a dark twin holding the old value (§61).
+- Ranking lists: home's Day/Week read the airing schedule, Season/Year filter by season and year, Month is the trending proxy described in §13. `rankings.html` now gives Day/Month/Week their own meanings too (§62); the home Ranks panel was not touched.
 - PRD feedback items: all 20 are mapped in `PRD-FEEDBACK-MAP.md`. #20 / #13 / #12 (home search), #17+#15 (rankings genre), #04 / #08 / #07 (ranking thumbnails) and #14 (Overview) were the last five gaps and were closed on 2026-11-17 (§40); #05's visible label became an icon (§20) and #07 / #16 stay as written refusals with reasons in that file.
 
 ## How to re-check

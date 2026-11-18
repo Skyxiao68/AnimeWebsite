@@ -103,7 +103,7 @@ h3 {
   left: var(--sp-4);
   z-index: var(--z-toast);
   padding: var(--sp-2) var(--sp-4);
-  background: var(--accent);
+  background: var(--accent-fill);
   color: var(--accent-ink);
   border-radius: var(--r-md);
   font-weight: 600;
@@ -148,7 +148,7 @@ h3 {
   display: inline-flex;
   align-items: baseline;
   gap: var(--sp-2);
-  color: rgb(130 121 145);
+  color: var(--brand);
   font-family: var(--font-brand);
   font-size: 25px;
   font-weight: 700;
@@ -201,7 +201,7 @@ h3 {
   width: clamp(200px, 19vw, 264px);
   height: 34px;
   padding-inline: 17px 7px;
-  border: 1px solid rgb(180 164 200 / 0.42);
+  border: 1px solid var(--search-line);
   border-radius: var(--r-pill);
   background: transparent;
   transition: border-color var(--t-fast) var(--ease);
@@ -222,7 +222,7 @@ h3 {
 }
 
 .nav-search__input::placeholder {
-  color: rgb(196 190 196 / 0.72);
+  color: var(--search-placeholder);
 }
 
 .nav-search__input:focus-visible {
@@ -238,7 +238,7 @@ h3 {
   border: 0;
   border-radius: 50%;
   background: none;
-  color: rgb(214 208 222 / 0.85);
+  color: var(--search-go);
   cursor: pointer;
 }
 
@@ -257,7 +257,7 @@ h3 {
   border: 0;
   border-radius: 50%;
   background: none;
-  color: #efeaf5;
+  color: var(--icon);
   cursor: pointer;
   transition: color var(--t-fast) var(--ease);
 }
@@ -273,8 +273,8 @@ h3 {
   height: 16px;
   padding-inline: 4px;
   border-radius: var(--r-pill);
-  background: var(--accent);
-  color: #1a0f1e;
+  background: var(--accent-fill);
+  color: var(--accent-ink);
   font-size: 10px;
   font-weight: 700;
   line-height: 16px;
@@ -656,8 +656,8 @@ h3 {
 }
 
 .hero__arrow:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+  border-color: var(--on-art-accent);
+  color: var(--on-art-accent);
 }
 
 .hero__arrow--prev { left: var(--sp-4); }
@@ -734,13 +734,13 @@ h3 {
 /* the selected thumbnail takes an accent frame and accent text, 4px clear of the poster;
    outline plus offset draws it without adding layout or shrinking the image */
 .hero__thumb.is-current .hero__thumb-name {
-  color: var(--accent);
+  color: var(--on-art-accent);
   font-weight: 600;
 }
 
 .hero__thumb-btn:hover .hero__thumb-name,
 .hero__thumb-btn:focus-visible .hero__thumb-name {
-  color: var(--accent);
+  color: var(--on-art-accent);
 }
 
 /* the design keeps the wordmark alone; no square marker */
@@ -750,7 +750,7 @@ h3 {
 
 .hero__thumb.is-current .hero__thumb-frame {
   border-color: transparent;
-  outline: 3px solid var(--accent);
+  outline: 3px solid var(--on-art-accent);
   outline-offset: 2px;
   box-shadow: 0 16px 36px rgb(0 0 0 / 0.45);
 }
@@ -781,8 +781,13 @@ h3 {
 .pair > .shelf {
   margin-block-end: 0;
   padding: 20px;
-  background: linear-gradient(180deg, rgb(189 145 200 / 0.18), rgb(189 145 200 / 0.05)), var(--surface);
-  border: 1px solid rgb(189 145 200 / 0.22);
+  background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--accent-fill) 18%, transparent),
+      color-mix(in srgb, var(--accent-fill) 5%, transparent)
+    ),
+    var(--surface);
+  border: 1px solid color-mix(in srgb, var(--accent-fill) 22%, transparent);
   border-radius: var(--r-lg);
 }
 
@@ -952,8 +957,8 @@ h3 {
 .chip-chip:hover:not(:disabled) { color: var(--text); }
 
 .chip-chip[aria-pressed="true"] {
-  background: var(--accent);
-  color: #1a0f1e;
+  background: var(--accent-fill);
+  color: var(--accent-ink);
 }
 
 .chip-chip:disabled {
@@ -973,7 +978,7 @@ h3 {
 
 .site-footer__copy,
 .site-footer__links {
-  color: #fff;
+  color: var(--footer-text);
   font-size: var(--fs-sm);
 }
 
@@ -984,7 +989,7 @@ h3 {
 }
 
 .site-footer__links a {
-  color: #fff;
+  color: var(--footer-text);
   text-decoration: none;
 }
 
@@ -993,7 +998,7 @@ h3 {
 .site-footer__note {
   width: min(100% - 2 * var(--gutter), var(--container));
   margin: var(--sp-4) auto 0;
-  color: rgb(255 255 255 / 0.55);
+  color: var(--footer-note);
   font-size: var(--fs-xs);
 }
 
@@ -1029,8 +1034,8 @@ h3 {
   /* The base rule lives at the end of the file with the same two-segment specificity; the prefixed class wins. */
   .grid .card__save:hover,
   .grid .card__save:focus-visible {
-    background: var(--accent);
-    color: #1a0f1e;
+    background: var(--accent-fill);
+    color: var(--accent-ink);
   }
 
   .card:hover .card__save,
@@ -1041,8 +1046,8 @@ h3 {
 
   /* Saved state fills the icon, still only on hover - no permanent purple patch on every poster. */
   .grid .card__save[aria-pressed="true"] {
-    background: var(--accent);
-    color: #1a0f1e;
+    background: var(--accent-fill);
+    color: var(--accent-ink);
   }
 }
 
@@ -1121,7 +1126,7 @@ h3 {
   padding-inline: var(--sp-5);
   border: 0;
   border-radius: var(--r-pill);
-  background: var(--accent);
+  background: var(--accent-fill);
   color: var(--accent-ink);
   font-size: var(--fs-md);
   font-weight: 650;
@@ -1330,7 +1335,7 @@ body.page-saved main {
   overflow: hidden;
   font-family: var(--font-sans);
   font-size: 14px;
-  color: rgb(242 238 249 / 0.78); /* The render's card title is one step dimmer than body text, not pure white. */
+  color: var(--text-soft); /* The render's card title is one step dimmer than body text, not pure white. */
   font-weight: 400;
   line-height: 20px;
   transition: color 0.18s ease;
@@ -1408,7 +1413,7 @@ body.page-saved main {
 
 .card--skeleton .card__cover,
 .card--skeleton .skeleton-line {
-  background: linear-gradient(100deg, var(--surface-2) 20%, #2c2339 40%, var(--surface-2) 60%);
+  background: linear-gradient(100deg, var(--surface-2) 20%, var(--skeleton-hi) 40%, var(--surface-2) 60%);
   background-size: 220% 100%;
   animation: shimmer 1.4s linear infinite;
 }
@@ -1527,7 +1532,7 @@ body.page-saved main {
   position: fixed;
   inset: 0;
   z-index: calc(var(--z-drawer) - 1);
-  background: rgba(0, 0, 0, 0.55);
+  background: var(--scrim-strong);
   border: 0;
   cursor: pointer;
 }
@@ -1592,7 +1597,7 @@ body.page-saved main {
 .site-footer {
   padding-block: 36px;
   background: var(--main);
-  color: #fff;
+  color: var(--footer-text);
   font-size: var(--fs-sm);
 }
 
@@ -1840,8 +1845,8 @@ body.page-saved main {
   border: 0;
   border-radius: 999px;
   /* Selected pill: solid accent with dark ink, not translucent purple with light text. */
-  background: var(--accent);
-  color: #1a0f1e;
+  background: var(--accent-fill);
+  color: var(--accent-ink);
   font: inherit;
   font-size: var(--fs-xs);
   font-weight: 700;
@@ -1900,8 +1905,8 @@ body.page-saved main {
 
 .opt[aria-pressed="true"] {
   /* Same as .chip-chip[aria-pressed=true]: solid accent with dark text, 8.4:1 contrast. */
-  background: var(--accent);
-  color: #1a0f1e;
+  background: var(--accent-fill);
+  color: var(--accent-ink);
   font-weight: 700;
 }
 
@@ -2010,8 +2015,8 @@ body.page-saved main {
 }
 
 .btn:hover:not(:disabled) {
-  background: var(--accent);
-  color: #1a0f1e;
+  background: var(--accent-fill);
+  color: var(--accent-ink);
 }
 
 .btn:active:not(:disabled) {
@@ -2103,7 +2108,7 @@ body.page-saved main {
 .drawer__name { font-size:.875rem; line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
 .drawer__meta { color: var(--text-muted); font-size: var(--fs-xs); font-variant-numeric: tabular-nums; }
 .drawer__remove { flex:none; display:grid; place-items:center; width:32px; height:32px; padding:0; border:0; border-radius:9px; background:transparent; color: var(--text-muted); cursor:pointer; transition: color var(--t-fast) var(--ease), background-color var(--t-fast) var(--ease); }
-.drawer__remove:hover, .drawer__remove:focus-visible { color:#F87171; background: color-mix(in srgb, #F87171 14%, transparent); }
+.drawer__remove:hover, .drawer__remove:focus-visible { color:var(--danger-ink); background: color-mix(in srgb, var(--danger-ink) 14%, transparent); }
 .drawer__empty { display:grid; justify-items:center; gap:6px; padding:34px 8px; text-align:center; color: var(--text-muted); }
 .drawer__empty-mark { color: var(--line-strong); }
 .drawer__empty strong { color: var(--text); font-size:.95rem; }
@@ -2144,7 +2149,7 @@ body.page-saved main {
     min-width: 1.35rem;
     padding: 1px 6px;
     border-radius: 999px;
-    background: var(--accent);
+    background: var(--accent-fill);
     color: var(--accent-ink);
     font-size: .75rem;
     font-variant-numeric: tabular-nums;
@@ -2221,7 +2226,7 @@ body.page-saved main {
     inset: 0;
     z-index: calc(var(--z-drawer) - 1);
     border: 0;
-    background: rgb(8 6 12 / .62);
+    background: var(--scrim);
   }
 
   .filters-backdrop[hidden] { display: none; }
@@ -2265,10 +2270,21 @@ body.page-saved main {
   color: var(--text);
 }
 
+/* Day, Week and Month come with their own ordering, so these stay pressed-looking
+   but cannot be chosen while one of them is on. */
+.rank-sort[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.rank-sort[aria-disabled="true"]:hover {
+  color: var(--text-muted);
+}
+
 .rank-sort[aria-pressed="true"] {
-  background: var(--accent);
+  background: var(--accent-fill);
   border-color: var(--accent);
-  color: #1a0f1e;
+  color: var(--accent-ink);
 }
 
 .rank-row {
@@ -2308,8 +2324,8 @@ body.page-saved main {
 }
 
 .rank-opt[aria-pressed="true"] {
-  background: var(--accent);
-  color: #1a0f1e;
+  background: var(--accent-fill);
+  color: var(--accent-ink);
   font-weight: 600;
 }
 
@@ -2436,8 +2452,8 @@ body.page-saved main {
   padding-inline: 6px;
   place-items: center;
   border-radius: 999px;
-  background: var(--accent);
-  color: #1a0f1e;
+  background: var(--accent-fill);
+  color: var(--accent-ink);
   font-size: var(--fs-sm);
   font-weight: 700;
 }
@@ -2580,6 +2596,12 @@ body.page-saved main {
     inset-block-start: 0;
     inset-inline-end: 0;
     margin-inline-start: 0;
+  }
+
+  /* Six Time chips have to stay on one line at 390; at the default size Day wraps onto a row of its own. */
+  .rank-row[data-group="time"] .rank-opt {
+    padding-inline: 8px;
+    font-size: var(--fs-xs);
   }
 
   /* The mobile render keeps the rows compact under the three big covers: a small thumbnail, the number and the name on one line. */
@@ -2740,8 +2762,8 @@ body.page-saved main {
 
 .rating__pill[aria-pressed="true"] {
   border-color: var(--accent);
-  background: var(--accent);
-  color: #1a0f1e;
+  background: var(--accent-fill);
+  color: var(--accent-ink);
 }
 
 .related {
@@ -2759,8 +2781,8 @@ body.page-saved main {
 /* Saved fills the whole pill with accent, the same read as the score pill and the card badge, so the pressed state is visible. */
 #detail-save[aria-pressed="true"] {
   border-color: var(--accent);
-  background: var(--accent);
-  color: #1a0f1e;
+  background: var(--accent-fill);
+  color: var(--accent-ink);
 }
 
 .related__title { margin: 0; font-size: 1.375rem; }
@@ -2946,6 +2968,144 @@ body.page-saved main {
   }
 }
 
+/* Below 520 the field is hidden; the header keeps the render's magnifier and opens
+   that field in place, so a keyword can be typed without leaving the page. */
+.nav-search-open,
+.nav-search-close {
+  display: none;
+}
+
+@media (max-width: 519px) {
+  .nav-search-open {
+    display: grid;
+  }
+
+  /* Open state: the field takes the header row, the brand and the other tools step out. */
+  .site-header[data-search-open="true"] .brand,
+  .site-header[data-search-open="true"] .site-nav,
+  .site-header[data-search-open="true"] .nav-search-open,
+  .site-header[data-search-open="true"] #open-recent,
+  .site-header[data-search-open="true"] #open-bookmarks {
+    display: none;
+  }
+
+  .site-header[data-search-open="true"] .header-tools {
+    flex: 1 1 auto;
+  }
+
+  /* The field is narrower than the matches, so the field drops its own anchor and
+     the panel hangs off the header: 16px gutters, full width, right under the row. */
+  .site-header[data-search-open="true"] .nav-search {
+    position: static;
+    display: flex;
+    flex: 1 1 auto;
+    width: auto;
+    margin-inline-end: 8px;
+  }
+
+  .site-header[data-search-open="true"] .nav-search-close {
+    display: grid;
+  }
+
+  .site-header[data-search-open="true"] .search-pop {
+    inset-inline: 16px;
+    width: auto;
+  }
+}
+
+/* Matches under the field: the header pill anchors them to its right edge, the phone
+   band's field fills the band. */
+.nav-search,
+.search-bar--phone .search {
+  position: relative;
+}
+
+.search-pop {
+  position: absolute;
+  inset-block-start: calc(100% + 8px);
+  inset-inline-end: 0;
+  z-index: 2;
+  width: min(420px, calc(100vw - 32px));
+  max-height: min(60vh, 460px);
+  overflow-y: auto;
+  padding: 6px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-2);
+}
+
+.search-bar--phone .search-pop {
+  inset-inline: 0 auto;
+  width: 100%;
+}
+
+.search-pop[hidden] {
+  display: none;
+}
+
+.search-pop__hit {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: var(--r-sm);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.search-pop__hit:hover,
+.search-pop__hit:focus-visible,
+.search-pop__hit.is-active {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+.search-pop__cover {
+  width: 34px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 4px;
+  background: var(--surface-2);
+}
+
+.search-pop__text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.search-pop__title {
+  overflow: hidden;
+  font-size: var(--fs-sm);
+  font-weight: 550;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.search-pop__meta {
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  line-height: 1.2;
+}
+
+.search-pop__note {
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+  padding: 10px 8px;
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  line-height: 1.4;
+}
+
+.search-pop__more {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 /* Catalog carries its own large search bar pinned at the top; a second one in the header would sit beside it. This page keeps only the lower one. */
 body.page-catalog .nav-search {
   display: none;
@@ -3003,16 +3163,16 @@ body.page-catalog .nav-search {
   position: sticky;
   min-height: 64px;
   /* Frosted header, same recipe as the hero's bottom edge: the image shows through blurred and the nav text sits on the frost. */
-  background: rgb(10 8 14 / 0.42);
+  background: var(--header-glass);
   border-block-end-color: transparent;
-  backdrop-filter: blur(14px) saturate(115%) brightness(0.86);
-  -webkit-backdrop-filter: blur(14px) saturate(115%) brightness(0.86);
+  backdrop-filter: var(--header-blur);
+  -webkit-backdrop-filter: var(--header-blur);
   transition: background-color 0.3s ease, border-block-end-color 0.3s ease;
 }
 
 /* Once pinned the background alone is not enough: past the hero there is no image left to blur, so add a little opacity as a floor. */
 .page-hero .site-header.is-stuck {
-  background: rgb(10 8 14 / 0.72);
+  background: var(--header-glass-stuck);
   border-block-end-color: transparent;
 }
 
@@ -3096,8 +3256,8 @@ body.page-catalog .nav-search {
   }
 
   .grid .card__save[aria-pressed="true"] {
-    background: var(--accent);
-    color: #1a0f1e;
+    background: var(--accent-fill);
+    color: var(--accent-ink);
   }
 }
 
@@ -3329,7 +3489,7 @@ body.page-catalog .nav-search {
 }
 
 .saved__chip[aria-pressed="true"] {
-  background: var(--accent);
+  background: var(--accent-fill);
   border-color: var(--accent);
   color: var(--accent-ink);
 }
@@ -3384,8 +3544,8 @@ body.page-catalog .nav-search {
 }
 
 .saved__manage-btn--danger:hover {
-  color: #f87171;
-  border-color: color-mix(in srgb, #f87171 42%, transparent);
+  color: var(--danger-ink);
+  border-color: color-mix(in srgb, var(--danger-ink) 42%, transparent);
 }
 
 .saved__meta {
@@ -3448,8 +3608,8 @@ body.page-catalog .nav-search {
   gap: var(--sp-3);
   flex-wrap: wrap;
   padding: var(--sp-3) var(--sp-4);
-  background: color-mix(in srgb, #f87171 8%, var(--surface));
-  border: 1px solid color-mix(in srgb, #f87171 34%, transparent);
+  background: color-mix(in srgb, var(--danger-ink) 8%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--danger-ink) 34%, transparent);
   border-radius: var(--r-md);
 }
 
@@ -3463,14 +3623,14 @@ body.page-catalog .nav-search {
 }
 
 .saved__danger {
-  color: #f87171;
-  border-color: color-mix(in srgb, #f87171 42%, transparent);
+  color: var(--danger-ink);
+  border-color: color-mix(in srgb, var(--danger-ink) 42%, transparent);
 }
 
 .saved__danger:hover {
-  background: #f87171;
-  border-color: #f87171;
-  color: #170f16;
+  background: var(--danger-fill);
+  border-color: var(--danger-fill);
+  color: var(--danger-on-fill);
 }
 
 /* The Move button on each card: low presence, opens the menu only when clicked. */
@@ -3669,3 +3829,67 @@ body.page-catalog .nav-search {
 .drawer__all:hover {
   color: var(--text);
 }
+
+/* ---------------------------------------------------------------- theme switch
+   The button shows the theme it would switch to, in the same 30px slot as the other
+   header glyphs, so nothing moves when the mode flips. */
+.theme-toggle__moon { display: none; }
+[data-theme="light"] .theme-toggle__sun { display: none; }
+[data-theme="light"] .theme-toggle__moon { display: block; }
+
+/* Light theme, part two: the few places painted directly instead of through a role.
+   Over the home hero the header sits on artwork, so it keeps white glyphs until the
+   glass floor appears at .is-stuck. */
+[data-theme="light"] .page-hero .site-header:not(.is-stuck) .brand,
+[data-theme="light"] .page-hero .site-header:not(.is-stuck) .site-nav__link,
+[data-theme="light"] .page-hero .site-header:not(.is-stuck) .icon-btn,
+[data-theme="light"] .page-hero .site-header:not(.is-stuck) .nav-search__go {
+  color: #fff;
+}
+
+[data-theme="light"] .page-hero .site-header:not(.is-stuck) .nav-search__input {
+  color: #fff;
+}
+
+[data-theme="light"] .page-hero .site-header:not(.is-stuck) .nav-search {
+  border-color: rgb(255 255 255 / 0.42);
+}
+
+[data-theme="light"] .page-hero .site-header:not(.is-stuck) .nav-search__input::placeholder {
+  color: rgb(255 255 255 / 0.78);
+}
+
+/* Black at 45% under a white panel reads as dirt; the light theme tints its shadows teal. */
+[data-theme="light"] .recent-pop,
+[data-theme="light"] .search-pop {
+  box-shadow: 0 18px 40px rgb(16 40 40 / 0.16);
+}
+
+[data-theme="light"] .tabbar {
+  box-shadow: 0 12px 30px rgb(16 40 40 / 0.18);
+}
+
+/* The hero fades into the page colour, so on a light page its bottom is near-white:
+   the thumbnail names flip to ink there instead of staying white. */
+[data-theme="light"] .hero__thumb-name {
+  color: var(--text-muted);
+}
+
+[data-theme="light"] .hero__thumb.is-current .hero__thumb-name,
+[data-theme="light"] .hero__thumb-btn:hover .hero__thumb-name,
+[data-theme="light"] .hero__thumb-btn:focus-visible .hero__thumb-name {
+  color: var(--accent);
+}
+
+[data-theme="light"] .to-top {
+  box-shadow: 0 8px 24px rgb(16 40 40 / 0.16);
+}
+
+/* Streaming logos are white artwork made for a dark chip. On a white panel they need
+   a dark tile under them or they disappear; the tile rides on the icon's own box. */
+[data-theme="light"] .ext-link__icon--brand {
+  border-radius: 4px;
+  background: #1A1424;
+  box-shadow: 0 0 0 2px #1A1424;
+}
+

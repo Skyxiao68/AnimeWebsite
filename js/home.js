@@ -161,9 +161,18 @@ function showPick(i, { animate = true } = {}) {
   const m = picks[index];
   const token = (swapToken += 1);
   const art = artFor(m, window.matchMedia('(max-width: 639px)').matches);
+  const gsap = window.gsap;
+  const copy = [el.tags, el.title, el.lede];
 
   if (!animate || reduceMotion.matches) {
     el.hero.classList.remove('is-swapping', 'is-sliding');
+    if (gsap) {
+      gsap.killTweensOf(copy);
+      copy.forEach((node) => {
+        node.style.transition = '';
+        gsap.set(node, { clearProps: 'opacity,transform,translate,rotate,scale' });
+      });
+    }
     setArt(el.img, art);
     paintMeta(m);
     el.hero.dataset.state = 'success';
@@ -180,7 +189,27 @@ function showPick(i, { animate = true } = {}) {
     el.img.style.transition = '';
   }
 
-  el.hero.classList.add('is-swapping', 'is-sliding');
+  if (gsap) {
+    // CSS still fades the copy for browsers without GSAP; here it can go out as
+    // three staggered lines instead of one block, then come back the same way.
+    el.hero.classList.remove('is-swapping');
+    copy.forEach((node) => {
+      node.style.transition = 'none';
+    });
+    gsap.killTweensOf(copy);
+    gsap.to(copy, {
+      opacity: 0,
+      y: 8,
+      duration: 0.3,
+      ease: 'power1.out',
+      stagger: 0.04,
+      overwrite: true,
+    });
+  } else {
+    el.hero.classList.add('is-swapping');
+  }
+
+  el.hero.classList.add('is-sliding');
   ghost.classList.toggle('hero__img--pv', art.isPv);
   ghost.dataset.banner = art.banner;
   // The incoming frame starts slightly right and 2% larger, then both drift 4% left.
@@ -228,6 +257,27 @@ function showPick(i, { animate = true } = {}) {
     ghost.style.transition = '';
     el.hero.classList.remove('is-swapping', 'is-sliding');
     el.hero.dataset.state = 'success';
+
+    if (gsap) {
+      gsap.fromTo(
+        copy,
+        { opacity: 0, y: 10 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.45,
+          ease: 'power2.out',
+          stagger: 0.06,
+          overwrite: true,
+          onComplete: () => {
+            copy.forEach((node) => {
+              node.style.transition = '';
+              gsap.set(node, { clearProps: 'opacity,transform,translate,rotate,scale' });
+            });
+          },
+        }
+      );
+    }
   }, SLIDE_MS);
 }
 
