@@ -1,0 +1,191 @@
+/* css/tokens.css - design tokens
+ * Values only, no selectors. Change the look here first instead of hunting magic
+ * numbers in style.css. 8px spacing scale; body colour #978FA3 comes from the PRD.
+ * Breakpoints are hard-coded inside media queries (CSS variables cannot be used in
+ * a query): <600 mobile / 600-991 tablet / >=992 desktop.
+ */
+
+/* Inter, latin subset, 48KB variable font: self-hosted rather than pulled from a
+ * third-party CDN, and one file covers weights 100-900. */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("../fonts/inter-var.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Brand wordmark: the render shows a handwriting brush face, not the body font.
+ * Caveat 700 is the closest match for stroke shape and rhythm, 24KB, self-hosted. */
+@font-face {
+  font-family: "Caveat";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../fonts/caveat-700.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  /* ---- colour roles (match the submitted PRD / Figma system: bg #141018, surface #1A1424, accent #BD91C8) ---- */
+  --bg: #141018; /* page base */
+  --bg-soft: #17121F; /* band under the hero, between bg and surface */
+  --surface: #1A1424; /* cards, panels */
+  --surface-2: #231B2F; /* hover states and inputs, one step above surface */
+  --main: #2A1F3A; /* the PRD's main colour; the whole footer band uses it */
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.16);
+
+  --text: #f2eef9; /* primary text: headings and emphasis */
+  --text-muted: #978fa3; /* body and secondary text (PRD; >= 4.5:1 on bg and surface) */
+  --text-dim: #6f6880; /* placeholders and disabled states */
+
+  --accent: #BD91C8; /* primary accent used as text: links, current page, hover (PRD accent) */
+  /* Fill and ink are separate roles: one value cannot stay legible as text and as a plate.
+     In the dark theme they are the submitted accent pair; the light theme moves each one. */
+  --accent-fill: #BD91C8; /* chips, buttons, badges: a surface that carries ink */
+  --accent-ink: #1A0F1E; /* text on accent-fill: deep ink, keeps contrast */
+  --accent-soft: rgba(189, 145, 200, 0.16);
+  --on-art-accent: #BD91C8; /* accent drawn over artwork, where page tokens do not apply */
+  --brand: rgb(130 121 145);
+  --text-soft: rgba(242, 238, 249, 0.78); /* card titles: one step below body text */
+  --icon: #efeaf5;
+  --search-line: rgb(180 164 200 / 0.42);
+  --search-placeholder: rgb(196 190 196 / 0.72);
+  --search-go: rgb(214 208 222 / 0.85);
+  --header-glass: rgb(10 8 14 / 0.42);
+  --header-glass-stuck: rgb(10 8 14 / 0.72);
+  --header-blur: blur(14px) saturate(115%) brightness(0.86);
+  --scrim: rgb(8 6 12 / 0.62);
+  --scrim-strong: rgba(0, 0, 0, 0.55);
+  --skeleton-hi: #2c2339;
+  --footer-text: #fff;
+  --footer-note: rgb(255 255 255 / 0.55);
+  --danger-ink: #f87171;
+  --danger-fill: #f87171;
+  --danger-on-fill: #170f16;
+  --focus: #8b7bf7; /* focus ring, kept distinct from the accent */
+  --ok: #4ec9a4;
+  --warn: #f0b456;
+  --danger: #ff6b6b;
+
+  /* ---- spacing (8px scale) ---- */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --sp-8: 64px;
+  --sp-9: 96px;
+
+  /* ---- type scale / line height ---- */
+  --fs-xs: 13px;
+  --fs-sm: 15px;
+  --fs-md: 17px;
+  --fs-lg: 22px;
+  --fs-xl: clamp(24px, 2.4vw, 32px);
+  --fs-2xl: clamp(32px, 4vw, 48px);
+  --fs-3xl: clamp(40px, 6vw, 72px);
+
+  --lh-tight: 1.15;
+  --lh-snug: 1.35;
+  --lh-body: 1.6;
+
+  --tracking-wide: 0.08em;
+
+  /* ---- radii / shadows ---- */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 16px;
+  --r-pill: 999px;
+
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-3: 0 16px 48px rgba(0, 0, 0, 0.55);
+
+  /* ---- layout ---- */
+  /* The handoff lays out 1200 centred. Widening to 1560 like cycani was tried and
+     reverted: the design's whitespace and line breaks assume 1200. */
+  --container: clamp(1200px, 50vw + 600px, 1440px);
+  --gutter: var(--sp-5); /* drops to 16px on mobile via media query */
+  --header-h: 64px;
+  --tabbar-h: 56px; /* phone tab bar height; body reserves this much padding */
+  --card-cover-ratio: 3 / 4; /* covers are uniformly 2:3 */
+
+  /* ---- layers ---- */
+  --z-header: 100;
+  --z-tabbar: 100;
+  --z-drawer: 200;
+  --z-toast: 300;
+
+  /* ---- motion (GSAP drives the tweens but CSS transitions reuse these) ---- */
+  --t-fast: 120ms;
+  --t-base: 200ms;
+  --t-slow: 320ms;
+  --ease: cubic-bezier(0.2, 0.6, 0.2, 1);
+
+  /* ---- fonts ---- */
+  --font-sans: "Inter", "Segoe UI", "Noto Sans SC", system-ui, -apple-system, sans-serif;
+  --font-display: "Inter", "Segoe UI", "Noto Sans SC", system-ui, sans-serif;
+  --font-brand: "Caveat", "Segoe Script", cursive;
+}
+
+/* Light theme: Hatsune Miku's teal and pink instead of the PRD's night purple.
+   Every colour role is restated, so a component only has to use tokens to follow the switch.
+   Artwork overlays are not here: white text on a poster stays white on a poster. */
+[data-theme="light"] {
+  --bg: #E7F3F1;
+  --bg-soft: #DDF0ED;
+  --surface: #FBFEFD;
+  --surface-2: #D8ECE9;
+  --main: #CFE8E4;
+  --line: rgba(16, 74, 75, 0.12);
+  --line-strong: rgba(16, 74, 75, 0.24);
+
+  --text: #113033;
+  --text-muted: #44666A;
+  --text-dim: #6E8D8F;
+  --text-soft: #2E5154;
+
+  --accent: #0A7A76;
+  --accent-fill: #39C5BB;
+  --accent-ink: #06302E;
+  --accent-soft: rgba(10, 122, 118, 0.12);
+  --on-art-accent: #6FE7DA;
+  --brand: #0A7A76;
+  --icon: #113033;
+  --search-line: rgba(16, 74, 75, 0.3);
+  --search-placeholder: #6E8D8F;
+  --search-go: #44666A;
+
+  /* Over the home artwork the glass stays dark, like a photo caption; it turns to light
+     glass only once the page scrolls under it (.is-stuck). White glyphs need that floor. */
+  --header-glass: rgb(10 8 14 / 0.42);
+  --header-glass-stuck: rgb(244 251 251 / 0.92);
+  --header-blur: blur(14px) saturate(115%) brightness(0.86);
+  --scrim: rgb(16 40 40 / 0.38);
+  --scrim-strong: rgba(16, 40, 40, 0.34);
+  --skeleton-hi: #CFECE9;
+  --footer-text: #113033;
+  --footer-note: #44666A;
+
+  --danger-ink: #C62828;
+  --danger-fill: #D93A3A;
+  --danger-on-fill: #FFFFFF;
+  --focus: #0A7A76;
+  --ok: #0C7A5B;
+  --warn: #9A6410;
+  --danger: #C62828;
+}
+
+/* Reduced motion: every transition collapses, and motion.js checks the same query */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --t-fast: 0ms;
+    --t-base: 0ms;
+    --t-slow: 0ms;
+  }
+}

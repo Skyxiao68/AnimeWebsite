@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en" data-root="pages/">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+      // Read the saved theme before the stylesheets paint: a light page must not flash dark.
+      try {
+        if (localStorage.getItem('mf.theme') === 'light') document.documentElement.dataset.theme = 'light';
+      } catch (err) {}
+    </script>
+    <title>MikuFansAnime · Discover anime worth your night</title>
+    <meta
+      name="description"
+      content="A poster pick, weekly keep-ups, the most popular and the best rated anime, all read live from AniList."
+    />
+    <link rel="preload" href="fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="css/tokens.css" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body class="page-hero">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <!-- Header: logo, three nav links, search, clock, bookmarks.
+         The clock opens a recently-viewed popover; organising bookmarks lives on
+         pages/saved.html, which the footer and the phone tab bar both point at. -->
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand" href="index.html">MikuFansAnime</a>
+
+        <nav class="site-nav" aria-label="Main">
+          <a class="site-nav__link" href="index.html" aria-current="page">Home</a>
+          <a class="site-nav__link" href="pages/catalog.html">Categories</a>
+          <a class="site-nav__link" href="pages/rankings.html">Ranks</a>
+        </nav>
+
+        <div class="header-tools">
+          <form class="nav-search" role="search" action="pages/catalog.html" method="get">
+            <label class="visually-hidden" for="nav-q">Search anime</label>
+            <input
+              class="nav-search__input"
+              id="nav-q"
+              name="q"
+              type="search"
+              placeholder="Search for..."
+              autocomplete="off"
+            />
+            <button class="nav-search__go" type="submit">
+              <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.6"/><path d="m19.6 19.6-3.4-3.4"/></svg>
+              <span class="visually-hidden">Search</span>
+            </button>
+          </form>
+          <button
+            class="icon-btn"
+            type="button"
+            id="open-recent"
+            aria-expanded="false"
+            aria-controls="recent-pop"
+            title="Recently viewed"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.4"/><path d="M12 7.6V12l3 1.8"/></svg>
+            <span class="visually-hidden">Recently viewed</span>
+          </button>
+
+          <button
+            class="icon-btn"
+            type="button"
+            id="open-bookmarks"
+            aria-expanded="false"
+            aria-controls="bookmark-drawer"
+            title="Bookmarks"
+          >
+            <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6.5 4h11v16l-5.5-3.8L6.5 20z"/></svg>
+            <span class="visually-hidden">Bookmarks</span>
+          </button>
+
+          <button
+            class="icon-btn theme-toggle"
+            type="button"
+            data-theme-toggle
+            aria-pressed="false"
+            aria-label="Switch to light theme"
+            title="Light theme"
+          >
+            <svg class="theme-toggle__sun" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 3.2v2.2M12 18.6v2.2M3.2 12h2.2M18.6 12h2.2M5.8 5.8l1.6 1.6M16.6 16.6l1.6 1.6M18.2 5.8l-1.6 1.6M7.4 16.6l-1.6 1.6"/></svg>
+            <svg class="theme-toggle__moon" width="19" height="19" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M20 14.6A8.4 8.4 0 0 1 9.4 4a8.6 8.6 0 1 0 10.6 10.6Z"/></svg>
+            <span class="visually-hidden">Theme</span>
+          </button>
+
+
+          <div class="recent-pop" id="recent-pop" hidden></div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Below 480 a search field does not fit: at 390 the brand takes 146 and the tools
+         122, leaving 75. In that band search becomes a strip under the header, same
+         shape as the catalog page; from 480 up it returns to the header. -->
+    <div class="search-bar search-bar--phone">
+      <div class="container">
+        <form class="search" action="pages/catalog.html" method="get" role="search">
+          <label class="search__label" for="home-q">Search anime</label>
+          <input
+            class="search__input"
+            id="home-q"
+            name="q"
+            type="search"
+            placeholder="Search anime, e.g. Frieren"
+            autocomplete="off"
+          />
+          <button class="search__submit" type="submit">Search</button>
+        </form>
+      </div>
+    </div>
+
+    <main id="main">
+      <!-- Full-bleed hero for the most trending title; title, tags, synopsis, arrows and thumbnails come from home.js -->
+      <section class="hero" id="hero" aria-labelledby="hero-title" data-state="loading">
+        <div class="hero__media" aria-hidden="true">
+          <img class="hero__img" id="hero-img" alt="" />
+        </div>
+
+        <div class="container hero__body">
+          <p class="hero__tags" id="hero-tags"></p>
+          <h1 class="hero__title" id="hero-title">
+            <a class="hero__title-link" id="hero-title-link" href="pages/catalog.html">Tonight&rsquo;s pick</a>
+          </h1>
+          <p class="hero__lede" id="hero-lede">
+            Loading the most talked-about title this week.
+          </p>
+          <ul class="hero__thumbs" id="hero-thumbs"></ul>
+        </div>
+
+        <button class="hero__arrow hero__arrow--prev" type="button" id="hero-prev">
+          <span aria-hidden="true">‹</span>
+          <span class="visually-hidden">Previous pick</span>
+        </button>
+        <button class="hero__arrow hero__arrow--next" type="button" id="hero-next">
+          <span aria-hidden="true">›</span>
+          <span class="visually-hidden">Next pick</span>
+        </button>
+
+      </section>
+
+      <div class="container">
+        <div class="pair">
+          <!-- Weekly Keep Ups: Mon-Sun really switches on AniList's airingSchedule -->
+          <section class="shelf" aria-labelledby="weekly-title">
+            <div class="shelf__head">
+              <h2 class="shelf__title" id="weekly-title">Weekly Keep Ups</h2>
+              <div class="chips" role="group" aria-label="Day of the week" id="day-chips">
+                <button class="chip-chip" type="button" data-day="0" aria-pressed="true">Mon</button>
+                <button class="chip-chip" type="button" data-day="1" aria-pressed="false">Tues</button>
+                <button class="chip-chip" type="button" data-day="2" aria-pressed="false">Wed</button>
+                <button class="chip-chip" type="button" data-day="3" aria-pressed="false">Thurs</button>
+                <button class="chip-chip" type="button" data-day="4" aria-pressed="false">Fri</button>
+                <button class="chip-chip" type="button" data-day="5" aria-pressed="false">Sat</button>
+                <button class="chip-chip" type="button" data-day="6" aria-pressed="false">Sun</button>
+              </div>
+              <a class="shelf__more" href="pages/catalog.html?sort=newest&format=TV">More →</a>
+            </div>
+            <div
+              class="grid shelf__grid"
+              id="weekly-grid"
+              data-state="loading"
+              aria-busy="true"
+            ></div>
+          </section>
+
+          <!-- Ranks: Day/Week re-sort the airing list by popularity, Season/Year use
+               AniList's season and year filters, and Month stands in with trending
+               because AniList has no real monthly chart -->
+          <section class="shelf" aria-labelledby="ranks-title">
+            <div class="shelf__head">
+              <h2 class="shelf__title" id="ranks-title">Ranks</h2>
+              <div class="chips" role="group" aria-label="Chart window" id="rank-chips">
+                <button class="chip-chip" type="button" data-window="day" aria-pressed="false">Day</button>
+                <button class="chip-chip" type="button" data-window="week" aria-pressed="true">Week</button>
+                <button
+                  class="chip-chip"
+                  type="button"
+                  data-window="month"
+                  aria-pressed="false"
+                  title="Airing titles ranked by what people are watching this month"
+                >
+                  Month
+                </button>
+                <button class="chip-chip" type="button" data-window="season" aria-pressed="false">Season</button>
+                <button class="chip-chip" type="button" data-window="year" aria-pressed="false">Year</button>
+              </div>
+              <a class="shelf__more" href="pages/rankings.html">More →</a>
+            </div>
+            <div
+              class="grid shelf__grid"
+              id="ranks-grid"
+              data-state="loading"
+              aria-busy="true"
+            ></div>
+          </section>
+        </div>
+
+        <section class="shelf shelf--wide" aria-labelledby="tv-title">
+          <div class="shelf__head">
+            <h2 class="shelf__title" id="tv-title">TV Shows</h2>
+            <a class="shelf__more" href="pages/catalog.html?format=TV">More →</a>
+          </div>
+          <div class="grid" id="tv-grid" data-state="loading" aria-busy="true"></div>
+        </section>
+
+        <section class="shelf shelf--wide" aria-labelledby="movies-title">
+          <div class="shelf__head">
+            <h2 class="shelf__title" id="movies-title">Movies</h2>
+            <a class="shelf__more" href="pages/catalog.html?format=MOVIE">More →</a>
+          </div>
+          <div class="grid" id="movies-grid" data-state="loading" aria-busy="true"></div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <a class="brand brand--sm" href="index.html">
+          MikuFansAnime
+        </a>
+        <p class="site-footer__copy">MikuFansAnime @ 2026. All rights reserved.</p>
+        <nav class="site-footer__links" aria-label="Footer">
+          <a href="index.html">Home</a>
+          <a href="pages/catalog.html">Categories</a>
+          <a href="pages/rankings.html">Ranks</a>
+          <a href="pages/saved.html">Bookmarks</a>
+        </nav>
+      </div>
+      <p class="site-footer__note">
+        Data from <a href="https://anilist.co" rel="noopener">AniList</a>. Built
+        for a university assignment, not affiliated with AniList.
+      </p>
+    </footer>
+
+    <aside
+      class="drawer"
+      id="bookmark-drawer"
+      data-open="false"
+      aria-labelledby="drawer-title"
+      inert
+    >
+      <div class="drawer__head">
+        <h2 class="drawer__title" id="drawer-title">Bookmarks</h2>
+        <button class="btn drawer__close" type="button" id="close-bookmarks">
+          Close
+        </button>
+      </div>
+      <ul class="drawer__list" id="bookmark-list">
+        <li class="drawer__empty">
+          Nothing saved yet. Tap Bookmark on any card.
+        </li>
+      </ul>
+      <a class="drawer__all" href="pages/saved.html">View all saved →</a>
+    </aside>
+    <button
+      class="drawer-backdrop"
+      type="button"
+      id="bookmark-backdrop"
+      aria-label="Close bookmarks"
+      hidden
+    ></button>
+
+    <button class="to-top" type="button" id="to-top" hidden>Back to top</button>
+
+    <nav class="tabbar" aria-label="Mobile">
+      <a class="tabbar__item" href="index.html" aria-current="page">
+        <span class="tabbar__icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M4.4 10.2 12 4.4l7.6 5.8V19.6H4.4z"/><path d="M9.8 19.6v-4.8h4.4v4.8"/></svg></span>
+        Home
+      </a>
+      <a class="tabbar__item" href="pages/catalog.html">
+        <span class="tabbar__icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M4.4 5.6h15.2l-5.8 6.8v5.4l-3.6 2v-7.4z"/></svg></span>
+        Catalog
+      </a>
+      <a class="tabbar__item" href="pages/rankings.html">
+        <span class="tabbar__icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5.2 19.4v-5.6"/><path d="M12 19.4V9"/><path d="M18.8 19.4V4.6"/></svg></span>
+        Rankings
+      </a>
+      <a class="tabbar__item" href="pages/saved.html">
+        <span class="tabbar__icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6.5 4h11v16l-5.5-3.8L6.5 20z"/></svg></span>
+        Saved
+      </a>
+    </nav>
+
+    <script src="vendor/gsap.min.js"></script>
+    <script src="vendor/ScrollTrigger.min.js"></script>
+    <script src="vendor/MotionPathPlugin.min.js"></script>
+    <script src="vendor/Draggable.min.js"></script>
+    <script type="module" src="js/motion.js"></script>
+    <script type="module" src="js/theme.js"></script>
+    <script type="module" src="js/home.js"></script>
+    <script type="module" src="js/search.js"></script>
+  </body>
+</html>

@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+      // Read the saved theme before the stylesheets paint: a light page must not flash dark.
+      try {
+        if (localStorage.getItem('mf.theme') === 'light') document.documentElement.dataset.theme = 'light';
+      } catch (err) {}
+    </script>
+    <title>Title · MikuFansAnime</title>
+    <meta
+      name="description"
+      content="One anime title: score, format, episode count, synopsis, related series and a place to rate it."
+    />
+    <link rel="preload" href="fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="../css/tokens.css" />
+    <link rel="stylesheet" href="../css/style.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand" href="../index.html">MikuFansAnime</a>
+
+        <nav class="site-nav" aria-label="Main">
+          <a class="site-nav__link" href="../index.html">Home</a>
+          <a class="site-nav__link" href="catalog.html">Categories</a>
+          <a class="site-nav__link" href="rankings.html">Ranks</a>
+        </nav>
+
+        <div class="header-tools">
+          <form class="nav-search" role="search" action="catalog.html" method="get">
+            <label class="visually-hidden" for="q">Search anime</label>
+            <input
+              class="nav-search__input"
+              id="q"
+              name="q"
+              type="search"
+              placeholder="Search for..."
+              autocomplete="off"
+            />
+            <button class="nav-search__go" type="submit">
+              <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.6"/><path d="m19.6 19.6-3.4-3.4"/></svg>
+              <span class="visually-hidden">Search</span>
+            </button>
+          </form>
+
+          <!-- The render puts a magnifier first in the tools. Below 520 it opens the
+               field in place, so the page can search without leaving. -->
+          <button class="icon-btn nav-search-open" type="button" aria-expanded="false" title="Search anime">
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.6"/><path d="m19.6 19.6-3.4-3.4"/></svg>
+            <span class="visually-hidden">Search anime</span>
+          </button>
+          <button class="icon-btn nav-search-close" type="button" title="Close search">
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+            <span class="visually-hidden">Close search</span>
+          </button>
+
+          <button
+            class="icon-btn"
+            type="button"
+            id="open-recent"
+            aria-expanded="false"
+            aria-controls="recent-pop"
+            title="Recently viewed"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.4"/><path d="M12 7.6V12l3 1.8"/></svg>
+            <span class="visually-hidden">Recently viewed</span>
+          </button>
+
+          <button
+            class="icon-btn"
+            type="button"
+            id="open-bookmarks"
+            aria-expanded="false"
+            aria-controls="bookmark-drawer"
+            title="Bookmarks"
+          >
+            <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6.5 4h11v16l-5.5-3.8L6.5 20z"/></svg>
+            <span class="visually-hidden">Bookmarks</span>
+          </button>
+
+          <button
+            class="icon-btn theme-toggle"
+            type="button"
+            data-theme-toggle
+            aria-pressed="false"
+            aria-label="Switch to light theme"
+            title="Light theme"
+          >
+            <svg class="theme-toggle__sun" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 3.2v2.2M12 18.6v2.2M3.2 12h2.2M18.6 12h2.2M5.8 5.8l1.6 1.6M16.6 16.6l1.6 1.6M18.2 5.8l-1.6 1.6M7.4 16.6l-1.6 1.6"/></svg>
+            <svg class="theme-toggle__moon" width="19" height="19" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M20 14.6A8.4 8.4 0 0 1 9.4 4a8.6 8.6 0 1 0 10.6 10.6Z"/></svg>
+            <span class="visually-hidden">Theme</span>
+          </button>
+
+
+          <div class="recent-pop" id="recent-pop" hidden></div>
+        </div>
+      </div>
+    </header>
+
+    <main id="main" class="container detail-page">
+      <div class="detail__top">
+        <figure class="detail__poster">
+          <img id="detail-cover" src="" alt="" width="230" height="330" decoding="async" />
+        </figure>
+
+        <div class="detail__info">
+          <h1 class="detail__title" id="detail-title">Loading&hellip;</h1>
+          <p class="detail__alts" id="detail-alts"></p>
+          <ul class="detail__genres" id="detail-genres"></ul>
+          <p class="detail__meta" id="detail-meta"></p>
+          <p class="detail__meta" id="detail-meta2"></p>
+
+          <p class="detail__badge" id="detail-badge" hidden></p>
+
+          <div class="detail__actions" id="detail-actions" hidden>
+            <button class="pill-btn" type="button" id="detail-save" aria-pressed="false">
+              <span id="detail-save-label">Bookmark</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none"
+                stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
+                <path d="M6.5 4h11v16l-5.5-3.8L6.5 20z" />
+              </svg>
+            </button>
+
+            <div class="rate">
+              <button class="pill-btn" type="button" id="detail-rate" aria-expanded="false"
+                aria-controls="detail-rating">
+                <span id="detail-rate-label">Rate</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </button>
+              <div class="rate__pop" id="detail-rating" hidden>
+                <p class="rate__hint" id="detail-rate-hint">Your score out of 10</p>
+                <div class="rate__row" id="rating-row" role="group" aria-label="Your score out of 10"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="related" id="related-panel" hidden aria-labelledby="related-title">
+          <h2 class="related__title" id="related-title">Related</h2>
+          <p class="related__count" id="related-count"></p>
+          <ul class="related__list" id="related-list"></ul>
+        </aside>
+      </div>
+
+      <div class="detail__state" id="detail-state" aria-live="polite"></div>
+
+      <section class="detail__block">
+        <!-- PRD feedback #14: the heading reads Overview rather than Introduction -->
+        <h2 class="detail__h2">Overview</h2>
+        <div class="detail__copy" id="detail-synopsis" data-clamped="true"></div>
+        <button class="text-btn" type="button" id="detail-more" aria-expanded="false" hidden>
+          Read more
+        </button>
+      </section>
+
+      <section class="detail__block" id="ext-block" hidden>
+        <h2 class="detail__h2">External &amp; Streaming Links</h2>
+        <div class="ext-links" id="detail-links"></div>
+      </section>
+
+      <section class="detail__block">
+        <h2 class="detail__h2">
+          Recommendations <span class="detail__hint">Chosen based on topic tags</span>
+        </h2>
+        <div class="grid reco-grid" id="reco-grid" data-state="loading" aria-busy="true"></div>
+      </section>
+
+      <button class="to-top" type="button" id="to-top" hidden>Back to top</button>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <a class="brand brand--sm" href="../index.html">
+          MikuFansAnime
+        </a>
+        <p class="site-footer__copy">MikuFansAnime @ 2026. All rights reserved.</p>
+        <nav class="site-footer__links" aria-label="Footer">
+          <a href="../index.html">Home</a>
+          <a href="catalog.html">Categories</a>
+          <a href="rankings.html">Ranks</a>
+          <a href="saved.html">Bookmarks</a>
+        </nav>
+      </div>
+      <p class="site-footer__note">
+        Data from <a href="https://anilist.co" rel="noopener">AniList</a>. Built
+        for a university assignment, not affiliated with AniList.
+      </p>
+    </footer>
+
+    <aside
+      class="drawer"
+      id="bookmark-drawer"
+      data-open="false"
+      aria-labelledby="drawer-title"
+      inert
+    >
+      <div class="drawer__head">
+        <h2 class="drawer__title" id="drawer-title">Bookmarks</h2>
+        <button class="btn drawer__close" type="button" id="close-bookmarks">
+          Close
+        </button>
+      </div>
+      <ul class="drawer__list" id="bookmark-list">
+        <li class="drawer__empty">
+          Nothing saved yet. Tap Bookmark on any card.
+        </li>
+      </ul>
+      <a class="drawer__all" href="saved.html">View all saved →</a>
+    </aside>
+    <button
+      class="drawer-backdrop"
+      type="button"
+      id="bookmark-backdrop"
+      aria-label="Close bookmarks"
+      hidden
+    ></button>
+
+    <nav class="tabbar" aria-label="Mobile">
+      <a class="tabbar__item" href="../index.html">
+        <span class="tabbar__icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M4.4 10.2 12 4.4l7.6 5.8V19.6H4.4z"/><path d="M9.8 19.6v-4.8h4.4v4.8"/></svg></span>
+        Home
+      </a>
+      <a class="tabbar__item" href="catalog.html">
+        <span class="tabbar__icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M4.4 5.6h15.2l-5.8 6.8v5.4l-3.6 2v-7.4z"/></svg></span>
+        Catalog
+      </a>
+      <a class="tabbar__item" href="rankings.html">
+        <span class="tabbar__icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5.2 19.4v-5.6"/><path d="M12 19.4V9"/><path d="M18.8 19.4V4.6"/></svg></span>
+        Rankings
+      </a>
+      <a class="tabbar__item" href="saved.html">
+        <span class="tabbar__icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6.5 4h11v16l-5.5-3.8L6.5 20z"/></svg></span>
+        Saved
+      </a>
+    </nav>
+
+    <script src="../vendor/gsap.min.js"></script>
+    <script src="../vendor/ScrollTrigger.min.js"></script>
+    <script src="../vendor/MotionPathPlugin.min.js"></script>
+    <script src="../vendor/Draggable.min.js"></script>
+    <script type="module" src="../js/motion.js"></script>
+    <script type="module" src="../js/theme.js"></script>
+    <script type="module" src="../js/detail.js"></script>
+    <script type="module" src="../js/search.js"></script>
+  </body>
+</html>
