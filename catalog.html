@@ -13,17 +13,18 @@
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body class="page-catalog">
-    <!-- 手机上六行筛选要立刻交给抽屉定位。这一行必须早于筛选区块被解析：
-         晚一步（等 js/filters.js 执行）它们会先按普通区块画出来，再被收成抽屉，刷新时闪一下。
-         JS 关掉时这行不跑，面板仍是可用的普通区块。 -->
+    <!-- On phones the six filter rows must be positioned as a drawer before they paint.
+         This line has to parse ahead of the filter markup: one step later they render
+         as plain blocks and then get collected, which flashes on reload. With JS off it
+         never runs and the panel stays usable as an ordinary block. -->
     <script>
       document.body.dataset.filtersReady = 'true';
     </script>
 
     <a class="skip-link" href="#main">Skip to content</a>
 
-    <!-- ============================================================ 顶栏（与首页同一套） -->
-    <!-- site-header--joined：这条顶栏和下面的搜索条是同一层玻璃，两段之间不画分界线。 -->
+    <!-- ============================================================ header (same set as home) -->
+    <!-- site-header--joined: header and search strip share one pane of glass, so no rule between them. -->
     <header class="site-header site-header--joined">
       <div class="site-header__inner">
         <a class="brand" href="index.html">MikuFansAnime</a>
@@ -82,8 +83,8 @@
       </div>
     </header>
 
-    <!-- ============================================================ 搜索条
-       首页那条是导航入口（action="catalog.html"），这里是真的搜索框。 -->
+    <!-- ============================================================ search strip
+        The home one is a navigation entry (action="catalog.html"); this one is a real search box. -->
     <div class="search-bar">
       <div class="container">
         <form class="search" action="catalog.html" method="get" role="search">
@@ -102,17 +103,18 @@
     </div>
 
     <main id="main" class="container">
-      <!-- ==================================================== 筛选区
-        结构照 Figma HiFi「Filter Out Your Anime」：每行 = 组名 + All + 选项值，
-        长行（Genre）折叠，Reset 在右上角。组名和值是两列，值不用胶囊边框。
+      <!-- ==================================================== filters
+        Structure follows the Figma HiFi "Filter Out Your Anime": each row is a group
+        label, All, then the values; long rows (Genre) collapse and Reset sits top right.
+        Label and values are two columns, and values carry no pill border.
 
-        filters.js 在这一个容器上做事件委托：
-          button[data-value]  → 选中该值，同组其它项 aria-pressed=false
-          button[data-all]    → 清空这一组
-          button[data-expand] → 切 aria-expanded + 行上的 data-expanded（不发请求）
-          #year (input)       → 监听 change，不是 click
+        filters.js runs one delegated listener on this container:
+          button[data-value]  -> select it, aria-pressed=false on the rest of the group
+          button[data-all]    -> clear the group
+          button[data-expand] -> flip aria-expanded plus data-expanded (no request)
+          #year (input)       -> listens to change, not click
       -->
-      <!-- ≤599px：六组筛选收进底部抽屉，这里只留一个带计数的按钮（PRD #11） -->
+      <!-- below 600 the six groups go into a bottom drawer and only a counted button stays (PRD #11) -->
       <button
         class="filters-toggle"
         type="button"
@@ -226,8 +228,8 @@
             </button>
           </div>
   
-          <!-- Genre 是长行：前 5 个直接显示，其余折叠。折叠是纯 CSS 的
-               （data-expanded="false" 时 :nth-child(n+6) 隐藏），JS 只切属性。 -->
+          <!-- Genre is long: five values show, the rest collapse. Collapsing is pure CSS
+               (:nth-child(n+6) hidden while data-expanded="false"); JS only flips the attribute. -->
           <div
             class="filters__row"
             data-group="genre"
@@ -277,9 +279,9 @@
             </button>
           </div>
   
-          <!-- 年份故意偏离设计稿：稿里是 2026→2005 一长串 + Expand，
-               PRD 评审第 19 条要求「year selection → type-in box instead of list」。
-               这是 20 条评论之一，不改就是「未回应 PRD 反馈」上限 69%。 -->
+          <!-- Year deliberately departs from the design: the sheet lists 2026 down to 2005
+               plus Expand, and PRD review #19 asks for a type-in box instead. Leaving it
+               unanswered caps the PRD-feedback criterion. -->
           <div class="filters__row" data-group="year">
             <span class="filters__label" id="label-year">Year</span>
             <button
@@ -308,7 +310,7 @@
             </div>
           </div>
   
-          <!-- Sort 没有可用的 All：它总有一个值（默认 Popularity） -->
+          <!-- Sort has no All: it always holds a value (Popularity by default) -->
           <div class="filters__row" data-group="sort">
             <span class="filters__label" id="label-sort">Sort</span>
             <span class="filters__all is-static" aria-hidden="true">All</span>
@@ -323,7 +325,7 @@
         </div>
       </section>
 
-      <!-- 结果头：左边说选了哪些标签，右边说找到多少（role=status，读屏也能听到变化） -->
+      <!-- Result line: chosen tags on the left, count on the right (role=status so screen readers hear it) -->
       <div class="catalog-head">
         <p class="catalog-head__tags" id="tag-summary">No tags selected</p>
         <p
@@ -336,7 +338,7 @@
         </p>
       </div>
 
-      <!-- 渲染进这个 .grid；四态用 data-state 表达（loading / success / error / empty） -->
+      <!-- Renders into this .grid; the four states are data-state (loading / success / error / empty) -->
       <div
         class="grid"
         id="catalog-grid"
@@ -351,7 +353,7 @@
       </div>
     </main>
 
-    <!-- 手机筛选抽屉的遮罩（点击关闭，见 js/filters.js） -->
+    <!-- Scrim for the phone filter drawer (click closes; see js/filters.js) -->
     <button
       class="filters-backdrop"
       type="button"
@@ -379,7 +381,7 @@
       </p>
     </footer>
 
-    <!-- 收藏抽屉结构同首页；行为在 js/bookmarks.js -->
+    <!-- Bookmark drawer, same structure as home; behaviour lives in js/bookmarks.js -->
     <aside
       class="drawer"
       id="bookmark-drawer"

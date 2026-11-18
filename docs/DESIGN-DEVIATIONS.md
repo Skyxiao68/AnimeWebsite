@@ -680,6 +680,8 @@ The rankings podium was three columns from 899px down, so an 897px window showed
 
 The single-column ranking list below 900px is unchanged — only the podium row moved.
 
+**Superseded for phones by §56**: below 600 the row now holds three covers and the list starts at 4, because the mobile render does that. 600–767 still shows five across three columns.
+
 Evidence: docs/evidence/_new/rankings-top5-897.png.
 
 ## 54. The avatar button is gone
@@ -692,10 +694,32 @@ Removed from all five pages (index, catalog, detail, rankings, saved) together w
 
 Evidence: docs/evidence/_new/header-no-avatar-1440.png.
 
+## 55. The rankings kicker was inheriting body grey
+
+`rankings.html` opens with "The Popularity of Anime" above the page title. That line carried `page-head__kicker`, a class with no rule anywhere in the stylesheet, so it fell back to the body colour and read as a subtitle. The catalog page's equivalent line (`filters__kicker`, "Browse in Categories") is the accent purple, which is what the client pointed at.
+
+`.page-head__kicker` now copies the catalog values: `color: var(--accent)`, `font-size: var(--fs-md)` (17px), weight 500, letter-spacing 0.01em, 4px below. Measured at 1440: rankings kicker rgb(189, 145, 200) / 17px / 500 — identical to the catalog's.
+
+Evidence: docs/evidence/_new/rankings-kicker-1440.png.
+
+## 56. Phones use the mobile render's three-across cards
+
+The mobile HiFi render (refs/catalog--render-mobile.png, refs/rankings--render-mobile.png, and the "3 column cards" line in all-pages--spec-mobile.png) shows three result cards across on phones. The catalog had been pinned to two since 2026-11-17 to avoid 103px posters, and the rankings podium was two columns of five with an orphan on the last row — both drifted from the render once the home shelves settled at three.
+
+Catalog: `#catalog-grid` is three columns below 600 again, so the ladder reads 3 / 3 / 4 / 6. Measured at 390: three columns of 113px, 10px gap, cover 3:4, bookmark overlay 30px at 8/8, title clamped to two lines, horizontal overflow 0. At 1440 it is still six columns of 200px.
+
+Rankings: the podium count now follows the viewport — five covers from 600 up, three below. `js/rankings.js` picks the count from `matchMedia('(max-width: 599px)')`, repaints on a breakpoint change without refetching, and numbers the list from wherever the row stops (4 on phones, 6 on desktop). The "TOP 5" label is hidden below 600, matching the render, which has no label.
+
+The ranking list rows on phones were 96×144 thumbnails in 160px rows, which dwarfed the three covers above them. They now use the render's compact row: 28px number, 48×72 thumbnail, 88px row, 10px gap. Desktop keeps 82×123 thumbnails and 139px rows.
+
+**Measured**: rankings.html at 390 → 3 podium cards of 113, cover 2:3, first list number 4, row 88 tall, thumbnail 48×72, overflow 0; at 1440 → 5 podium cards of 254, first list number 6, row 139 tall. Saved page and detail recommendations untouched (their own grids).
+
+Evidence: docs/evidence/_new/m3-catalog-390.png, m3-rank-390.png, m4-rank-list-390.png, m4-rank-desk-1440.png.
+
 ## What was *not* changed
 
 - Four states (loading / success / error / empty), skeleton geometry and `aria-busy`.
-- 6/5/4/3/2 column ladder for the wide shelves (the 3:4 cover frame is noted in §19).
+- The wide shelves' 6/4/3 ladder and the 3:4 cover frame (§19); only the catalog's phone step moved (§56).
 - Four GSAP moments (Timeline, ScrollTrigger, MotionPath, Draggable) and the reduced-motion branch.
 - Ranking lists: home's Day/Week read the airing schedule, Season/Year filter by season and year, Month is the trending proxy described in §13; `rankings.html` keeps its own Month/Day chips disabled (its Week is already trending).
 - PRD feedback items: all 20 are mapped in `PRD-FEEDBACK-MAP.md`. #20 / #13 / #12 (home search), #17+#15 (rankings genre), #04 / #08 / #07 (ranking thumbnails) and #14 (Overview) were the last five gaps and were closed on 2026-11-17 (§40); #05's visible label became an icon (§20) and #07 / #16 stay as written refusals with reasons in that file.

@@ -26,7 +26,7 @@ if (!gsap) {
   }
 
   // 2 — ScrollTrigger: cards appear once, in small batches, as they are reached.
-  // 卡片是异步渲染的，所以这里既处理首屏已有的，也盯着后来插进来的。
+  // Cards render asynchronously, so this covers the first paint and later inserts.
   function revealBatch(nodes) {
     if (!ScrollTrigger) return;
 
@@ -34,7 +34,7 @@ if (!gsap) {
       (el) =>
         el.matches('.card, .mini') &&
         !el.dataset.revealed &&
-        // Weekly 那一排交给 MotionPath，别两套动画抢同一个 transform
+        // the weekly row belongs to MotionPath; two tweens would fight over transform
         !el.closest('[data-section="weekly"]'),
     );
     if (!fresh.length) return;
@@ -94,7 +94,7 @@ if (!gsap) {
           duration: 0.75,
           stagger: 0.07,
           ease: 'power2.out',
-          // 三个点 + curviness：一条浅弧，终点是元素原本的位置
+          // three points plus curviness: a shallow arc back to the element's own spot
           motionPath: {
             path: [{ x: 0, y: 70 }, { x: 34, y: 26 }, { x: 0, y: 0 }],
             curviness: 1.5,
@@ -117,11 +117,11 @@ if (!gsap) {
 
     const build = () => {
       if (!narrow.matches || instance) return;
-      if (!row.querySelector('.card')) return; // 还没渲染出卡片，先什么都不做
+      if (!row.querySelector('.card')) return; // nothing rendered yet
 
       row.dataset.drag = 'true';
 
-      // 等一帧再量宽度：改成横向排列之后 scrollWidth 才准
+      // wait one frame before measuring: scrollWidth is only right after the switch
       requestAnimationFrame(() => {
         const overflow = Math.max(0, row.scrollWidth - row.clientWidth);
         if (!overflow) {
@@ -154,7 +154,7 @@ if (!gsap) {
 
     narrow.addEventListener('change', () => (narrow.matches ? build() : tearDown()));
 
-    // 卡片迟到（首页四段是拉数据之后才画的）
+    // cards arrive late (the four sections draw after the fetch)
     if (row.querySelector('.card')) build();
     else {
       const observer = new MutationObserver(() => {

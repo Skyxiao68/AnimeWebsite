@@ -81,8 +81,8 @@
         </p>
       </header>
 
-      <!-- 结构照 HiFi「Rankings」：一块面板，顶行是排序三选，
-           下面三行是 Region / Format / Time。All 是那行的默认值。 -->
+      <!-- Structure follows the HiFi Rankings: one panel, the sort triple on top,
+           then Region / Format / Time. All is each row's default. -->
       <section class="rank-panel" aria-label="Ranking filters">
         <div class="rank-sorts" role="group" aria-label="Sort by">
           <button
@@ -155,9 +155,9 @@
           </div>
         </div>
 
-        <!-- Genre：#17 + #15 要用题材区分榜单。17 个 chip 一次铺开会把三行筛选压成
-             一屏高，默认只露 8 个，其余收在 More 后面（折叠是纯 CSS 的，
-             data-expanded="false" 时隐藏第 10 个 chip 起）。 -->
+        <!-- Genre: PRD #17 and #15 want the charts split by genre. Seventeen chips
+             would push the three filter rows to a full screen, so eight show and the
+             rest sit behind More (pure CSS: hidden from the ninth while collapsed). -->
         <div class="rank-row" data-group="genre" data-collapsible="8" data-expanded="false">
           <span class="rank-row__label" id="rank-label-genre">Genre</span>
           <div
@@ -191,10 +191,11 @@
           </div>
         </div>
 
-        <!-- Time：All / Year / Season / Week 走真实字段（seasonYear、season、
-             TRENDING_DESC）；Month 和 Day 是两个 AniList 不提供的粒度，保留位置但禁用。
-             Month 在首页是可用的（连载中按 trending），但这一页的 Week 本身就是 trending，
-             打开 Month 会和 Week 一模一样，所以这里不重复摆一个假选项。 -->
+        <!-- Time: All / Year / Season / Week use real fields (seasonYear, season,
+             TRENDING_DESC); Month and Day are granularities AniList does not offer, so
+             the slots stay but are disabled. Month works on the home page (airing sorted
+             by trending), but here Week already is trending, so an enabled Month would
+             duplicate it - an honest gap beats a fake option. -->
         <div class="rank-row" data-group="time">
           <span class="rank-row__label" id="rank-label-time">Time</span>
           <div
