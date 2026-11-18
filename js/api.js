@@ -1,12 +1,9 @@
-// js/api.js - AniList GraphQL data layer
+// js/api.js - AniList GraphQL data layer.
 //
-// One place for transport, caching and failure classification. Pages only ever see
-// the KIND set below, never an HTTP status code.
-// 8s timeout, 5 minute cache, 429 honours Retry-After, Jikan as the fallback source.
-//
-// Each trap below is written next to the code that dodges it.
-//
-// Pages only speak KIND, never HTTP codes - that is what makes the four states possible.
+// All transport, cache and error mapping live here. Pages only see KIND,
+// never an HTTP status.
+// 8s timeout, 5 minute cache, 429 honours Retry-After, Jikan as fallback.
+// Each trap is explained where the code handles it.
 
 const ENDPOINT = 'https://graphql.anilist.co';
 const TIMEOUT_MS = 8000;
@@ -229,8 +226,8 @@ async function raw(query, variables, { noStore = false } = {}) {
   try {
     data = await throttle(() => send(query, vars));
   } catch (err) {
-    // Retry 429 once, with Retry-After capped at 15s: anything longer just freezes the page, and the
-    // panel can say "retry in Xs" instead.
+    // Retry 429 once. Cap Retry-After at 15s: a longer wait freezes the page,
+    // and the panel can say "retry in Xs" instead.
     if (!(err instanceof ApiError) || err.kind !== KIND.RATE) throw err;
     const waitMs = Math.min(Math.max(err.retryAfter || 5, 1), 15) * 1000;
     await new Promise((r) => setTimeout(r, waitMs));
@@ -459,8 +456,8 @@ export async function hero({ count = 3, from = null } = {}) {
   const today = from || (await airingWindow({ days: 1 }));
   const ids = today.slice(0, count).map((m) => m.id);
 
-  // A midweek day can carry fewer than three airing shows (the schedule is minute-based and quiet
-  // days are sparse), so pad the window to a week rather than show a hero with a missing image.
+  // Some days carry fewer than three airing shows, so pad the window to a week
+  // instead of showing a hero with a missing image.
   if (ids.length < count) {
     for (const m of await airingWindow({ days: 7 })) {
       if (ids.length >= count) break;
@@ -474,7 +471,7 @@ export async function hero({ count = 3, from = null } = {}) {
 }
 
 // Weekly airing list, the Mon-Sun strip of Weekly Keep Ups. AniList's airingSchedule answers
-// "what airs on this day", so the chips really switch data instead of decorating.
+// "what airs on this day", so each chip gets its own list.
 const SCHEDULE_QUERY = `query ($from: Int, $to: Int) {
   Page(page: 1, perPage: 30) {
     airingSchedules(airingAt_greater: $from, airingAt_lesser: $to, sort: TIME) {
@@ -755,7 +752,7 @@ export async function chart(windowName, { perPage = 4, fresh = false } = {}) {
 }
 
 // Keep these short names on the URL instead of AniList's enums. key is what the URL and
-// catalog.html data-value use; the first four follow the design's Sort row, newest is the
+// catalog.html data-value use; the first four follow the mockup's Sort row, newest is the
 // catalog's newest-first sort.
 export const SEARCH_SORTS = {
   popular: 'POPULARITY_DESC',

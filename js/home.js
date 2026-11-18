@@ -30,7 +30,7 @@ const el = {
   rankChips: document.getElementById('rank-chips'),
 };
 
-// The outgoing image leaves the way the incoming one arrives - that is what reads as a slide.
+// Old image moves out the same way the new one comes in, so the swap looks like a slide.
 const ghost = document.createElement('img');
 ghost.className = 'hero__img hero__img--ghost';
 ghost.alt = '';
@@ -145,9 +145,9 @@ function paintMeta(m) {
     .join('');
 }
 
-// Timing copied from cycani: both images shift 4% and scale to 1.02 while cross-fading
-// over 650ms with cubic-bezier(.4,0,.2,1). Nothing is pushed off screen, so it reads light.
-// The copy swaps halfway and fades back in; thumbnails stay put so the row does not blink.
+// Timing from cycani: both images move 4% and scale to 1.02, cross-fade
+// 650ms with cubic-bezier(.4,0,.2,1). No layer leaves the frame, so it stays light.
+// Copy swaps halfway and fades back. Thumbnails stay put so the row does not blink.
 const SLIDE_MS = 650;
 const AUTO_MS = 7000;
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -416,7 +416,7 @@ async function loadDay(dayIndex, btn) {
         el.weekly,
         'empty',
         'Nothing airing that day',
-        'Try another day — the schedule is read live and quiet days happen.'
+        'Try another day. The schedule is live, and some days have no shows.'
       );
     }
   } catch (err) {
@@ -441,7 +441,7 @@ async function loadChart(which) {
     if (items.length) {
       paint(el.ranks, items);
     } else {
-      paintMessage(el.ranks, 'empty', 'Nothing charted for this window', 'The chart is read live — a quiet window happens.');
+      paintMessage(el.ranks, 'empty', 'Nothing charted for this window', 'The chart is live. Some windows have no entries.');
     }
   } catch (err) {
     paintMessage(el.ranks, 'error', 'The chart did not load', userMessage(err), 'Try again', () =>

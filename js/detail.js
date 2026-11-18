@@ -1,5 +1,5 @@
-// One title: fetch it, then paint every slot. Descriptions arrive as HTML, so
-// everything goes in via textContent or createElement — no innerHTML anywhere.
+// One title: fetch it, then paint every slot. Descriptions arrive as HTML,
+// so everything goes in via textContent or createElement. No innerHTML.
 import { media } from './api.js';
 import { card, mountToTop, renderCards, renderState } from './ui.js';
 import { pageHref } from './paths.js';
@@ -152,7 +152,7 @@ const LINK_GLYPH = {
   OTHER: '<path d="M13.4 4.6h5.8v5.8M19.2 4.6l-8 8M11 5.2H5.4v13.4h13.4V13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>',
 };
 
-// The word on the right: every link says what kind it is, not just Info.
+// The word on the right: each link says its kind, not a generic Info.
 const LINK_KIND = { STREAMING: 'Streaming', SOCIAL: 'Social', INFO: 'Info', OTHER: 'Other' };
 
 // AniList ships an official icon per site; fall back to the glyph when it is missing or broken.

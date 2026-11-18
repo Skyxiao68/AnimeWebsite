@@ -114,9 +114,8 @@ h3 {
 }
 
 /* ---------------------------------------------------------------- header */
-/* The render settles three things: the wordmark is a brush face, the nav links are
- * plain text (current page dimmed, no purple pill), and the right side is one wide
- * search pill plus three bare icons. */
+/* Header from the mockup: brush wordmark, plain nav text with the current page
+   dimmed, and one wide search pill plus three bare icons. */
 .site-header {
   position: sticky;
   top: 0;
@@ -163,7 +162,7 @@ h3 {
 .site-nav {
   display: none; /* tab bar on mobile; links only from desktop up */
   gap: 46px;
-  /* in the render the wordmark ends ~43px before "Home": gap 16 + 24 here + no padding ~= 40. */
+  /* Mockup gap from wordmark to "Home": 16 + 24 here + no padding, about 40px. */
   margin-inline-start: var(--sp-4);
 }
 
@@ -179,9 +178,8 @@ h3 {
   color: var(--accent);
 }
 
-/* The render shows no difference between the current page and the others (no pill, no
-   colour). It became an accent because that was hard to spot, but the shape stays
-   plain - no element the render does not have. */
+/* Mockup gives the current page no special shape (no pill, no colour), so
+   colour is the only marker. Keep the link itself plain. */
 .site-nav__link[aria-current="page"] {
   color: var(--accent);
 }
@@ -246,7 +244,7 @@ h3 {
   color: var(--accent);
 }
 
-/* Bare glyphs: the render shows no circular outline around the icons. */
+/* Bare glyphs: the mockup has no circular outline around the icons. */
 .icon-btn {
   display: grid;
   place-items: center;
@@ -286,7 +284,7 @@ h3 {
   color: var(--accent);
 }
 
-/* The clock is "recently viewed". The icon is in the render; it opens a small popover. */
+/* Clock = recently viewed. Opens a small popover. */
 .recent-pop {
   position: absolute;
   inset-block-start: calc(var(--header-h) - 8px);
@@ -628,7 +626,7 @@ h3 {
   -webkit-line-clamp: 2;
 }
 
-/* Bold no longer gets its own white stroke: the paragraph is already bold and more emphasis just makes it uneven */
+/* Bold gets no extra white stroke: the paragraph is already bold, and more weight looks uneven. */
 .hero__lede strong {
   font-weight: inherit;
   color: inherit;
@@ -772,7 +770,7 @@ h3 {
 .pair {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  /* the render keeps 9px between the two panels */
+  /* Mockup keeps 9px between the two panels */
   gap: 10px;
   margin-block-end: 64px;
 }
@@ -916,7 +914,7 @@ h3 {
 }
 
 .shelf {
-  /* the render leaves about 87px between blocks, from one block's bottom to the next heading */
+  /* Mockup leaves about 87px between blocks, from one block's bottom to the next heading */
   margin-block-end: 64px;
 }
 
@@ -930,7 +928,7 @@ h3 {
 
 .shelf__title {
   margin: 0;
-  /* the render sets section headings at 26px */
+  /* Mockup sets section headings at 26px */
   font-size: 26px;
   letter-spacing: -0.01em;
 }
@@ -1005,7 +1003,8 @@ h3 {
 /* the footer wordmark keeps the header size; the design does not shrink it */
 .brand--sm { font-size: 25px; }
 
-/* Bookmark stays out of the way on desktop: hidden until hover or keyboard focus. Touch has no hover, so it is always visible. The design card is just cover, title and score. */
+/* Bookmark stays hidden on desktop until hover or keyboard focus. Touch has
+   no hover, so it stays visible. The mockup card is only cover, title and score. */
 .grid .card { position: relative; }
 
 @media (min-width: 600px) {
@@ -1204,7 +1203,8 @@ main {
 .grid {
   display: grid;
   grid-template-columns: repeat(1, minmax(0, 1fr));
-  /* The render shows 10px, but cycani's gap is 10.8% of the card width (194 card / 21 gap); our 1440 card is 211 wide, where 10px reads tight. Step the gap with the column count. */
+  /* Mockup shows 10px, but cycani uses 10.8% of card width (194 card / 21 gap).
+     At 1440 our card is 211 wide, and 10px is too tight. Gap follows columns. */
   gap: 10px;
 }
 
@@ -1232,7 +1232,7 @@ main {
   gap: 10px;
 }
 
-/* The Bookmarks page reuses the same card and the same column ladder (6 / 4 / 3), just without a row limit. */
+/* Bookmarks reuses the same card and column ladder (6 / 4 / 3), with no row limit. */
 #saved-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
@@ -1267,7 +1267,7 @@ body.page-saved main {
   flex-direction: column;
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 10px; /* The render uses a small poster radius; 16px reads like a button. */
+  border-radius: 10px; /* Mockup uses a small poster radius; 16px looks like a button. */
   overflow: hidden;
   transition: transform var(--t-base) var(--ease), border-color var(--t-base) var(--ease),
     box-shadow var(--t-base) var(--ease);
@@ -1335,7 +1335,7 @@ body.page-saved main {
   overflow: hidden;
   font-family: var(--font-sans);
   font-size: 14px;
-  color: var(--text-soft); /* The render's card title is one step dimmer than body text, not pure white. */
+  color: var(--text-soft); /* Mockup card title is one step dimmer than body text, not pure white. */
   font-weight: 400;
   line-height: 20px;
   transition: color 0.18s ease;
@@ -1601,7 +1601,7 @@ body.page-saved main {
   font-size: var(--fs-sm);
 }
 
-/* Three columns: wordmark left, copyright centred, links right (the render centres the copyright). */
+/* Three columns: wordmark left, copyright centred, links right (mockup centres the copyright). */
 .site-footer__inner {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
@@ -1676,7 +1676,9 @@ body.page-saved main {
   }
 }
 
-/* 600-899 used to have no navigation at all: the tab bar stopped at 600, the header nav started at 900, leaving a 300px dead zone. The bar now runs to 899, just capped and centred - full width it reads like a desktop dock, narrowed it reads like a phone pill. */
+/* 600-899 used to have no nav: the tab bar stopped at 600, the header nav
+   started at 900, so 300px had nothing. Now the bar runs to 899, capped and
+   centred. Full width looks like a desktop dock, narrowed looks like a phone pill. */
 @media (min-width: 600px) and (max-width: 899px) {
   .tabbar {
     inset-inline: auto;
@@ -1722,7 +1724,8 @@ body.page-saved main {
     grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 
-  /* The first two home sections are four-wide rows (Weekly and Ranks sit side by side in the render); six columns would leave two holes, so pin them back to four. TV and Movies stay at six. */
+  /* First two home sections are four-wide rows: Weekly and Ranks sit side by side
+     in the mockup. Six columns would leave two holes, so keep four. TV and Movies stay at six. */
   .grid[data-section="weekly"],
   .grid[data-section="topRated"] {
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1745,7 +1748,7 @@ body.page-saved main {
   margin-block-end: var(--sp-3);
 }
 
-/* The render has a small accent line above the title; on phones it is the same element. */
+/* Mockup has a small accent line above the title; on phones it is the same element. */
 .filters__kicker {
   margin: 0 0 4px;
   color: var(--accent);
@@ -1910,7 +1913,9 @@ body.page-saved main {
   font-weight: 700;
 }
 
-/* Collapsed row: data-collapsible is how many stay visible; pure CSS, JS only flips data-expanded. 5 = Genre shows five, 3 = Status shows three. The review said 'too many choices at once', so we show fewer than the render rather than the same. */
+/* Collapsed row: data-collapsible is how many stay visible; pure CSS, JS only
+   flips data-expanded. 5 = Genre shows five, 3 = Status shows three. The review
+   said 'too many choices at once', so we show fewer than the mockup. */
 .filters__row[data-collapsible="5"][data-expanded="false"] .opt:nth-child(n + 6),
 .filters__row[data-collapsible="3"][data-expanded="false"] .opt:nth-child(n + 4) {
   display: none;
@@ -1967,7 +1972,8 @@ body.page-saved main {
   font-size: var(--fs-xs);
 }
 
-/* Result head: chosen tags on the left, count on the right. Both 13px grey; only the number phrase is bold accent, as in the render. Reset sits top-right of the filter area. */
+/* Result head: chosen tags on the left, count on the right. Both 13px grey;
+   only the number phrase is bold accent, as in the mockup. Reset sits top-right. */
 .catalog-head {
   display: flex;
   flex-wrap: wrap;
@@ -1994,7 +2000,8 @@ body.page-saved main {
   font-weight: 600;
 }
 
-/* .btn had no rules at all, so buttons fell back to the browser's grey box, which reads as disabled on a dark page. One outlined style: accent border and text, filling in on hover. */
+/* .btn had no rules, so buttons used the browser's grey box. On a dark page
+   that looked disabled. One outlined style: accent border and text, fill on hover. */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -2568,7 +2575,7 @@ body.page-saved main {
     gap: 10px;
   }
 
-  /* The mobile render drops the section label; the three badges already say what the row is. */
+  /* The mobile mockup drops the section label; the three badges already say what the row is. */
   .rank-top__title {
     display: none;
   }
@@ -2585,7 +2592,8 @@ body.page-saved main {
     gap: 2px;
   }
 
-  /* The mobile render has no Genre row - Region, Format and Time carry the panel, and seventeen chips would bury the list. */
+  /* The mobile mockup has no Genre row. Region, Format and Time carry the panel;
+     seventeen chips would bury the list. */
   .rank-row[data-group="genre"] {
     display: none;
   }
@@ -2604,7 +2612,8 @@ body.page-saved main {
     font-size: var(--fs-xs);
   }
 
-  /* The mobile render keeps the rows compact under the three big covers: a small thumbnail, the number and the name on one line. */
+  /* The mobile mockup keeps rows compact under the three big covers: small
+     thumbnail, number and name on one line. */
   .rank-item__link {
     grid-template-columns: 1.75rem 48px minmax(0, 1fr);
     gap: 10px;
@@ -2879,7 +2888,7 @@ body.page-saved main {
 
 .ext-links {
   display: grid;
-  /* The render shows five equal pills in this row, not six. */
+  /* The mockup shows five equal pills in this row, not six. */
   grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   gap: var(--sp-2);
 }
@@ -2968,7 +2977,7 @@ body.page-saved main {
   }
 }
 
-/* Below 520 the field is hidden; the header keeps the render's magnifier and opens
+/* Below 520 the field is hidden; the header keeps the mockup's magnifier and opens
    that field in place, so a keyword can be typed without leaving the page. */
 .nav-search-open,
 .nav-search-close {
@@ -3128,7 +3137,8 @@ body.page-catalog .nav-search {
   }
 }
 
-/* Catalog columns follow the home TV Shows / Movies ladder: 3 / 4 / 6. The mobile design render shows three cards across, same as home. */
+/* Catalog columns follow the home TV Shows / Movies ladder: 3 / 4 / 6.
+   The mobile mockup shows three cards across, same as home. */
 @media (max-width: 599px) {
   #catalog-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -3859,7 +3869,8 @@ body.page-catalog .nav-search {
   color: rgb(255 255 255 / 0.78);
 }
 
-/* Black at 45% under a white panel reads as dirt; the light theme tints its shadows teal. */
+/* Black at 45% under a white panel looks like a grey smear, so light theme
+   tints shadows teal. */
 [data-theme="light"] .recent-pop,
 [data-theme="light"] .search-pop {
   box-shadow: 0 18px 40px rgb(16 40 40 / 0.16);

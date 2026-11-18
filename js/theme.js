@@ -1,10 +1,10 @@
 /*
- * js/theme.js - the light/dark switch.
+ * js/theme.js - light/dark switch.
  *
- * The saved mode is read by a one-line inline script in each page's <head> before the
- * stylesheets, so a light page never paints dark first. This module only handles the
- * button: it labels it for the theme it would switch to and writes the choice back.
- * Dark stays the default; nothing follows the OS setting unless the learner asks for it.
+ * A one-line script in each page's <head> reads the saved mode before the
+ * stylesheets, so a light page does not paint dark first. This module handles
+ * the button: label it for the theme it switches to, then save the choice.
+ * Dark is the default. We do not follow the OS setting.
  */
 const KEY = 'mf.theme';
 const root = document.documentElement;
@@ -22,7 +22,7 @@ export function setTheme(light) {
   try {
     localStorage.setItem(KEY, light ? 'light' : 'dark');
   } catch (err) {
-    /* Private mode: the switch still works for this page, it just will not be remembered. */
+    /* Private mode: the switch works for this page but will not be remembered. */
   }
 
   for (const button of document.querySelectorAll('[data-theme-toggle]')) {

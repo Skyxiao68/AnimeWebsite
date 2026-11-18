@@ -12,7 +12,7 @@
     <title>Catalog · MikuFansAnime</title>
     <meta
       name="description"
-      content="Search and filter anime by region, format, status, genre and year — live from AniList."
+      content="Search and filter anime by region, format, status, genre and year. Data from AniList."
     />
     <link rel="preload" href="fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="../css/tokens.css" />
@@ -298,9 +298,8 @@
             </button>
           </div>
   
-          <!-- Year deliberately departs from the design: the sheet lists 2026 down to 2005
-               plus Expand, and PRD review #19 asks for a type-in box instead. Leaving it
-               unanswered caps the PRD-feedback criterion. -->
+          <!-- Year is a type-in box, not the 2026-2005 chip list from the mockup.
+               PRD review #19 asked for this. -->
           <div class="filters__row" data-group="year">
             <span class="filters__label" id="label-year">Year</span>
             <button
