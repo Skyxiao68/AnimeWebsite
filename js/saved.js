@@ -3,6 +3,7 @@
 // it, asks it to change, and paints the result.
 
 import { card, statePanel, mountToTop } from './ui.js';
+import { pageHref } from './paths.js';
 import {
   all,
   collections,
@@ -328,7 +329,7 @@ function render() {
         message: 'Tap the bookmark on any poster and it lands here, ready to sort into collections.',
         actionLabel: 'Browse catalog',
         onAction: () => {
-          window.location.href = 'catalog.html';
+          window.location.href = pageHref('catalog.html');
         },
       }),
     );

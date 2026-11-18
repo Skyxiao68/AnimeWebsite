@@ -61,9 +61,9 @@ function sayFound() {
 
   const lead = document.createElement('strong');
   lead.className = 'result-count__lead';
-  lead.textContent = `A Total of ${shown}`;
+  lead.textContent = String(shown);
 
-  count.replaceChildren(lead, ' Titles have been found');
+  count.replaceChildren(lead, shown === 1 ? ' title found' : ' titles found');
 }
 
 function setBusy(busy) {
